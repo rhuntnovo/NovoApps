@@ -584,7 +584,7 @@
       "note": "The source labels two consecutive instructions as Step 4. Per curriculum-owner approval for v0.6.1, the final duplicate Step 4 (Talk with your partner) is corrected to Step 5."
     }
   ],
-  "presentation_version": "0.8.0",
+  "presentation_version": "0.8.1",
   "presentation_notes": "Visual-learning refinement: more prominent module opener; corrected source-emphasis matching; Step 4 and Step 5 separated; non-Scripture prayer/application separated from Jeremiah 29:11; added content-specific visual learning elements while preserving canonical wording.",
   "guided_presentation": {
     "enabled": true,

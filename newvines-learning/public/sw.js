@@ -1,4 +1,4 @@
-const CACHE_NAME = "novo-apps-shell-v0.8.0";
+const CACHE_NAME = "novo-apps-shell-v0.8.1";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/courses/nvi-fgmm-m01.en-global.json", "/assets/NVI-logo-clear.png"];
 const OPTIONAL_GUIDED_AUDIO = ["p005-s01","p005-s02","p005-s03","p006-s01","p006-s02","p006-s03","p006-s04","p006-s05","p007-s01","p007-s02","p007-s03","p008-s01","p008-s02","p008-s03","p008-s04"].map(x=>`/audio/guided-demo/${x}.opus`);
 self.addEventListener("install", event=>{event.waitUntil(caches.open(CACHE_NAME).then(async cache=>{await cache.addAll(APP_SHELL);await Promise.all(OPTIONAL_GUIDED_AUDIO.map(url=>cache.add(url).catch(()=>null)))}));self.skipWaiting()});

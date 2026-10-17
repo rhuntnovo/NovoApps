@@ -1,4 +1,4 @@
-# New Vines Learning PWA v0.8.0
+# New Vines Learning PWA v0.8.1
 
 This version unifies Self Paced and Guided presentation into one canonical course JSON record.
 
