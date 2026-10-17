@@ -1,0 +1,70 @@
+# NovoApps --- Decisions and Roadmap
+
+## Strongly settled
+
+-   Develop outside OneDrive at `C:\Development\NovoApps`; Git/GitHub is
+    source history.
+-   Node/npm + VS Code; lightweight Preact/TypeScript/Vite PWAs.
+-   Learning has one canonical record; Self Paced/Guided are
+    presentation modes.
+-   Protect canonical curriculum.
+-   Marin Opus selected for production Guided narration; browser TTS
+    fallback/option.
+-   CMS authoring source → published JSON/assets delivery.
+-   `workspace` is universal data partition.
+-   IndexedDB for offline structured operational data; Cache Storage for
+    static/large course media.
+-   UUIDv7 for new synchronized record IDs; server sync sequence
+    separate.
+-   tombstones/version metadata for sync.
+-   client-side encrypted sensitive payload + minimal clear envelope.
+-   residency remains relevant.
+-   public educational content and private operational/user data are
+    separate storage classes.
+-   Inventory remains simple last-cost microbusiness workflow; JSON Gzip
+    restore + Excel human export; offline + EN/ES.
+
+## Open decisions
+
+Backend is not final: Supabase-first, Cloudflare Worker+D1, or
+evolutionary hybrid. Current leaning: Supabase accelerates
+Auth/workspace/RLS/admin; Worker+D1-per-workspace is attractive for
+encrypted sync/isolation. Keep protocol/provider boundary clean.
+
+Encryption/key recovery still needs deliberate design: workspace keys,
+per-user/device wrapping, trusted-device/member transfer, recovery
+secret/threshold option, lost-device recovery. Account recovery is
+distinct.
+
+Conflict resolution can start simple where acceptable but preserve
+metadata for improvement.
+
+CMS physical SQL schema follows stabilization of published schema and
+authoring workflows.
+
+Before country rollout, determine residency/transfer law, provider
+regions, encrypted-ciphertext treatment, workspace region/provider
+pinning, retention/export/deletion.
+
+## Recommended sequence
+
+1.  **Learning delivery:** keep v0.8.0 stable; test
+    install/update/offline; formalize JSON schema, IDs, content/schema
+    versions, catalog; finish Guided UI issues.
+2.  **CMS:** course/module/page/block editor; preview;
+    Guided/facilitator; assets; localization;
+    validation/approval/publication; controlled narration generation.
+3.  **Shared platform:** auth; workspaces/roles; IndexedDB; UUIDv7;
+    sync/tombstones; encryption/key prototype; provider-neutral Sync
+    API; residency routing.
+4.  **Inventory:** inspect old source; reproduce
+    purchase/sale/last-cost; move to shared foundation; preserve
+    backup/export; offline validation.
+5.  **Finance:** accounts/categories; transactions; budgets;
+    budget-vs-actual; ledger; multi-user; optional Inventory linkage.
+
+## Documentation rule
+
+When an architectural decision changes, update the relevant `docs/` file
+and `AGENTS.md` if it affects future coding behavior. Prefer
+documentation changes in the same Git commit as the architecture change.
