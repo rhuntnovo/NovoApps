@@ -1,0 +1,21 @@
+# Node dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store

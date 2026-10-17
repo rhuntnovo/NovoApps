@@ -1,0 +1,608 @@
+{
+  "schema_version": "0.2",
+  "course_id": "FGMM",
+  "title": "Foundations of Godly Money Management",
+  "track": "Managing Personal Money",
+  "language": "en",
+  "country": "global",
+  "content_policy": {
+    "canonical_source": "PowerPoint",
+    "rule": "Do not rewrite canonical content. Correct only approved typos. Localization and translation are stored separately.",
+    "localization_policies": [
+      "LOCKED",
+      "TRANSLATE_ONLY",
+      "LOCALIZE_EXAMPLE",
+      "LOCALIZE_CURRENCY",
+      "LOCALIZE_IMAGE"
+    ]
+  },
+  "module": {
+    "id": "FGMM-M01",
+    "number": 1,
+    "title": "First Principles – Intentional Saving, Thoughtful Spending",
+    "source_slide_range": "8-24",
+    "pages": [
+      {
+        "id": "FGMM-M01-P001",
+        "source_slide": 8,
+        "title": "Managing Personal Money",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Managing Personal Money\n\nModule 1: First Principles – \nIntentional Saving, \nThoughtful Spending",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "title",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P002",
+        "source_slide": 9,
+        "title": "Learning Goals",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Learning Goals",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "By the end of this track, you will…\n\nUnderstand what God’s Word says about saving (why)\nLearn different ways to save effectively (how)\nHave set personal goals for general savings (what)\nHave set personal goals for emergency savings (what)\nLearn techniques to protect your savings (how)",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "teaching",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P003",
+        "source_slide": 10,
+        "title": "Setting the Stage",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Setting the Stage\n\nBy Wisdom a house is built,\nand by understanding it is established.\n(Proverbs 24:3)\n\nSeeking God’s Plan (Wisdom) and putting it to work (understanding) yields a life of happiness and purpose \n\nNot just in heaven, but in the here and now.",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "scripture",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P004",
+        "source_slide": 11,
+        "title": "What Does God’s Word Say?",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "What Does God’s Word Say?",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "The wise store up choice food and olive oil, \nbut fools gulp down theirs.  (Proverbs 21:20)\n\nSaving does not indicate a lack of faith, \nbut it does reflect the heart of a faithful steward.\n\nThe Bible does warn that saving merely to become self-reliant \nand take life easy is wrong. There is a higher purpose.",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "scripture",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P005",
+        "source_slide": 12,
+        "title": "What Does God’s Word Say?",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "What Does God’s Word Say?",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "The wise store up choice food and olive oil, \nbut fools gulp down theirs.  (Proverbs 21:20)\n\nBalancing your savings is an opportunity to honor God \nand experience His blessings. \n\nSavings gives you access to resources you can share prudently \nwhen someone REALLY needs it.",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "scripture",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        },
+        "guided": {
+          "narration": "Proverbs gives us a simple picture of wisdom: the wise person does not consume everything today. Saving creates room to respond faithfully tomorrow. Notice that the purpose is not fear or selfish accumulation. A balanced savings plan can honor God and leave us prepared to help when a genuine need arises. As you look at this page, think about saving as stewardship: receiving God's provision, setting some aside wisely, and remaining ready to give prudently when someone truly needs help.",
+          "estimated_seconds": 49,
+          "facilitator": {
+            "title": "Connect saving with stewardship",
+            "prompt": "Ask the group: How can having savings make it possible to help someone else wisely? Invite one or two responses, then press Continue.",
+            "time": "2–3 min"
+          },
+          "auto_advance": false,
+          "narration_segments": [
+            "Proverbs gives us a simple picture of wisdom: the wise person does not consume everything today. Saving creates room to respond faithfully tomorrow.",
+            "Notice that the purpose is not fear or selfish accumulation. A balanced savings plan can honor God and help us manage His provision wisely.",
+            "Savings can also leave us prepared to help when a genuine need arises. Think of saving as stewardship: receiving God's provision, setting some aside wisely, and remaining ready to give prudently when someone truly needs help."
+          ],
+          "audio_segments": [
+            "/audio/guided-demo/p005-s01.opus",
+            "/audio/guided-demo/p005-s02.opus",
+            "/audio/guided-demo/p005-s03.opus"
+          ],
+          "narration_mode": "marin_opus",
+          "browser_tts_available": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P006",
+        "source_slide": 13,
+        "title": "What Does God’s Word Say?",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "What Does God’s Word Say?",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "God provides manna from Heaven – every day.\n(Exodus 16:17-20)\n\nGod will always provide for your needs. \nIt may not be in the way we expect, but He is always faithful.\n\nWhen you try to hoard your savings, your money can infect you. God has a specific purpose for it! \n\nInstead of hoarding, be diligent to save according to Scripture, to give wisely, and trust that God sees your every need. \n\nDon’t sacrifice giving for savings – you receive blessings and joy from giving!",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "scripture",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        },
+        "guided": {
+          "narration": "Scripture also teaches us not to confuse saving with trusting money. In Exodus, God provided manna day by day. The people were called to trust Him rather than hoard what He gave. That same tension matters for us. We save diligently because Scripture teaches wisdom and preparation, but our security remains in God. We should never let saving replace generosity. The goal is faithful stewardship: save wisely, give wisely, and trust God with our needs.",
+          "estimated_seconds": 52,
+          "facilitator": {
+            "title": "Discuss trust versus hoarding",
+            "prompt": "Ask: What is the difference between wise saving and trusting or hoarding money? Let participants respond. Reinforce that God is the Provider; saving is a stewardship practice.",
+            "time": "3–4 min"
+          },
+          "auto_advance": false,
+          "narration_segments": [
+            "In Exodus, God provided manna from heaven day by day. The people gathered what they needed, and they were called to depend on God's provision.",
+            "This reminds us that God is our Provider. His provision may not always come in the way we expect, but our trust belongs in Him rather than in money.",
+            "Scripture also warns us not to let saving turn into hoarding. Money is a tool entrusted to us, not the source of our security.",
+            "So we should be diligent to save according to biblical wisdom, give wisely, and continue trusting that God sees our needs.",
+            "And we should not sacrifice generosity simply to make our savings larger. Giving is also part of faithful stewardship and can bring blessing and joy."
+          ],
+          "audio_segments": [
+            "/audio/guided-demo/p006-s01.opus",
+            "/audio/guided-demo/p006-s02.opus",
+            "/audio/guided-demo/p006-s03.opus",
+            "/audio/guided-demo/p006-s04.opus",
+            "/audio/guided-demo/p006-s05.opus"
+          ],
+          "narration_mode": "marin_opus",
+          "browser_tts_available": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P007",
+        "source_slide": 14,
+        "title": "Savings Goals: Defined",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Savings Goals: Defined",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Savings: Money which you put aside for a specific purpose and \ndo not spend today.\n\nGoal: A future good. You must have a plan to reach it, and you must be disciplined to accomplish it. Both are necessary.\n\nSavings Goals are future needs you’re saving for today.",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "teaching",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        },
+        "guided": {
+          "narration": "Now we move from the biblical reason for saving to a practical definition. Savings is money we intentionally set aside for a specific purpose instead of spending it today. A goal is something good in the future that requires both a plan and the discipline to follow that plan. Put those ideas together and a savings goal becomes a future need that we begin preparing for today. The important words are purpose, plan, discipline, future, and today.",
+          "estimated_seconds": 43,
+          "facilitator": {
+            "title": "Check understanding",
+            "prompt": "Ask one participant to explain a savings goal in their own words. Then ask the group to name one future need they might reasonably save for.",
+            "time": "2–3 min"
+          },
+          "auto_advance": false,
+          "narration_segments": [
+            "Now we move from the biblical reason for saving to a practical definition. Savings is money we intentionally set aside for a specific purpose instead of spending it today.",
+            "A goal is something good in the future that requires both a plan and the discipline to follow that plan. Both are necessary.",
+            "Put those ideas together and a savings goal is a future need that we begin preparing for today."
+          ],
+          "audio_segments": [
+            "/audio/guided-demo/p007-s01.opus",
+            "/audio/guided-demo/p007-s02.opus",
+            "/audio/guided-demo/p007-s03.opus"
+          ],
+          "narration_mode": "marin_opus",
+          "browser_tts_available": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P008",
+        "source_slide": 15,
+        "title": "Savings Goals: Characteristics",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Savings Goals: Characteristics",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Savings Goals are future needs you’re saving for today.\n\nGoals are tangible. They are concrete. \nA feeling is not a goal. A new bicycle is.\n\nGoals are measurable. You know where you are in reaching them. \nIs it here? Is it 50% done? Etc.\n\nGoals have deadlines. \n\"Someday I'll be rich\" isn't a goal. \n\"I'll have 25% of my annual income in savings by December\" is.",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "concepts",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true,
+          "localization_review": "COUNTRY_OR_REGION_EXAMPLES"
+        },
+        "guided": {
+          "narration": "A useful savings goal has three characteristics. First, it is tangible: concrete enough that you can clearly say what you are saving for. Second, it is measurable: you can tell how much progress you have made. Third, it has a deadline: there is a real point in time when you intend to reach it. Compare 'someday I will have more money' with a specific savings target by December. Specific goals make it possible to plan, measure progress, and stay accountable.",
+          "estimated_seconds": 50,
+          "facilitator": {
+            "title": "Turn a hope into a goal",
+            "prompt": "Ask participants to choose one possible savings goal. Have them state: WHAT they are saving for, HOW MUCH they need, and BY WHEN they want to reach it. Use the workbook if available.",
+            "time": "4–6 min"
+          },
+          "auto_advance": false,
+          "narration_segments": [
+            "A savings goal is a future need that we begin preparing for today.",
+            "First, a useful goal is tangible. It is concrete enough that you can clearly say what you are saving for. A feeling is not a goal, but a new bicycle can be.",
+            "Second, a useful goal is measurable. You can tell how much progress you have made and how much remains.",
+            "Third, a useful goal has a deadline. 'Someday I'll be rich' is not a goal. A specific savings target by December is. Specific goals make it possible to plan, measure progress, and stay accountable."
+          ],
+          "audio_segments": [
+            "/audio/guided-demo/p008-s01.opus",
+            "/audio/guided-demo/p008-s02.opus",
+            "/audio/guided-demo/p008-s03.opus",
+            "/audio/guided-demo/p008-s04.opus"
+          ],
+          "narration_mode": "marin_opus",
+          "browser_tts_available": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P009",
+        "source_slide": 16,
+        "title": "Savings Goals: Illustrated",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Savings Goals: Illustrated",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Savings Goals are future needs you’re saving for today.\n\nSome examples:\n\nCatastrophic Illness\nUnplanned Medical bills\nReduced Income Months\nBuy a house\nStart a business\nChristmas and Birthdays\nSchool Fees",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "concepts",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true,
+          "localization_review": "COUNTRY_OR_REGION_EXAMPLES"
+        }
+      },
+      {
+        "id": "FGMM-M01-P010",
+        "source_slide": 17,
+        "title": "Savings Goals: Discernment",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Savings Goals: Discernment",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "There are things which we absolutely must have in order to live, such as food, clothing, and shelter.\n\nAnd there are items which are nice to have but aren’t essential, such as a new television, new furniture, appliances (what else?)\n\nTo distinguish between essentials (needs) and non-essentials (wants), we must pray for and exercise the spiritual gift of discernment (also wisdom).",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "concepts",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P011",
+        "source_slide": 18,
+        "title": "Savings Goals: Discernment",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Savings Goals: Discernment",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "God speaks to us through prayer, Bible reading, and our most important relationships – especially through our spouse.\n\nBe sure to engage in this process in a prayerful way, listening actively to what your spouse shares with you.\n\nGod promises to guide us: “Speak, Lord, your servant is listening.” (1 Samuel)",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "scripture",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P012",
+        "source_slide": 19,
+        "title": "Looking Back: Past Experience",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Looking Back: Past Experience",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Were you ever taught how to save? Who taught you? How?\n\nDo you have a safe place to keep the money you save?\n\nDo you have any savings currently? Is it what you expect to have?\n\nDo you have savings goals? How did you set them?\n\nHave you ever successfully met a savings goal and used the money \nfor the goal you identified?\n\nHave you ever met a savings goal and used the money for something \nelse instead? Why?\n\n(Pick one or two questions for discussion)",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "question",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P013",
+        "source_slide": 20,
+        "title": "Discipline: The Missing Ingredient",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Discipline: The Missing Ingredient",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Consider these Scriptures:\n\nShe gets up while it is still night; she provides food for her family and portions for her female servants.  She considers a field and buys it; out of her earnings she plants a vineyard. She sets about her work vigorously; her arms are strong for her tasks.  Proverbs 31:15-17\n\nGo to the ant, you sluggard; consider its ways and be wise! It has no commander, no overseer or ruler, yet it stores its provisions in summer and gathers its food at harvest.  Proverbs 6:6\n\nFor the Spirit of God does not make us timid, but gives us power, love, and self-discipline.  2 Timothy 1:7",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "scripture",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P014A",
+        "source_slide": 21,
+        "title": "From Theory Into Practice: Five Steps",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "From Theory Into Practice: Five Steps",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Step 1: Think of some possible emergencies you might face:\n\tMedical Bills\n\tLoss of your job\n\tLow income month",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "steps",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true,
+          "source_page_part": 1
+        }
+      },
+      {
+        "id": "FGMM-M01-P014B",
+        "source_slide": 21,
+        "title": "From Theory Into Practice: Five Steps",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "From Theory Into Practice: Five Steps",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Step 2: Now, think of some things you will need in the future:\n\tSchool Fees\n\tClothes\n\tHouse Furnishings",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "steps",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true,
+          "source_page_part": 2
+        }
+      },
+      {
+        "id": "FGMM-M01-P015A",
+        "source_slide": 22,
+        "title": "From Theory Into Practice: Five Steps",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "From Theory Into Practice: Five Steps",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Step 3: Discuss among yourselves about which item in each of these categories is the most important.",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "steps",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true,
+          "source_page_part": 1
+        }
+      },
+      {
+        "id": "FGMM-M01-P015B",
+        "source_slide": 22,
+        "title": "From Theory Into Practice: Five Steps",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "From Theory Into Practice: Five Steps",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Step 4: WRITE DOWN YOUR TOP TWO SAVINGS GOALS! \nIf you don’t write it down, it’s not a goal – just a dream.",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "steps",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true,
+          "source_page_part": 2
+        }
+      },
+      {
+        "id": "FGMM-M01-P015C",
+        "source_slide": 22,
+        "title": "From Theory Into Practice: Five Steps",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "From Theory Into Practice: Five Steps",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Step 5: Talk with your partner, reach consensus.\nAgreement between spouses makes the goal concrete.\n\nActually, there’s one more step \neven more important than these…",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "steps",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true,
+          "source_page_part": 2
+        }
+      },
+      {
+        "id": "FGMM-M01-P016",
+        "source_slide": 23,
+        "title": "Surrender",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "Surrender",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Ask God for wisdom and discipline, right here and right now.\n\nLet’s pray for God’s grace and power to honor the commitments we make about money and finances, with wisdom and insight, every day.\n\nFor I know the plans I have for you, declares the Lord, \nplans to prosper you and not to harm you, \nplans to give you hope and a future. (Jeremiah 29:11)",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "scripture",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      },
+      {
+        "id": "FGMM-M01-P017",
+        "source_slide": 24,
+        "title": "A Prayer of Surrender",
+        "layout": "source",
+        "blocks": [
+          {
+            "type": "source_text",
+            "text": "A Prayer of Surrender",
+            "localization_policy": "TRANSLATE_ONLY"
+          },
+          {
+            "type": "source_text",
+            "text": "Take, Lord, and receive all my liberty.\nMy memory, my understanding, my entire will.\n\nAll that I have and call my own \nYou have given to me. To you, Lord, I return it.\nEverything is yours; do with it what you will.\n\nGive me only your love and your grace,\nThat is enough for me.\n\n\nIgnatius Loyola 1491-1566",
+            "localization_policy": "TRANSLATE_ONLY"
+          }
+        ],
+        "template": "prayer",
+        "presentation": {
+          "accent": "newvines-green",
+          "show_source_note": true
+        }
+      }
+    ]
+  },
+  "source_issues": [
+    {
+      "id": "ISSUE-FGMM-M01-001",
+      "source_slide": 22,
+      "type": "numbering_typo",
+      "status": "corrected_with_approval",
+      "note": "The source labels two consecutive instructions as Step 4. Per curriculum-owner approval for v0.6.1, the final duplicate Step 4 (Talk with your partner) is corrected to Step 5."
+    }
+  ],
+  "presentation_version": "0.8.0",
+  "presentation_notes": "Visual-learning refinement: more prominent module opener; corrected source-emphasis matching; Step 4 and Step 5 separated; non-Scripture prayer/application separated from Jeremiah 29:11; added content-specific visual learning elements while preserving canonical wording.",
+  "guided_presentation": {
+    "enabled": true,
+    "reveal_lead_ms": 500,
+    "default_narration_mode": "marin_opus",
+    "narration_modes": {
+      "browser_tts": {
+        "label": "Use Browser Text to Speech",
+        "requires_api_key": false
+      },
+      "marin_opus": {
+        "label": "Marin Opus AI Audio",
+        "requires_api_key": true,
+        "provider": "OpenAI",
+        "voice": "marin",
+        "format": "opus"
+      }
+    },
+    "cms_note": "Show Marin Opus AI Audio only when an OpenAI API key is configured. Guided metadata is supplemental to the canonical page record."
+  }
+}
