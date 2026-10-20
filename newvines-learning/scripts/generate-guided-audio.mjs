@@ -11,8 +11,11 @@ const instructions=`Speak as a warm, experienced Christian financial educator ad
 let count=0;
 console.log('\nNew Vines Guided Presentation — Marin narration\n');
 for(const page of course.module.pages.filter(p=>p.guided?.narration_mode==='marin_opus')){
- const segments=page.guided?.narration_segments||[];const assets=page.guided?.audio_segments||[];
+ const mapped=page.guided?.segments;
+ const segments=mapped?mapped.map(segment=>segment.text):page.guided?.narration_segments||[];
+ const assets=mapped?mapped.map(segment=>segment.audio):page.guided?.audio_segments||[];
  if(segments.length!==assets.length)throw new Error(`${page.id}: narration/audio segment counts do not match`);
+ if(assets.some(asset=>!asset))throw new Error(`${page.id}: an audio output path is missing`);
  for(let i=0;i<segments.length;i++){
   const output=path.resolve('public',assets[i].replace(/^\//,''));await fs.mkdir(path.dirname(output),{recursive:true});
   process.stdout.write(`${page.id} segment ${i+1}/${segments.length}... `);

@@ -1,11 +1,12 @@
 {
   "name": "newvines-learning-pwa",
   "private": true,
-  "version": "0.8.1",
+  "version": "0.8.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run validate:course && tsc --noEmit && vite build",
+    "validate:course": "node scripts/validate-course.mjs",
     "preview": "vite preview",
     "generate:guided-audio": "node --env-file=.env scripts/generate-guided-audio.mjs"
   },

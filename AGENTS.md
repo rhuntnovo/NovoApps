@@ -43,7 +43,8 @@ NovoApps/
 └─ shared/               # only when repeated requirements justify extraction
 ```
 
-Current Learning baseline is v0.8.0.
+Current deployed Learning baseline is v0.8.2. The shared section viewer is used throughout Module 1; see docs/01.
+Self Paced is manual advancement for an individual or group/projector. Individual/group questions are independent of narration mode.
 
 Before Learning work read `docs/01-CURRENT-LEARNING-CODEBASE.md` and
 `docs/02-LEARNING-CMS-ARCHITECTURE.md`. Before platform/data work also

@@ -90,3 +90,52 @@ belongs in CDN/object storage and PWA Cache Storage.
 8.  Localization.
 9.  Validation/approval/publication.
 10. Controlled narration generation.
+
+## Published shared-viewer schema
+
+The published Learning schema 0.3 uses stable ContentBlock.id values and
+Page.presentation.reveal_blocks for incremental display. Guided segments reference
+block_id and hold supplemental narration text/audio; both modes render the same
+canonical block. Reordering blocks does not change narration-to-block identity.
+Individual reflection prompts (Page.reflection) and facilitator group prompts
+(Page.guided.facilitator) are audience variants of an activity, not copies of
+canonical participant teaching. The section viewer now covers all teaching pages;
+pre-generated recorded narration still covers P005--P008.
+CMS preview and publication should preserve this shared renderer and validate
+all block references and media. Physical CMS SQL design remains open.
+
+## Narration settings and write-only API credentials
+
+Requested CMS setting: **Use AI generated Audio for Narration**. When enabled,
+show a masked/password field for pasting an OpenAI API key, restricted to authorized
+settings administrators. Saving sends the key over HTTPS to the authoring server;
+store it in a server-side secret manager or protected environment configuration.
+After saving, return only a configured/not-configured indicator, never the full key.
+Provide replace/revoke actions instead of redisplaying a retrievable secret. Authors
+may be allowed to generate approved audio without permission to read/manage credentials.
+Generation runs server-side (or in the existing trusted local-authoring script), and
+published course JSON/PWA bundles/caches must contain only media references, never keys.
+
+A password field masks on-screen text but does not make a browser-held key impossible
+to inspect/copy. Prevent reuse by other CMS users through write-only credential APIs,
+authorization, server-side storage, and secret-free responses/logs. Do not promise that
+input masking alone protects the key. Official OpenAI authentication guidance:
+https://developers.openai.com/api/reference/overview#authentication
+
+Disabling AI generation leaves browser TTS available and does not delete published
+recordings. Playback choice, authoring permission, and generation configuration are
+separate settings. Existing recorded Opus playback requires no API key on learner devices.
+
+## Audience and illustration authoring
+
+Self Paced means manually advanced, for an individual or a leader/projector group.
+Guided adds optional narration. Individual/group activity wording is an independent
+setting shared by both modes. Preserve leader-controlled reveals in Present mode.
+
+CMS asset authoring should allow uploaded or generated context-appropriate graphics
+attached to canonical block IDs, with localized alt text, explicit LOCALIZE_IMAGE policy,
+approval/provenance, and versioned optimized variants. Use responsive sizes and retain
+existing icons. Images are supplemental: the canonical text and normal offline operation
+must remain available if optional images fail. The current needs/wants page demonstrates
+an East African family meal and a soccer ball; locale-specific variants can replace them
+without rewriting the teaching. Never put an image-generation credential in published data.

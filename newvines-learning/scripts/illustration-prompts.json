@@ -1,0 +1,80 @@
+{
+  "generator": "Built-in image_gen tool",
+  "outputs": [
+    {
+      "asset": "/assets/illustrations/needs-family-v1.webp",
+      "small_asset": "/assets/illustrations/needs-family-v1-384.webp",
+      "prompt": "Use case: illustration-story. Asset type: responsive teaching illustration for a lightweight financial-literacy PWA used by adults in East Africa, on projector, tablet and phone. Primary request: a context-appropriate family sharing a nutritious everyday meal to illustrate food as a basic need. A warm, respectful depiction of a present-day East African household: two adult caregivers and two school-age children sitting together at a modest, clean dining table, eating rice, beans and green vegetables from ordinary bowls and plates. Calm natural smiles, normal everyday clothing. Style: polished editorial illustration, simple clear shapes, gently textured shading, restrained muted greens, warm ochre and cream matching an educational green-and-cream interface. Landscape composition, complete people and table comfortably framed, easy to read at small sizes, uncluttered light cream background. No writing, labels, numbers, logos or watermarks. No split panels. Avoid luxury decor or poverty stereotypes. The food and family interaction must be immediately legible."
+    },
+    {
+      "asset": "/assets/illustrations/wants-soccer-v1.webp",
+      "small_asset": "/assets/illustrations/wants-soccer-v1-384.webp",
+      "prompt": "Use case: illustration-story. Asset type: responsive teaching illustration for a lightweight financial-literacy PWA used by adults in East Africa, on projector, tablet and phone. Primary request: a soccer ball to illustrate an optional purchase or want. One clean black-and-white soccer ball resting on a small patch of short green grass in warm daylight, with a very simple softly indicated open playing area behind it. Style: polished editorial illustration with clear simple shapes and gently textured shading, restrained muted greens, warm ochre and cream matching an educational green-and-cream interface. Landscape composition, soccer ball large and easily recognizable at phone sizes, comfortably framed against a light cream background. No people, extra objects, writing, labels, numbers, logos or watermarks. No split panels."
+    },
+    {
+      "asset": "/assets/illustrations/saving-aside-kenya-v1.webp",
+      "small_asset": "/assets/illustrations/saving-aside-kenya-v1-384.webp",
+      "block_ids": [
+        "FGMM-M01-P007-B002",
+        "FGMM-M01-P014A-B002"
+      ],
+      "audience": "Kenya",
+      "prompt": "Use case: illustration-story. Asset type: responsive financial-literacy teaching illustration for Kenyan adults, used on projector, tablet and phone. Style: warm polished editorial illustration, clear natural proportions, softly textured shading, muted green, warm ochre and cream, consistent with the existing Kenyan family-meal and soccer-ball illustrations. Respectful present-day Kenya setting with ordinary well-kept everyday clothing and surroundings, neither luxury nor poverty stereotypes. Landscape 3:2 framing; main subjects complete and easily legible when reduced to phone size; simple uncluttered light cream background. No text, labels, readable writing, currency amounts, logos, brands or watermark. No split panels. Primary request: show the practical action of setting money aside for later. Close view of a Kenyan adult's hands placing a few ordinary coins through the slot of a simple small metal savings tin on a clean wooden table; tin has a small padlock on its lid. Show the whole tin and hands, with a modest small pile of remaining coins beside it. Focus on intentional saving, not a bank or payment service. Coin details generic without legible denominations. No toy piggy bank, no piles of wealth."
+    },
+    {
+      "asset": "/assets/illustrations/generosity-neighbours-kenya-v1.webp",
+      "small_asset": "/assets/illustrations/generosity-neighbours-kenya-v1-384.webp",
+      "block_ids": [
+        "FGMM-M01-P005-B004"
+      ],
+      "audience": "Kenya",
+      "prompt": "Use case: illustration-story. Asset type: responsive financial-literacy teaching illustration for Kenyan adults, used on projector, tablet and phone. Style: warm polished editorial illustration, clear natural proportions, softly textured shading, muted green, warm ochre and cream, consistent with the existing Kenyan family-meal and soccer-ball illustrations. Respectful present-day Kenya setting with ordinary well-kept everyday clothing and surroundings, neither luxury nor poverty stereotypes. Landscape 3:2 framing; main subjects complete and easily legible when reduced to phone size; simple uncluttered light cream background. No text, labels, readable writing, currency amounts, logos, brands or watermark. No split panels. Primary request: illustrate being prepared to help someone else wisely. Two Kenyan adult neighbours standing at eye level beside a simple home doorway, one warmly offering the other a reusable shopping bag containing ordinary household food supplies: a plain bag of maize flour and a small clear bag of beans. Both adults have relaxed respectful expressions and everyday clothing, equal dignity; this is a friendly neighbour-to-neighbour interaction. No desperate expressions, no cash exchange, no crowd, no pity imagery. Keep the food bag and the sharing gesture immediately recognizable."
+    },
+    {
+      "asset": "/assets/illustrations/bicycle-goal-kenya-v1.webp",
+      "small_asset": "/assets/illustrations/bicycle-goal-kenya-v1-384.webp",
+      "block_ids": [
+        "FGMM-M01-P008-B003"
+      ],
+      "audience": "Kenya",
+      "prompt": "Use case: illustration-story. Asset type: responsive financial-literacy teaching illustration for Kenyan adults, used on projector, tablet and phone. Style: warm polished editorial illustration, clear natural proportions, softly textured shading, muted green, warm ochre and cream, consistent with the existing Kenyan family-meal and soccer-ball illustrations. Respectful present-day Kenya setting with ordinary well-kept everyday clothing and surroundings, neither luxury nor poverty stereotypes. Landscape 3:2 framing; main subjects complete and easily legible when reduced to phone size; simple uncluttered light cream background. No text, labels, readable writing, currency amounts, logos, brands or watermark. No split panels. Primary request: illustrate a tangible savings goal using the exact lesson example, a new bicycle. One practical well-maintained everyday bicycle with a simple rear carrier, upright handlebars, two complete visible wheels and normal pedals, standing on its kickstand on a quiet Kenyan neighbourhood path. Very lightly indicated greenery and a modest plaster wall behind it. Bicycle is the dominant subject and fully framed. No rider, racing equipment, extra bicycles or signage. Clear coherent bicycle geometry."
+    },
+    {
+      "asset": "/assets/illustrations/couple-planning-kenya-v1.webp",
+      "small_asset": "/assets/illustrations/couple-planning-kenya-v1-384.webp",
+      "block_ids": [
+        "FGMM-M01-P011-B003",
+        "FGMM-M01-P015C-B002"
+      ],
+      "audience": "Kenya",
+      "prompt": "Use case: illustration-story. Asset type: responsive financial-literacy teaching illustration for Kenyan adults, used on projector, tablet and phone. Style: warm polished editorial illustration, clear natural proportions, softly textured shading, muted green, warm ochre and cream, consistent with the existing Kenyan family-meal and soccer-ball illustrations. Respectful present-day Kenya setting with ordinary well-kept everyday clothing and surroundings, neither luxury nor poverty stereotypes. Landscape 3:2 framing; main subjects complete and easily legible when reduced to phone size; simple uncluttered light cream background. No text, labels, readable writing, currency amounts, logos, brands or watermark. No split panels. Primary request: illustrate partners listening to each other and agreeing on a savings plan. A Kenyan adult couple sitting together at an ordinary wooden table; one person gestures gently while speaking, the other listens attentively, both engaged equally. An open notebook and a pencil between them indicate shared planning, but no readable writing or numbers. Comfortable everyday clothing, calm thoughtful expressions, simple clean home background. No devices, charts or stacks of banknotes. Both faces and the shared notebook clearly visible."
+    },
+    {
+      "asset": "/assets/illustrations/school-needs-kenya-v1.webp",
+      "small_asset": "/assets/illustrations/school-needs-kenya-v1-384.webp",
+      "block_ids": [
+        "FGMM-M01-P014B-B002"
+      ],
+      "audience": "Kenya",
+      "prompt": "Use case: illustration-story. Asset type: responsive financial-literacy teaching illustration for Kenyan adults, used on projector, tablet and phone. Style: warm polished editorial illustration, clear natural proportions, softly textured shading, muted green, warm ochre and cream, consistent with the existing Kenyan family-meal and soccer-ball illustrations. Respectful present-day Kenya setting with ordinary well-kept everyday clothing and surroundings, neither luxury nor poverty stereotypes. Landscape 3:2 framing; main subjects complete and easily legible when reduced to phone size; simple uncluttered light cream background. No text, labels, readable writing, currency amounts, logos, brands or watermark. No split panels. Primary request: illustrate preparing for future school needs as a family savings purpose. A Kenyan parent and two primary-school-age children at a simple table, preparing plain exercise books, pencils, and an ordinary school bag together. Children wear practical clean Kenyan-style school uniforms without badges or visible school logos. Warm calm sense of preparation, not a shopping advertisement. Include the people, books and bag clearly; very simple home background. No readable book titles or writing, no money or fee amounts."
+    },
+    {
+      "asset": "/assets/illustrations/writing-goals-kenya-v1.webp",
+      "small_asset": "/assets/illustrations/writing-goals-kenya-v1-384.webp",
+      "block_ids": [
+        "FGMM-M01-P015B-B002"
+      ],
+      "audience": "Kenya",
+      "prompt": "Use case: illustration-story. Asset type: responsive financial-literacy teaching illustration for Kenyan adults, used on projector, tablet and phone. Style: warm polished editorial illustration, clear natural proportions, softly textured shading, muted green, warm ochre and cream, consistent with the existing Kenyan family-meal and soccer-ball illustrations. Respectful present-day Kenya setting with ordinary well-kept everyday clothing and surroundings, neither luxury nor poverty stereotypes. Landscape 3:2 framing; main subjects complete and easily legible when reduced to phone size; simple uncluttered light cream background. No text, labels, readable writing, currency amounts, logos, brands or watermark. No split panels. Primary request: illustrate physically writing down savings goals. Close three-quarter over-the-shoulder view of a Kenyan adult seated at a wooden table writing with a pencil in an open notebook. Show a hand actually holding and using the pencil, and the notebook as the focus. The notebook contains only two small simple pictorial sketches, one bicycle and one stack of school books, with blank space beside them, no words, no numbers. The person, table and page should be easy to understand at small size. Simple cream background, everyday clothing. No smartphone, no digital interface or financial charts."
+    },
+    {
+      "asset": "/assets/illustrations/ants-diligence-v1.webp",
+      "small_asset": "/assets/illustrations/ants-diligence-v1-384.webp",
+      "block_ids": [
+        "FGMM-M01-P013-B004"
+      ],
+      "audience": "Kenya",
+      "prompt": "Use case: illustration-story. Asset type: responsive financial-literacy teaching illustration for Kenyan adults, used on projector, tablet and phone. Style: warm polished editorial illustration, clear natural proportions, softly textured shading, muted green, warm ochre and cream, consistent with the existing Kenyan family-meal and soccer-ball illustrations. Respectful present-day Kenya setting with ordinary well-kept everyday clothing and surroundings, neither luxury nor poverty stereotypes. Landscape 3:2 framing; main subjects complete and easily legible when reduced to phone size; simple uncluttered light cream background. No text, labels, readable writing, currency amounts, logos, brands or watermark. No split panels. Primary request: a natural-history illustration of ants gathering and storing food, supporting the lesson's Proverbs example. A few realistically proportioned ants carrying small dry seeds across warm soil toward the entrance of their simple nest, with a little dry grass and a few more seeds. Close ground-level view; ants large enough to see clearly on a small screen. Natural insects with six legs, segmented bodies and antennae; not human characters or a cartoon village. No faces, clothing, tools, speech bubbles or text. Show calm purposeful cooperative activity."
+    }
+  ]
+}

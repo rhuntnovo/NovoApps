@@ -9,7 +9,7 @@
     presentation modes.
 -   Protect canonical curriculum.
 -   Marin Opus selected for production Guided narration; browser TTS
-    fallback/option.
+    is an explicit learner option.
 -   CMS authoring source → published JSON/assets delivery.
 -   `workspace` is universal data partition.
 -   IndexedDB for offline structured operational data; Cache Storage for
@@ -48,7 +48,7 @@ pinning, retention/export/deletion.
 
 ## Recommended sequence
 
-1.  **Learning delivery:** keep v0.8.0 stable; test
+1.  **Learning delivery:** keep deployed v0.8.2 stable; test
     install/update/offline; formalize JSON schema, IDs, content/schema
     versions, catalog; finish Guided UI issues.
 2.  **CMS:** course/module/page/block editor; preview;
@@ -68,3 +68,29 @@ pinning, retention/export/deletion.
 When an architectural decision changes, update the relevant `docs/` file
 and `AGENTS.md` if it affects future coding behavior. Prefer
 documentation changes in the same Git commit as the architecture change.
+
+## Learning v0.8.2 release (October 19, 2026)
+
+Released to Cloudflare Worker novoapps-newvines. Self Paced and Guided now share
+one section viewer throughout Module 1, with the title cover and single-block
+closing prayer preserved. Group/individual questions are independent of narration;
+Self Paced and Present support a group leader advancing sections on a projector.
+The compact phone dock, viewport-safe reflections, subtle green active borders,
+Scripture borders, icons, and bulleted step examples are included.
+
+Stable block IDs and schema 0.3 map the unchanged narration to the existing 15 Opus
+recordings on P005--P008. Recorded audio remains the default; errors show Retry and
+browser TTS requires an explicit choice. The user confirmed desktop Chrome plays
+the recordings; their VS Code embedded browser does not. No audio was regenerated.
+
+Nine Kenya-audience illustrations have responsive WebP variants, localized-image
+metadata, provenance, and optional offline caching. Canonical curriculum wording
+is unchanged. The CMS audio setting, write-only API credential design, and upload/
+generation workflow are documented for future authoring implementation.
+
+Package/display version is 0.8.2; schema version is independently 0.3. The build
+passed course validation and TypeScript/Vite. All 44 deployed files matched the
+local build by SHA-256. Previous local browser checks covered layouts, reveals,
+reflections, real recording playback, failure handling, and offline content/media.
+Next priorities remain physical Android install/update/offline validation, catalog
+and publication design, followed by the planned CMS and shared platform sequence.

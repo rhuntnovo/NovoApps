@@ -5,18 +5,18 @@ const body=(page:CoursePage)=>page.blocks.map((b,n)=>{
   return n===0 && lines[0]===page.title ? lines.slice(1).join('\n') : b.text;
 }).filter(Boolean) as string[];
 
-const BibleIcon=()=> (
+export const BibleIcon=()=> (
   <svg class="bible-icon" viewBox="0 0 64 64" role="img" aria-label="Bible">
     <path d="M10 10h18c5 0 8 3 8 8v36c-2-4-6-6-11-6H10z"/><path d="M54 10H36v44c2-4 6-6 11-6h7z"/>
     <path class="icon-line" d="M20 19h8M24 15v12"/>
   </svg>
 );
-const PrayerIcon=()=> (
+export const PrayerIcon=()=> (
   <svg class="prayer-icon" viewBox="0 0 64 64" role="img" aria-label="Prayer">
     <path d="M31 9c-4 8-5 16-3 24l-8 13c-2 4 0 9 4 10 3 1 6 0 8-3l5-8 4 8c2 3 5 4 8 3 4-1 6-6 4-10L45 33c2-8 1-16-3-24"/><path class="icon-line" d="M32 15h9M36.5 10.5v9"/>
   </svg>
 );
-const VisualIcon=({kind}:{kind:string})=>{
+export const VisualIcon=({kind}:{kind:string})=>{
  const paths:Record<string,any>={
   tangible:<><circle cx="32" cy="32" r="20"/><circle cx="32" cy="32" r="11"/><circle cx="32" cy="32" r="3"/><path d="M47 17l-15 15"/></>,
   measurable:<><path d="M12 42l30-30 10 10-30 30H12z"/><path d="M23 35l6 6M30 28l6 6M37 21l6 6"/></>,
@@ -24,6 +24,7 @@ const VisualIcon=({kind}:{kind:string})=>{
   needs:<><path d="M11 31l21-18 21 18"/><path d="M16 28v25h32V28M27 53V37h10v16"/></>,
   wants:<><path d="M32 52s-18-10-18-25c0-7 5-12 12-12 4 0 6 2 6 5 0-3 3-5 7-5 7 0 12 5 12 12 0 15-19 25-19 25z"/></>,
   discern:<><path d="M32 8v9M15 15l7 7M49 15l-7 7"/><circle cx="32" cy="34" r="13"/><path d="M27 47v7h10v-7M27 31c3-5 8-5 11 0"/></>
+  ,examples:<><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="12"/><circle cx="32" cy="32" r="3"/></>
  };
  return <svg class="visual-icon" viewBox="0 0 64 64" aria-hidden="true">{paths[kind]}</svg>
 };
@@ -31,7 +32,7 @@ const VisualIcon=({kind}:{kind:string})=>{
 const splitParagraphs=(text:string)=>text.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
 const splitLines=(text:string)=>text.split('\n').map(x=>x.trim()).filter(Boolean);
 
-function Inline({text}:{text:string}){
+export function Inline({text}:{text:string}){
   // Presentation-only emphasis copied from the source PowerPoint. Match whole phrases only,
   // so e.g. "plan" never highlights the middle of "Unplanned".
   const emphasis=['in the here and now','do not spend','disciplined','pray for','must have','nice to have','discernment (also wisdom)','plan','future','today'];
