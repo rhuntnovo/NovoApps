@@ -12,6 +12,31 @@ export function GuidedDemoViewer({course}:{course:Course}){
  const [index,setIndex]=useState(hashIndex>=0?hashIndex:0); const [playing,setPlaying]=useState(false); const [paused,setPaused]=useState(false); const [revealed,setRevealed]=useState(1); const [activeSegment,setActiveSegment]=useState<number|null>(null); const [showPrompt,setShowPrompt]=useState(false); const [readyForFacilitator,setReadyForFacilitator]=useState(false);
  const utterance=useRef<SpeechSynthesisUtterance|null>(null); const audio=useRef<HTMLAudioElement|null>(null); const timers=useRef<number[]>([]); const runId=useRef(0); const segmentIndex=useRef(0); const pendingSegment=useRef<number|null>(null); const cardRefs=useRef<(HTMLDivElement|null)[]>([]);
  const page=pages[index]; const paras=useMemo(()=>splitParas(page),[page]);
+ const promptRef=useRef<HTMLDivElement|null>(null);
+ const readyButtonRef=useRef<HTMLButtonElement|null>(null);
+ useEffect(()=>{
+  if(!showPrompt){readyButtonRef.current?.focus({preventScroll:true});return}
+  const previousFocus=document.activeElement;
+  const previousOverflow=document.body.style.overflow;
+  document.body.style.overflow='hidden';
+  const buttons=promptRef.current?.querySelectorAll<HTMLButtonElement>('button');
+  buttons?.[0]?.focus({preventScroll:true});
+  const key=(event:KeyboardEvent)=>{
+   if(event.key==='Escape'){event.preventDefault();setShowPrompt(false)}
+   if(event.key==='Tab'&&buttons?.length){
+    const first=buttons[0],last=buttons[buttons.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+   }
+  };
+  document.addEventListener('keydown',key);
+  return()=>{
+   document.body.style.overflow=previousOverflow;
+   document.removeEventListener('keydown',key);
+   if(previousFocus instanceof HTMLElement&&previousFocus.isConnected)previousFocus.focus({preventScroll:true});
+   else readyButtonRef.current?.focus({preventScroll:true});
+  };
+ },[showPrompt]);
  const clearTimers=()=>{timers.current.forEach(clearTimeout);timers.current=[]};
  const stop=()=>{runId.current++;speechSynthesis?.cancel();if(audio.current){audio.current.pause();audio.current.currentTime=0;audio.current=null}clearTimers();pendingSegment.current=null;setPlaying(false);setPaused(false);setActiveSegment(null)};
  const go=(n:number)=>{stop();setShowPrompt(false);setReadyForFacilitator(false);setRevealed(1);setIndex(Math.max(0,Math.min(pages.length-1,n)))};
@@ -42,9 +67,9 @@ export function GuidedDemoViewer({course}:{course:Course}){
   <div class={`guided-content guided-${page.template||'teaching'}`}>
    {paras.map((p,i)=>{const scripture=page.template==='scripture'&&i===0;return <div ref={el=>{cardRefs.current[i]=el}} key={i} class={`guided-card ${i<revealed?'revealed':''} ${activeSegment===i&&!scripture?'active':''} ${scripture?'persistent-scripture':''}`}><span class="reveal-dot">{i+1}</span><div>{p.split('\n').map((l,j)=><span key={j}>{l}{j<p.split('\n').length-1&&<br/>}</span>)}</div></div>})}
   </div>
-  {showPrompt&&page.guided?.facilitator&&<div class="facilitator-overlay"><div class="facilitator-box"><button class="fac-close" aria-label="Close facilitator prompt" onClick={()=>{setShowPrompt(false);setReadyForFacilitator(true);setRevealed(paras.length)}}>×</button><div class="fac-label">FACILITATOR PAUSE {page.guided.facilitator.time&&`• ${page.guided.facilitator.time}`}</div><h2>{page.guided.facilitator.title}</h2><p>{page.guided.facilitator.prompt}</p><button onClick={()=>index<pages.length-1?go(index+1):(setShowPrompt(false),setReadyForFacilitator(false))}>{index<pages.length-1?'Continue Lesson →':'Close Prompt'}</button></div></div>}
  </section></main>
- {readyForFacilitator&&!showPrompt&&page.guided?.facilitator&&<button class="fac-ready-btn" onClick={()=>setShowPrompt(true)}>Continue →</button>}
+ {showPrompt&&page.guided?.facilitator&&<div class="facilitator-overlay"><div ref={promptRef} class="facilitator-box" role="dialog" aria-modal="true" aria-labelledby="facilitator-title"><button class="fac-close" aria-label="Close facilitator prompt" onClick={()=>{setShowPrompt(false);setReadyForFacilitator(true);setRevealed(paras.length)}}>×</button><div class="fac-label">FACILITATOR PAUSE {page.guided.facilitator.time&&`• ${page.guided.facilitator.time}`}</div><h2 id="facilitator-title">{page.guided.facilitator.title}</h2><p>{page.guided.facilitator.prompt}</p><button onClick={()=>index<pages.length-1?go(index+1):(setShowPrompt(false),setReadyForFacilitator(false))}>{index<pages.length-1?'Continue Lesson →':'Close Prompt'}</button></div></div>}
+ {readyForFacilitator&&!showPrompt&&page.guided?.facilitator&&<button ref={readyButtonRef} class="fac-ready-btn" onClick={()=>setShowPrompt(true)}>Continue →</button>}
  <div class="guided-controls"><button disabled={index===0} onClick={()=>go(index-1)}>←</button><button class="playbtn" onClick={toggle}>{playing?'❚❚ Pause':paused?'▶ Resume':'▶ Play Narration'}</button><button disabled={index===pages.length-1} onClick={()=>go(index+1)}>→</button></div>
  <div class="demo-note">AI-generated narration</div></div>
 }
