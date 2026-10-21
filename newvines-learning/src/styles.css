@@ -324,6 +324,12 @@ body.presenter .nav-shell{width:min(calc(100% - (var(--edge-gap) * 2)),1200px);l
 
 /* Shared Self Paced / Guided lesson viewer. */
 .course-version{white-space:nowrap;padding:2px 7px;border-radius:999px;background:#e6eee7;color:#31543a;font-size:.72rem;font-weight:800}
+.course-release{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap}
+.update-notice{position:relative;display:inline-flex}
+.update-button{min-height:32px;border:1px solid #31543a;border-radius:8px;padding:4px 7px;background:#e6eee7;color:#28472f;font-size:.75rem;font-weight:800;white-space:nowrap;cursor:pointer}
+.update-button:disabled{opacity:.65;cursor:wait}
+.update-button:focus-visible{outline:2px solid #31543a;outline-offset:3px}
+.update-error{position:absolute;right:0;top:calc(100% + 5px);z-index:40;width:230px;max-width:calc(100vw - 24px);padding:10px;border:1px solid #b46b3c;border-radius:8px;background:#fff7ed;color:#673c22;font-size:.8rem;box-shadow:0 4px 16px #0002}
 .modebtn{font-weight:800;color:#31543a;background:#f6faf6;white-space:nowrap}
 .module-logo{display:block;width:min(360px,72%);height:auto;max-height:150px;object-fit:contain;object-position:left center;margin:0 0 22px;position:relative;z-index:1}
 .lesson-header{gap:8px}

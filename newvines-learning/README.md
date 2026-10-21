@@ -1,4 +1,13 @@
-# New Vines Learning PWA v0.8.2
+# New Vines Learning PWA v0.8.3
+
+Published v0.8.3 (October 20, 2026): https://novoapps-newvines.rhuntnovo.workers.dev
+
+Version 0.8.3 includes the offline-startup correction and the user-controlled Update
+button described below. Package/lockfile and displayed presentation metadata are
+0.8.3; the published schema remains 0.3. Curriculum and existing recordings are unchanged.
+The release passed 26 regression checks, and all 44 published files matched the local
+build by SHA-256. A live Chrome check confirmed the displayed version, immediate offline
+startup, and recorded narration playback. Physical iPhone/Samsung verification remains.
 
 Lightweight Preact + TypeScript + Vite PWA, published through Cloudflare Workers Static Assets.
 Read `../AGENTS.md` and the architecture documents in `../docs/` before making changes.
@@ -44,6 +53,76 @@ Run `npm run validate:course` to check IDs, narration references, reflection met
 and audio asset availability. The build runs this check automatically.
 App/package version, displayed presentation version, published schema version, and
 service-worker cache revision are separate fields.
+
+## Offline startup and updates
+
+Production opens the saved app immediately; it never waits for a network check
+before displaying a cached lesson. Update checks run in the background when the
+browser reports connectivity, and registration retries when connectivity returns.
+Checks run on launch, every 15 minutes while visible, and on foreground/focus return
+(foreground checks are limited to once per minute). Mobile background suspension
+does not prevent a fresh check when the app is resumed. No update check is required
+to open an already downloaded copy.
+
+A downloaded update waits for the learner. A compact **↻ Update** button appears
+beside the version, using the browser's waiting-worker lifecycle:
+https://developer.chrome.com/docs/workbox/handling-service-worker-updates
+Tapping saves the lesson state, activates the saved update, and reloads into it.
+There is no automatic reload during a lesson. A ready update can also be applied
+offline. Other open windows offer their own Update action rather than force a reload.
+
+The one-time, per-window sessionStorage handoff preserves page/block IDs, visible
+sections, mode, individual/group audience, in-app presentation, reflection state,
+and narration voice choice. Narration remains stopped after reloading; browser
+fullscreen requires another user gesture. This is not durable learner progress.
+Missing pages/blocks after a curriculum update fall back safely to available content.
+Storage or activation failure keeps the app open, shows an error, and allows retry.
+
+Learning has no editable record forms yet. Future data-entry screens must register
+an async `appUpdates.beforeUpdate` callback, block editing while saving/updating,
+and await local database transaction completion before allowing activation/reload.
+A failed save cancels the update. Pending cloud synchronization is independent of
+local saving and must not require connectivity to apply a downloaded app update.
+
+`npm run build` generates `dist/sw.js` from `public/sw.js` using
+`scripts/build-service-worker.mjs`. Its manifest includes the built HTML, hashed
+JavaScript/CSS, course JSON, manifest, logo, and icons. A content hash identifies
+each release cache independently of app/content/schema versions. Required files
+must all download successfully before the new worker replaces the previous one.
+Core downloads time out after 8 seconds; optional narration/illustrations after
+5 seconds. Missing optional media does not prevent installation. Successful later
+full-media downloads are also saved. Cached recordings support byte-range requests.
+
+Saved public files are served cache-first as one release, including when a server
+adds `Vary: Origin` to responses. Missing files skip fetching when explicitly offline;
+otherwise their network request has a 3-second connection/response-header timeout.
+Activation removes only older caches belonging to this app.
+
+Open the app online once and allow its download to finish before testing airplane
+mode. Clearing website data or browser storage eviction removes the offline copy.
+Local Vite development disables service workers; use the production build and
+`npm run preview` for offline testing. `npm run test:offline` checks cached startup
+against offline/stalled networks, incomplete updates, optional media, and range requests.
+`npm run test:updates` covers pending writes, save/activation failure, retry, first
+installation, long-running sessions, multiple windows, and the state handoff.
+
+## Deployment rollback
+
+Cloudflare Workers versions include static assets. An administrator can restore a
+previous deployment through Workers & Pages > novoapps-newvines > Deployments >
+the previous version's menu > Rollback, or use Wrangler with an explicit version ID.
+See https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/
+and https://developers.cloudflare.com/workers/versions-and-deployments/.
+This is a server deployment operation; it does not instantly replace an offline
+device's saved app. Devices must reconnect and receive/apply the restored worker.
+Update detection compares worker bytes, so it does not require a higher app version.
+
+Another recovery option is to restore known-good source behavior and publish it as
+the next patch version. Record release commits/tags and Cloudflare deployment IDs
+when publishing. Neither option is an in-app offline Undo button: activation currently
+removes older release caches. Such a feature would need deliberate previous-cache
+retention and a recovery interface. Future database schema changes must also remain
+compatible with supported app rollbacks; restoring app code does not restore data.
 
 ## Development and preview
 

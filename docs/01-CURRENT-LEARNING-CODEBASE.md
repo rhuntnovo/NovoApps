@@ -2,7 +2,7 @@
 
 ## Released baseline
 
-Current deployed baseline: **v0.8.2** (October 19, 2026). Stack: Vite + Preact +
+Current deployed baseline: **v0.8.3** (October 20, 2026). Stack: Vite + Preact +
 TypeScript + PWA/offline support + Cloudflare Workers Static Assets.
 Node/npm workflow. Worker: `novoapps-newvines`.
 
@@ -73,8 +73,8 @@ The viewer follows canonical block order and resolves narration by ID, rather
 than splitting paragraphs or aligning independent arrays at runtime.
 
 Package/app version, displayed presentation version, schema, and asset/cache
-versions remain conceptually separate. Package/display version is currently 0.8.2,
-schema is 0.3, and the service-worker cache is `novo-apps-shell-v0.8.2`.
+versions remain conceptually separate. Package/display version is currently 0.8.3,
+schema is 0.3, and the service-worker cache is content-derived: `novo-apps-shell-63f3e47ebc9bc3a6028f`.
 
 ## Responsive artwork
 
@@ -106,7 +106,9 @@ src/types/course.ts
 public/courses/nvi-fgmm-m01.en-global.json
 public/assets/illustrations/
 public/manifest.webmanifest
-public/sw.js
+public/sw.js (build template)
+scripts/build-service-worker.mjs
+tests/service-worker.test.mjs
 scripts/validate-course.mjs
 scripts/generate-guided-audio.mjs
 scripts/illustration-prompts.json
@@ -123,10 +125,12 @@ and Vite. `npm run preview` serves the built release locally.
 Use `npm.cmd` where PowerShell blocks npm.ps1.
 
 Cloudflare serves `dist/` with SPA fallback; courses are under `/courses/`.
-The production service worker caches shell/course content and optional media.
+The production service worker precaches a complete HTML/JS/CSS/course shell and
+optional media from the generated build manifest. Saved content opens immediately;
+updates download in the background and wait for the learner's Update action.
 Missing optional media must not break installation. Vite development unregisters
-service workers to avoid stale content. Hashed JS/CSS are currently cached at runtime;
-first-install/update/offline lifecycle checks on physical Android devices remain important.
+service workers to avoid stale content. Physical iPhone/Samsung install/update/offline
+lifecycle checks remain important. See the v0.8.3 details below.
 
 ## Validation and remaining refinements
 
@@ -140,3 +144,103 @@ Remaining work includes physical Samsung/Android install/update/offline testing,
 catalog/publication architecture, persistent learner state, external UI localization,
 and data-driven module title metadata instead of hardcoding Module 1.
 Update documentation alongside future architectural changes.
+
+## Offline-startup correction (v0.8.3, October 20, 2026)
+
+Physical iPhone airplane-mode testing exposed an unbounded network-first navigation
+in the previously deployed v0.8.2 worker. Saved JS/CSS were also dependent on runtime caching.
+The local fix serves the saved shell/code/course immediately, with update checks
+separate from rendering. Production registration skips an explicitly offline browser
+and retries on the online event. Downloaded updates now wait for a user action;
+an active lesson is not automatically reloaded.
+
+The build now generates dist/sw.js from public/sw.js using
+scripts/build-service-worker.mjs. A content-derived cache revision includes every
+published file and the worker template, independent of package/schema/content versions.
+HTML, Vite hashed JS/CSS, course JSON, manifest, logo, and icons are required precache
+files. Every required download must succeed before replacement; failure preserves
+the previous worker/cache. Required downloads abort after 8 seconds. Optional media
+attempts abort after 5 seconds and cannot prevent installation; later successful
+full-media downloads can be saved. Partial (206) responses are never stored as full
+recordings. Cached recordings support byte-range requests for mobile media players.
+
+Public same-origin cache matches ignore Vary so CDN Vary: Origin does not hide saved
+module/CORS assets. Core files stay together as a release rather than being individually
+refreshed in the background. Missing files return immediately when explicitly offline,
+otherwise fetch has a 3-second connection/response-header timeout. Activation deletes
+only older novo-apps-shell- caches. Vite development still unregisters service workers;
+use npm run build and npm run preview for offline validation.
+
+npm run test:offline covers immediate cached startup with an unresponsive network,
+complete offline shell access, CDN Vary matching, failed/stalled updates, optional
+media failures/recovery, cache cleanup boundaries, fetch timeout, and audio ranges.
+The build passes. A fresh Chrome production-preview installation saved all 43 content
+files; offline and simulated 10-second-latency launches completed in about 0.1 seconds,
+with HTML/JS/CSS/course all coming from Cache Storage. Actual cached Opus playback
+also passed offline. Physical iPhone and Samsung testing of the fix is still needed.
+This correction is published in v0.8.3 alongside the update notification below.
+
+## Update notification (v0.8.3, October 20, 2026)
+
+A compact Update button beside the displayed version appears when a new worker has
+finished downloading. Updates wait rather than automatically calling skipWaiting.
+The first installation activates normally without displaying an update notification.
+Checks run on launch, connectivity return, focus/visibility return (foreground checks
+limited to once per minute), and every 15 minutes while visible/online. Mobile
+background timers may be suspended; resuming the app triggers a foreground check.
+The app still opens from its cache without waiting for an update request.
+
+Tapping Update awaits all appUpdates.beforeUpdate callbacks, then sends ACTIVATE_UPDATE
+to the waiting worker, waits for controllerchange, and reloads. Repeated taps cannot
+start duplicate updates. Failed saves or a 10-second activation timeout leave the app
+open with retry guidance. A fully downloaded update can be applied offline. A different
+window activating a worker shows Update in this window without forcing it to reload.
+
+Learning currently has no editable operational records. Its beforeUpdate callback
+writes a one-time, course/language-scoped sessionStorage handoff: page and block IDs,
+revealed section, Self Paced/Guided, individual/group audience, presentation fallback,
+reflection state, and voice choice. Missing page/block IDs fall back to available
+content after a publication change. Narration stays stopped after reload. Native
+fullscreen requires a fresh gesture; in-app presentation is preserved. This handoff
+is not durable learner progress or cloud synchronization.
+
+Future editable screens must register async local-write/transaction flush callbacks
+and disable edits while saving/updating. Rejection must cancel activation/reload;
+never claim that cloud synchronization is required to preserve committed local edits.
+
+Important new files: src/pwa/updateManager.ts, src/pwa/updates.ts,
+src/pwa/lessonResume.ts, src/components/UpdateNotice.tsx, tests/update-manager.test.mjs.
+The build and 26 regression checks pass. A real two-release Chrome test verified
+foreground detection, no forced reload, save failure/retry, and an offline update
+that restored lesson state. Layouts were checked at 320, 390, 768, and 1440 pixels.
+Physical iPhone/Samsung verification remains pending. Published as v0.8.3. Existing installed
+clients must first receive this app update before they can display future update buttons.
+
+## v0.8.3 release (October 20, 2026)
+
+Package.json, root lockfile package entries, and displayed presentation_version are
+now 0.8.3. The build passed, including the generated complete offline release; all
+26 offline/update regression checks passed. Schema remains 0.3. The only change to
+the canonical course JSON in this version bump is presentation_version; teaching,
+Scripture, narration, IDs, and asset references are unchanged. This release includes
+the offline-startup correction and user-controlled update notification described above.
+Published to Cloudflare Worker novoapps-newvines at
+https://novoapps-newvines.rhuntnovo.workers.dev.
+Cloudflare version: b9591d53-a87b-47ce-8969-5ca91214d405.
+Previous v0.8.2 Cloudflare version: 517f8d21-a134-464a-bfb2-6ae47e9c01e5.
+Release cache revision: 63f3e47ebc9bc3a6028f.
+All 44 published files matched dist by SHA-256. A fresh live Chrome installation
+rendered v0.8.3 and saved 43 content files (the worker itself is not precached).
+Offline startup completed in 67 ms and a simulated 10-second-latency launch in 54 ms
+on the desktop test machine; HTML, JS, CSS, and course came from Cache Storage.
+Actual recorded Opus playback and byte-range responses passed offline. These timings
+are desktop measurements, not guarantees for low-end devices. Physical iPhone/Samsung
+validation remains pending. Source, tests, and documentation form the v0.8.3 release commit.
+
+Cloudflare supports rollback to a previous Worker deployment, including its static
+assets. Installed PWAs receive the restored worker through a subsequent online
+update check; offline devices retain their current saved copy until reconnecting.
+The updater detects changed worker bytes rather than requiring a numerically
+higher version. There is no per-device offline Undo action because old release
+caches are deleted on activation. See the Learning README for recovery options and
+Cloudflare documentation. No offline Undo feature was added and no rollback operation was performed.

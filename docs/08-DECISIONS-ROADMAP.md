@@ -48,7 +48,7 @@ pinning, retention/export/deletion.
 
 ## Recommended sequence
 
-1.  **Learning delivery:** keep deployed v0.8.2 stable; test
+1.  **Learning delivery:** keep deployed v0.8.3 stable; test
     install/update/offline; formalize JSON schema, IDs, content/schema
     versions, catalog; finish Guided UI issues.
 2.  **CMS:** course/module/page/block editor; preview;
@@ -94,3 +94,33 @@ local build by SHA-256. Previous local browser checks covered layouts, reveals,
 reflections, real recording playback, failure handling, and offline content/media.
 Next priorities remain physical Android install/update/offline validation, catalog
 and publication design, followed by the planned CMS and shared platform sequence.
+
+## Offline launch follow-up (v0.8.3, October 20, 2026)
+
+Prioritize the iPhone airplane-mode startup correction before further feature work.
+The released Learning fix uses a complete build-generated precache and immediate saved
+shell delivery, with background update checks and bounded missing-file requests.
+It preserves the prior release on failed core downloads and supports cached media
+byte ranges. See docs/01 and the Learning README for behavior and verification.
+Verify the published correction on the physical iPhone and Samsung tablet; the
+currently deployed baseline is v0.8.3. No curriculum or audio regeneration
+is required for this correction.
+
+## User-controlled Learning updates (v0.8.3)
+
+The offline-startup correction also includes a compact Update action beside the
+version, periodic/foreground checks for long-running sessions, and save-before-reload
+hooks. Ready updates wait for a tap. Learning preserves a one-time session handoff;
+future record-entry screens must flush local transactions before update activation
+and block further edits while saving. Cloud sync remains independent. Browser update,
+failed-save retry, phone layout, and offline state restoration were verified locally.
+Published together as v0.8.3; repeat physical iPhone/Samsung testing.
+
+## v0.8.3 publication verification (October 20, 2026)
+
+Published to novoapps-newvines, Cloudflare version
+b9591d53-a87b-47ce-8969-5ca91214d405. Package/display is 0.8.3; schema stays 0.3.
+Build and 26 regression checks passed; all 44 live files matched dist by SHA-256.
+Live Chrome confirmed v0.8.3, complete offline installation, immediate cached startup
+under offline/stalled connectivity, and real recorded Opus playback offline.
+Keep physical iPhone and Samsung installation/update/offline tests as the next check.

@@ -3,19 +3,26 @@ import type { Course, CoursePage, GuidedNarrationMode } from '../types';
 import { useNarration } from '../hooks/useNarration';
 import { LessonBlocks, revealBlocks } from './LessonBlocks';
 import { ReflectionDialog } from './ReflectionDialog';
+import { UpdateNotice } from './UpdateNotice';
+import { appUpdates } from '../pwa/updates';
+import { saveLessonResume, takeLessonResume, type LessonResume } from '../pwa/lessonResume';
 import TemplateRenderer, { BibleIcon, PrayerIcon } from './templates/TemplateRenderer';
 
 type Mode = 'self-paced' | 'guided';
 type Audience = 'individual' | 'group';
 
 export function CourseViewer({ course, initialMode = 'self-paced' }: { course: Course; initialMode?: Mode }) {
-  const [mode, setMode] = useState<Mode>(initialMode);
-  const [audience, setAudience] = useState<Audience>(initialMode === 'guided' ? 'group' : 'individual');
+  const [resume, setResume] = useState(() => {
+    const saved = takeLessonResume(course.course_id, course.language);
+    return saved && course.module.pages.some(page => page.id === saved.pageId) ? saved : null;
+  });
+  const [mode, setMode] = useState<Mode>(resume?.mode || initialMode);
+  const [audience, setAudience] = useState<Audience>(resume?.audience || (initialMode === 'guided' ? 'group' : 'individual'));
   const [pageId, setPageId] = useState(() => {
     const requested = course.module.pages.find(page => `#${page.id}` === location.hash);
-    return requested?.id || (initialMode === 'guided' ? course.module.pages.find(page => page.guided)?.id : undefined) || course.module.pages[0]?.id;
+    return resume?.pageId || requested?.id || (initialMode === 'guided' ? course.module.pages.find(page => page.guided)?.id : undefined) || course.module.pages[0]?.id;
   });
-  const [presenting, setPresenting] = useState(false);
+  const [presenting, setPresenting] = useState(resume?.presenting || false);
   const pages = course.module.pages;
   const index = Math.max(0, pages.findIndex(page => page.id === pageId));
   const page = pages[index];
@@ -52,25 +59,27 @@ export function CourseViewer({ course, initialMode = 'self-paced' }: { course: C
   if (!page) return <main><p>No Guided pages are available.</p><button onClick={() => setMode('self-paced')}>Self Paced</button></main>;
 
   return <LessonPage key={page.id} course={course} page={page} mode={mode} index={index} total={pages.length}
+    resume={resume?.pageId === page.id ? resume : null}
     audience={audience} onAudience={() => setAudience(audience === 'group' ? 'individual' : 'group')}
     presenting={presenting} onPresent={() => void togglePresent()} onMode={changeMode}
-    onNavigate={delta => { const target = pages[index + delta]; if (target) setPageId(target.id); }}/>;
+    onNavigate={delta => { const target = pages[index + delta]; if (target) { setResume(null); setPageId(target.id); } }}/>;
 }
 
-function LessonPage({ course, page, mode, audience, onAudience, index, total, presenting, onPresent, onMode, onNavigate }: {
+function LessonPage({ course, page, mode, audience, onAudience, index, total, presenting, onPresent, onMode, onNavigate, resume }: {
   course: Course; page: CoursePage; mode: Mode; index: number; total: number; presenting: boolean;
   audience: Audience; onAudience: () => void;
   onPresent: () => void; onMode: () => void; onNavigate: (delta: number) => void;
+  resume: LessonResume | null;
 }) {
   const blocks = revealBlocks(page);
   const progressive = blocks.length > 0;
   const guided = mode === 'guided';
-  const [revealed, setRevealed] = useState(1);
-  const [showAll, setShowAll] = useState(false);
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [reflected, setReflected] = useState(false);
-  const [scrollId, setScrollId] = useState<string | null>(null);
-  const [voiceOverride, setVoiceOverride] = useState<GuidedNarrationMode | null>(null);
+  const [revealed, setRevealed] = useState(() => Math.max(1, blocks.findIndex(block => block.id === resume?.blockId) + 1));
+  const [showAll, setShowAll] = useState(resume?.showAll || false);
+  const [showPrompt, setShowPrompt] = useState(resume?.showPrompt || false);
+  const [reflected, setReflected] = useState(resume?.reflected || false);
+  const [scrollId, setScrollId] = useState<string | null>(resume?.blockId || null);
+  const [voiceOverride, setVoiceOverride] = useState<GuidedNarrationMode | null>(resume?.voiceOverride || null);
   const nextButton = useRef<HTMLButtonElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const options = useRef<HTMLDetailsElement>(null);
@@ -94,6 +103,17 @@ function LessonPage({ course, page, mode, audience, onAudience, index, total, pr
     },
     onComplete: () => setRevealed(blocks.length),
   });
+
+  const prepareUpdate = useRef<() => void>(() => {});
+  prepareUpdate.current = () => {
+    saveLessonResume(course.course_id, course.language, {
+      schema: 1, pageId: page.id, mode, audience, presenting,
+      blockId: blocks[Math.min(revealed, blocks.length) - 1]?.id || null,
+      showAll, showPrompt, reflected, voiceOverride
+    });
+    narration.stop();
+  };
+  useLayoutEffect(() => appUpdates.beforeUpdate(() => prepareUpdate.current()), []);
 
   useLayoutEffect(() => { window.scrollTo(0, 0); }, [page.id]);
   useEffect(() => {
@@ -161,7 +181,7 @@ function LessonPage({ course, page, mode, audience, onAudience, index, total, pr
       </details>
     </header>
     <main class="lesson-main">
-      <div class="coursebar lesson-coursebar"><span>{course.title}</span><span class="course-version">v{course.presentation_version || '1.0'}</span><div class="progress" aria-label={`Page ${index + 1} of ${total}`}><div style={{ width: `${(index + 1) / total * 100}%` }}/></div></div>
+      <div class="coursebar lesson-coursebar"><span>{course.title}</span><div class="course-release"><span class="course-version">v{course.presentation_version || '1.0'}</span><UpdateNotice/></div><div class="progress" aria-label={`Page ${index + 1} of ${total}`}><div style={{ width: `${(index + 1) / total * 100}%` }}/></div></div>
       <section class={`slide lesson-stage template-${page.template || 'teaching'}`} onTouchStart={event => {
         const point = event.changedTouches[0]; touch.current = { x: point.clientX, y: point.clientY };
       }} onTouchEnd={event => {

@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import { startUpdateChecks } from './pwa/updates';
 
 
 // Development safeguard:
@@ -12,11 +13,7 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
 }
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((error) => {
-      console.warn('Service worker registration failed:', error);
-    });
-  });
+  startUpdateChecks();
 }
 
 import { render } from 'preact';
