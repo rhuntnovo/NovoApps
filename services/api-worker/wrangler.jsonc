@@ -1,0 +1,21 @@
+{
+  "name": "novoapps-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-20",
+  "env": {
+    "local": {
+      "vars": {
+        "LOCAL_AUTHORING": "true",
+        "CMS_ORIGIN": "http://127.0.0.1:5174"
+      },
+      "d1_databases": [
+        {
+          "binding": "CONTENT_DB",
+          "database_name": "nvi-content-local",
+          "database_id": "00000000-0000-0000-0000-000000000001",
+          "migrations_dir": "../../database/content/migrations"
+        }
+      ]
+    }
+  }
+}

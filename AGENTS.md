@@ -66,3 +66,29 @@ npm run preview
 Run `npm install` when dependencies need installation. Do not regenerate
 AI narration unless narration/audio changed. Never request, expose, or
 commit the user's API key.
+
+## Platform architecture and local CMS
+
+Before platform or CMS work, also read docs/NEW_VINES_PLATFORM_ARCHITECTURE.md,
+the relevant docs/ADR/ files, and docs/09-LOCAL-CMS-MILESTONE.md.
+D1 for nvi-control/nvi-content is accepted (ADR 0004). Better Auth and SQLite-backed
+Durable Objects per workspace remain preferred proposals pending validation.
+D1 and SQLite-backed Durable Objects are distinct Cloudflare services.
+The existing sensitive-sync encryption requirement is not weakened by conditional
+wording in the target architecture; settle recovery/policy before private-data rollout.
+
+The user selected a local CMS/preview milestone before hosted registration (ADR 0008).
+New root npm workspaces: apps/cms-web (React), apps/cms-preview (Preact),
+services/api-worker (Hono/local D1), packages/content-model (Zod), database/content
+(Drizzle schema/migrations). Keep newvines-learning in its existing directory with
+its independent package/lockfile. Do not convert or move it for CMS work.
+
+From the repository root: npm.cmd install, npm.cmd run dev:cms.
+Checks: npm.cmd run test:cms and npm.cmd run build:cms.
+The preview imports the existing renderer in a separate iframe and registers no
+service worker. Do not mix the React and Preact runtime/hooks in one application root.
+Local draft saves and exports must not publish or replace the deployed course.
+Preserve the imported snapshot and published IDs; wording edits are review-required drafts.
+The local-only API restriction is not authentication and must not be deployed as one.
+Implement validated Better Auth/control D1 and permissions before hosted authoring.
+Never commit .wrangler state, .dev.vars, local databases, or secrets.

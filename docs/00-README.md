@@ -3,7 +3,7 @@
 These files preserve agreed design context so VS Code/Codex sessions do
 not depend on conversational memory.
 
--   `01-CURRENT-LEARNING-CODEBASE.md` --- New Vines Learning v0.8.0.
+-   `01-CURRENT-LEARNING-CODEBASE.md` --- New Vines Learning v0.8.3.
 -   `02-LEARNING-CMS-ARCHITECTURE.md` --- authoring/publishing CMS.
 -   `03-NOVOAPPS-PLATFORM-ARCHITECTURE.md` --- shared multi-app
     platform.
@@ -20,3 +20,9 @@ should read first.
 
 Update these documents when an architectural decision changes; they
 describe the current agreed design, not just history.
+
+Current platform direction: [NEW_VINES_PLATFORM_ARCHITECTURE.md](NEW_VINES_PLATFORM_ARCHITECTURE.md).
+Read [ADR 0001–0008](ADR/) for accepted decisions and proposals; ADR statuses are meaningful.
+The new target and accepted ADRs supersede earlier Supabase-first guidance in docs 03/05/08.
+[09-LOCAL-CMS-MILESTONE.md](09-LOCAL-CMS-MILESTONE.md) describes the working local CMS,
+its scope/access boundary, and what remains before hosted authoring.

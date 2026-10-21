@@ -1,6 +1,6 @@
 # Backend Decision --- Cloudflare D1/R2 vs Supabase
 
-Status: **not finally locked**.
+Status: **Background comparison; current direction is in NEW_VINES_PLATFORM_ARCHITECTURE.md and ADR 0003–0005.**
 
 ## Supabase
 
@@ -33,7 +33,7 @@ client-side image optimization before user-file upload
 Auth, sync protocol, encrypted data storage, and public content storage
 should remain conceptually separable.
 
-## Current posture
+## Earlier posture
 
 Supabase is simpler for an early integrated MVP
 (registration/auth/workspaces/RLS/admin). Cloudflare Worker +
@@ -47,3 +47,16 @@ international rollout
 
 Neither provider should be assumed to offer suitable in-country regions
 everywhere. Verify current regions/law at rollout.
+
+## Current decision (October 20, 2026)
+
+ADR 0004 accepts separate Cloudflare D1 databases for nvi-control and nvi-content.
+The first CMS uses Wrangler local D1 only. No remote database has been provisioned.
+Better Auth for central identity and SQLite-backed Durable Objects for workspace operational
+data are preferred proposals (ADR 0003/0005), pending implementation/operational validation.
+They replace the earlier Supabase-first leaning as the work direction, not as a claim that
+auth/session, recovery, backup, cost, or data-residency questions are already solved.
+
+D1 and Durable Objects SQLite are distinct products with different access/lifecycle models.
+Keep central identity and content out of per-workspace operational databases.
+Retain the provider/API and public/private storage boundaries described above.

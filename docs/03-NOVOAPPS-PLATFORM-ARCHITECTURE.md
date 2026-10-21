@@ -58,3 +58,16 @@ Do not assume encryption automatically satisfies transfer/residency law.
 
 Prior build-version convention: `YYYYMMDD.N`; Git milestone tags and
 course versions are separate concepts.
+
+## Current direction (October 20, 2026)
+
+NEW_VINES_PLATFORM_ARCHITECTURE.md and ADR 0001–0008 are the current platform context.
+Keep this document's earlier Supabase preferences as background rather than the selected stack.
+D1 control/content separation is accepted. Better Auth and workspace SQLite Durable Objects
+are preferred proposals to validate before production. R2 remains the target for assets and
+published packages. Hono/Drizzle/Zod are used in the new local CMS pilot; field PWAs stay Preact.
+
+The root now has npm workspaces for new apps/services/packages; the deployed Learning
+app stays in newvines-learning with an independent package/lockfile. React administration
+and a separate Preact renderer iframe are deliberately isolated. The first CMS is local-only;
+see docs/09 and ADR 0008. No control database, user registration or workspace sync is deployed.

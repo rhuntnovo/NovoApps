@@ -244,3 +244,15 @@ The updater detects changed worker bytes rather than requiring a numerically
 higher version. There is no per-device offline Undo action because old release
 caches are deleted on activation. See the Learning README for recovery options and
 Cloudflare documentation. No offline Undo feature was added and no rollback operation was performed.
+
+## Device confirmation and separate CMS (October 20, 2026)
+
+The user confirmed smooth online updating and fast airplane-mode cold reopening on
+both iOS and Android for deployed v0.8.3. This is the requested device startup/update
+validation noted as pending in the release history above. Additional device/media
+and recovery cases can be tested independently.
+
+A local CMS milestone now uses this app's existing CourseViewer/CSS in a separate
+Preact iframe alongside a React editor; see docs/09. No Learning source/package,
+service worker or published content was changed for that milestone. The CMS does not
+publish drafts or require learners to query a content database.

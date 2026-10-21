@@ -26,10 +26,11 @@
 
 ## Open decisions
 
-Backend is not final: Supabase-first, Cloudflare Worker+D1, or
-evolutionary hybrid. Current leaning: Supabase accelerates
-Auth/workspace/RLS/admin; Worker+D1-per-workspace is attractive for
-encrypted sync/isolation. Keep protocol/provider boundary clean.
+Current platform direction is NEW_VINES_PLATFORM_ARCHITECTURE.md and ADR 0001–0008.
+Separate D1 control/content databases are accepted. Better Auth and one SQLite-backed
+Durable Object per operational workspace are preferred proposals pending validation.
+Hono, Drizzle and Zod are used in the local CMS. Earlier Supabase-first notes are
+background alternatives; keep API/storage boundaries clear.
 
 Encryption/key recovery still needs deliberate design: workspace keys,
 per-user/device wrapping, trusted-device/member transfer, recovery
@@ -39,7 +40,7 @@ distinct.
 Conflict resolution can start simple where acceptable but preserve
 metadata for improvement.
 
-CMS physical SQL schema follows stabilization of published schema and
+The initial local D1 authoring schema is implemented; fuller CMS SQL follows
 authoring workflows.
 
 Before country rollout, determine residency/transfer law, provider
@@ -48,7 +49,7 @@ pinning, retention/export/deletion.
 
 ## Recommended sequence
 
-1.  **Learning delivery:** keep deployed v0.8.3 stable; test
+1.  **Learning delivery:** keep deployed v0.8.3 stable; maintain tested
     install/update/offline; formalize JSON schema, IDs, content/schema
     versions, catalog; finish Guided UI issues.
 2.  **CMS:** course/module/page/block editor; preview;
@@ -124,3 +125,22 @@ Build and 26 regression checks passed; all 44 live files matched dist by SHA-256
 Live Chrome confirmed v0.8.3, complete offline installation, immediate cached startup
 under offline/stalled connectivity, and real recorded Opus playback offline.
 Keep physical iPhone and Samsung installation/update/offline tests as the next check.
+
+## Local CMS milestone and device verification (October 20, 2026)
+
+The user confirmed that v0.8.3 updated smoothly online and then opened quickly after
+closing/reopening in airplane mode on both iOS and Android. This completes the requested
+device startup/update check; it is not a claim that every device/media/recovery case is tested.
+
+The user selected local CMS and preview first, with registration/authenticated access
+before hosted deployment (ADR 0008). A working React editor, Hono/local D1 service,
+Drizzle migrations and separate Preact runtime preview are now available. Module 1
+imports/exports with every existing JSON value preserved. Draft revisions, explicit
+wording-review changes, conflict rejection, responsive preview, original media/icons,
+and save/reload persistence were checked. See docs/09 and the root README.
+
+Next: validate Better Auth against a separate control D1, add authenticated editor
+identity/content permissions and audit attribution, then implement controlled review,
+approval, R2 assets and immutable publishing. Do not expose the local authoring bypass.
+Keep workspace Durable Objects, Finance/Inventory sync and private-data crypto/recovery
+as later platform work. No remote CMS database or public CMS was provisioned/deployed.

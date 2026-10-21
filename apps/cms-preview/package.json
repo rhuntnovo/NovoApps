@@ -1,0 +1,18 @@
+{
+  "name": "@novoapps/cms-preview",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@novoapps/content-model": "0.1.0",
+    "preact": "11.0.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "2.10.6",
+    "vite": "8.3.4"
+  }
+}

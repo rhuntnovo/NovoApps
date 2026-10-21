@@ -1,4 +1,4 @@
-# New Vines Learning --- Planned CMS
+# New Vines Learning --- CMS Architecture
 
 ## Goal
 
@@ -102,7 +102,7 @@ Individual reflection prompts (Page.reflection) and facilitator group prompts
 canonical participant teaching. The section viewer now covers all teaching pages;
 pre-generated recorded narration still covers P005--P008.
 CMS preview and publication should preserve this shared renderer and validate
-all block references and media. Physical CMS SQL design remains open.
+all block references and media. Initial local D1 page-aggregate revisions are implemented; full approval/translation SQL remains open.
 
 ## Narration settings and write-only API credentials
 
@@ -139,3 +139,24 @@ existing icons. Images are supplemental: the canonical text and normal offline o
 must remain available if optional images fail. The current needs/wants page demonstrates
 an East African family meal and a soccer ball; locale-specific variants can replace them
 without rewriting the teaching. Never put an image-generation credential in published data.
+
+## Local authoring milestone (October 20, 2026)
+
+The user approved local CMS and preview first, then registration/authenticated access
+before online deployment. The working pilot is documented in docs/09 and ADR 0008.
+It uses separate React CMS and Preact preview apps, Hono/local D1, Drizzle migrations,
+and shared Zod schema 0.3 validation. All 20 pages import without value changes.
+Preview uses the existing viewer/CSS/media; no duplicated participant wording or new
+learner runtime is created. Learning v0.8.3 remains deployed and unchanged.
+
+Course/module/page authoring identities use UUIDv7 alongside unchanged published IDs.
+Page revisions retain ordered blocks and supplemental metadata as page aggregates,
+with immutable import baseline and a unique revision constraint for conflict rejection.
+Draft wording changes require an explicit unlock and are flagged for review.
+Export is draft-only; there is no publish or canonical-approval operation yet.
+
+The API is restricted to localhost development and has no production binding/opt-in.
+Next: Better Auth with separate nvi-control D1, authenticated editor identity and
+content permissions; then review/approval, media management, translation schema and
+controlled R2 publishing. Do not provision workspace Durable Objects just for the CMS.
+See ADR 0004 for accepted D1 separation and ADRs 0003/0005 for proposals to validate.

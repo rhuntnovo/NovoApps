@@ -1,0 +1,28 @@
+{
+  "name": "novoapps-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:cms": "node tooling/dev-cms.mjs",
+    "build:cms": "npm run check:cms && npm run build --workspace @novoapps/cms-web && npm run build --workspace @novoapps/cms-preview",
+    "check:cms": "tsc -p services/api-worker/tsconfig.json --noEmit && tsc -p apps/cms-web/tsconfig.json --noEmit && tsc -p apps/cms-preview/tsconfig.json --noEmit",
+    "test:cms": "tsx --test packages/content-model/test/*.test.ts services/api-worker/test/*.test.ts",
+    "cms:migrate": "npm run db:migrate --workspace @novoapps/api-worker",
+    "cms:import": "tsx tooling/import-learning.ts"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
+  }
+}

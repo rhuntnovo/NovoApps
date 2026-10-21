@@ -19,3 +19,7 @@ Desktop.ini
 
 # macOS
 .DS_Store
+# Local Cloudflare state and secrets
+.wrangler/
+.dev.vars
+.dev.vars.*
