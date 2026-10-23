@@ -1,15 +1,10 @@
-export type LessonResume = {
-  schema: 1;
-  pageId: string;
-  mode: 'self-paced' | 'guided';
-  audience: 'individual' | 'group';
-  presenting: boolean;
-  blockId: string | null;
-  showAll: boolean;
-  showPrompt: boolean;
-  reflected: boolean;
-  voiceOverride: 'browser_tts' | 'marin_opus' | null;
-};
+import type { LessonState as LessonResume } from '../../../packages/content-runtime/src/state';
+import type { Course } from '../types';
+export type { LessonState as LessonResume } from '../../../packages/content-runtime/src/state';
+
+export function lessonResumeIdentity(course:Pick<Course,'provider'|'course_id'|'country'|'module'>){
+  return [course.provider?.id||'new-vines',course.course_id,course.module.id,course.country.toLowerCase()].join(':');
+}
 
 const key = (courseId: string, language: string) => `novoapps:update-resume:${courseId}:${language}`;
 

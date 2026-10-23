@@ -1,13 +1,10 @@
-# New Vines Learning PWA v0.8.3
+# New Vines Learning PWA v0.8.4
 
-Published v0.8.3 (October 20, 2026): https://novoapps-newvines.rhuntnovo.workers.dev
+Published v0.8.4 (October 23, 2026): https://novoapps-newvines.rhuntnovo.workers.dev
 
-Version 0.8.3 includes the offline-startup correction and the user-controlled Update
-button described below. Package/lockfile and displayed presentation metadata are
-0.8.3; the published schema remains 0.3. Curriculum and existing recordings are unchanged.
-The release passed 26 regression checks, and all 44 published files matched the local
-build by SHA-256. A live Chrome check confirmed the displayed version, immediate offline
-startup, and recorded narration playback. Physical iPhone/Samsung verification remains.
+v0.8.4 adds a compact English/Spanish selector and approved, versioned Module 1 delivery snapshots. Both editions work offline. The app version is separate from content versions; the published schema remains 0.3 and canonical source wording is preserved.
+
+The release passed 62 automated checks. All 106 deployed files match the final local build. Live Chrome checks verified the existing-app Update flow, page/Guided-mode handoff, offline Spanish startup and language switching. See docs/12 for the release and CMS hosting boundaries.
 
 Lightweight Preact + TypeScript + Vite PWA, published through Cloudflare Workers Static Assets.
 Read `../AGENTS.md` and the architecture documents in `../docs/` before making changes.
@@ -185,3 +182,9 @@ Future CMS authoring should support uploads and approved generated illustrations
 
 Each file has a corresponding `-384.webp` phone variant. Graphics are supplemental
 and marked for image localization; curriculum wording and narration are unchanged.
+
+## v0.8.4 English and Spanish viewer
+
+The Language / Idioma selector chooses approved English or Spanish/Nicaragua Module 1. Both editions and their media are bundled for offline use. Existing installed clients can tap Update while online. App version 0.8.4 is separate from immutable course/content versions; the imported canonical JSON is preserved.
+
+Current publication, hash-verified staging commands, release IDs and CMS hosting prerequisites: [docs/12](../docs/12-LEARNING-BILINGUAL-RELEASE-AND-CMS-HOSTING.md). Future local CMS Publish actions upload R2 packages; refreshing this frozen viewer catalog still requires staging/building/deploying a viewer release. CMS and authoring D1 remain local.

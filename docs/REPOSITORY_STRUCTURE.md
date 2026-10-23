@@ -62,7 +62,7 @@ NovoApps/
 │
 ├── scripts/
 ├── package.json
-├── pnpm-workspace.yaml
+├── package-lock.json
 └── tsconfig.base.json
 ```
 
@@ -270,35 +270,22 @@ Do not extract code simply to make the repository appear more modular.
 
 The current Learning PWA should remain functional throughout restructuring.
 
-Recommended migration sequence:
+Current migration sequence (updated 2026-10-21):
 
-```text
-Current newvines-learning
-        ↓
-Establish monorepo shell
-        ↓
-Move/rename as apps/learning-pwa
-        ↓
-Verify identical build and runtime behavior
-        ↓
-Extract content-model
-        ↓
-Verify again
-        ↓
-Extract minimal reusable content-runtime
-        ↓
-Verify again
-        ↓
-Create apps/cms-web
-```
+1. Keep newvines-learning in place with its independent package/build command.
+2. Establish root npm workspaces and separate apps/services/packages (implemented).
+3. Consolidate shared content contracts and extract shared page presentation (implemented).
+4. Build provider-aware authoring and linked translation review (implemented locally).
+5. Verify learner/offline/update behavior after each extraction.
+6. Consider apps/learning-pwa as a separate later move, including deployment-path checks.
 
-Avoid a large simultaneous refactor.
+The target tree above is not an instruction to move all applications now.
+Do not create unused shared packages, or move Inventory/Finance placeholders prematurely.
 
 ---
-
 # 7. Workspace Tooling
 
-Use a JavaScript/TypeScript workspace manager such as pnpm workspaces.
+Use a JavaScript/TypeScript workspace manager using the existing npm workspaces.
 
 Benefits:
 

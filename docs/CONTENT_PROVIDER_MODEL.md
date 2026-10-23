@@ -118,7 +118,7 @@ Possible publish metadata:
 ```json
 {
   "provider": {
-    "id": "nvi",
+    "id": "019a0640-0000-7000-8000-000000000001",
     "name": "New Vines International",
     "logo": "assets/provider-logo.webp",
     "theme": {
@@ -201,3 +201,10 @@ This distinction should influence:
 - CMS permissions
 
 It does not require changing public product branding immediately.
+
+
+## Implementation note (2026-10-21)
+
+Provider ownership, neutral CMS identity, provider-scoped course editions and linked
+translation drafts are implemented locally. Full branding/assets and provider roles
+remain future work. See docs/10 and ADR 0012 for precise boundaries.

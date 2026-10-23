@@ -31,7 +31,8 @@ function existingMedia(): Plugin {
   };
 }
 export default defineConfig({
-  plugins: [preact(), existingMedia()], publicDir: false,
+  preview:{headers:{'X-Robots-Tag':'noindex, nofollow, nosnippet, noimageindex'}},
+  plugins: [preact(), existingMedia()], publicDir: 'public',
   resolve: { dedupe: ['preact'] },
-  server: { host:'127.0.0.1', port:5175, strictPort:true, fs:{allow:[repository]} }
+  server: { headers:{'X-Robots-Tag':'noindex, nofollow, nosnippet, noimageindex'}, proxy:{'/assets/cms/':process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789','/audio/cms/':process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789'}, host:'127.0.0.1', port:5175, strictPort:true, fs:{allow:[repository]} }
 });

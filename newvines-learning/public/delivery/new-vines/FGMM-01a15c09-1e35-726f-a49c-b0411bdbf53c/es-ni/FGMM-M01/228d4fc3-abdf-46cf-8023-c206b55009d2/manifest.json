@@ -1,0 +1,183 @@
+{
+  "release": "228d4fc3-abdf-46cf-8023-c206b55009d2",
+  "createdAt": "2026-10-23T17:49:28.398Z",
+  "provider": "new-vines",
+  "courseId": "FGMM-01a15c09-1e35-726f-a49c-b0411bdbf53c",
+  "locale": "es-ni",
+  "moduleId": "FGMM-M01",
+  "approval": {
+    "confirm": true,
+    "approvePrimaryWording": true,
+    "structureRevision": 3,
+    "metadataRevision": 2,
+    "pages": {
+      "01a16937-9d7c-7375-9eda-b35458a7e7c7": 3,
+      "01a16937-9d7c-7375-9eda-b4d76430ec4d": 3,
+      "01a16937-9d7c-7375-9eda-b87ec0aaeaec": 3,
+      "01a16937-9d7c-7375-9eda-bfb51b08ed2c": 3,
+      "01a16937-9d7c-7375-9eda-c094dfa438bd": 4,
+      "01a16937-9d7c-7375-9eda-c64a2e374b83": 3,
+      "01a16937-9d7c-7375-9eda-cb428b55bc13": 3,
+      "01a16937-9d7c-7375-9eda-cf7b5c111b6b": 3,
+      "01a16937-9d7c-7375-9eda-d36deadc6d40": 3,
+      "01a16937-9d7c-7375-9eda-d41b2481288e": 3,
+      "01a16937-9d7c-7375-9eda-d96fadacce24": 3,
+      "01a16937-9d7c-7375-9eda-de74bfa7e401": 3,
+      "01a16937-9d7c-7375-9eda-e3980c2d6e17": 3,
+      "01a16937-9d7c-7375-9eda-e45ee3b5fe86": 3,
+      "01a16937-9d7c-7375-9eda-e98e23cc73cc": 3,
+      "01a16937-9d7c-7375-9eda-ecb6c6ea52c2": 3,
+      "01a16937-9d7c-7375-9eda-f1c662ac8e03": 3,
+      "01a16937-9d7c-7375-9eda-f605c73bf991": 9,
+      "01a16937-9d7c-7375-9eda-f96c6bfca6c2": 3,
+      "01a16937-9d7c-7375-9eda-ffab5b9f2d60": 3
+    },
+    "at": "2026-10-23T17:49:28.395Z",
+    "mode": "local-author"
+  },
+  "files": [
+    {
+      "path": "assets/630ce9ead5f8a033a49760ef.webp",
+      "bytes": 54772,
+      "sha256": "630ce9ead5f8a033a49760ef895590169dbedd0d5f1d4985ad2867bf5ff20104",
+      "sourcePath": "assets/illustrations/generosity-neighbours-kenya-v1.webp"
+    },
+    {
+      "path": "assets/d75bce637d64414340da3af4.webp",
+      "bytes": 18672,
+      "sha256": "d75bce637d64414340da3af49986c2c82b44363bb2df8362d77a9e16c8adfafd",
+      "sourcePath": "assets/illustrations/generosity-neighbours-kenya-v1-384.webp"
+    },
+    {
+      "path": "assets/a1d8acd169908cc69e597209.webp",
+      "bytes": 38132,
+      "sha256": "a1d8acd169908cc69e59720935f96a1123bede96ae036c1553f21e830fa6c713",
+      "sourcePath": "assets/illustrations/saving-aside-kenya-v1.webp"
+    },
+    {
+      "path": "assets/c5eeb286d17a69f365a157aa.webp",
+      "bytes": 14030,
+      "sha256": "c5eeb286d17a69f365a157aa3037c3f8365ae4a4369896e87cdfbee8074c038b",
+      "sourcePath": "assets/illustrations/saving-aside-kenya-v1-384.webp"
+    },
+    {
+      "path": "assets/d28d8a6c3cf08463d7af6791.webp",
+      "bytes": 84132,
+      "sha256": "d28d8a6c3cf08463d7af67916490472c7e953948c7285154165b0376f9dc01af",
+      "sourcePath": "assets/illustrations/bicycle-goal-kenya-v1.webp"
+    },
+    {
+      "path": "assets/506734c76d1413df8abd28ea.webp",
+      "bytes": 27682,
+      "sha256": "506734c76d1413df8abd28ea02f4b07a99f9235610c61060aebc042d10145ed3",
+      "sourcePath": "assets/illustrations/bicycle-goal-kenya-v1-384.webp"
+    },
+    {
+      "path": "assets/b11d1aa46066d441a78c4b3b.webp",
+      "bytes": 71350,
+      "sha256": "b11d1aa46066d441a78c4b3b395092d571dc6cb8072eafcdc9069977430261e9",
+      "sourcePath": "assets/illustrations/needs-family-v1.webp"
+    },
+    {
+      "path": "assets/97aa4bdd4a34b01776a8a3f3.webp",
+      "bytes": 25574,
+      "sha256": "97aa4bdd4a34b01776a8a3f3699cab398d03fec282200b88e8f5e57cd6ec8544",
+      "sourcePath": "assets/illustrations/needs-family-v1-384.webp"
+    },
+    {
+      "path": "assets/e5c53ab0b0b89f29a2a1b3b4.webp",
+      "bytes": 49578,
+      "sha256": "e5c53ab0b0b89f29a2a1b3b4691406e9e03d46b6be7918a958f63eee591f648f",
+      "sourcePath": "assets/illustrations/wants-soccer-v1.webp"
+    },
+    {
+      "path": "assets/928cd2bf3c7d5b7b55de2536.webp",
+      "bytes": 17130,
+      "sha256": "928cd2bf3c7d5b7b55de2536ec73d823afbee3af7980b9a82b8e5e11252c730b",
+      "sourcePath": "assets/illustrations/wants-soccer-v1-384.webp"
+    },
+    {
+      "path": "assets/b4e43149d2d47d96edb57b5b.webp",
+      "bytes": 52010,
+      "sha256": "b4e43149d2d47d96edb57b5bd73c2316daebab9ac4863c41d7fdaa9c64dc080a",
+      "sourcePath": "assets/illustrations/couple-planning-kenya-v1.webp"
+    },
+    {
+      "path": "assets/1a2e8736a312f9a6c60b76be.webp",
+      "bytes": 18572,
+      "sha256": "1a2e8736a312f9a6c60b76bed975563557863244cc4a11239fa826d677382404",
+      "sourcePath": "assets/illustrations/couple-planning-kenya-v1-384.webp"
+    },
+    {
+      "path": "assets/fa5e895d91e2c6ccabee1c5c.webp",
+      "bytes": 72878,
+      "sha256": "fa5e895d91e2c6ccabee1c5c247734b4bb0db32854a8057fb4edd322b8e19b90",
+      "sourcePath": "assets/illustrations/ants-diligence-v1.webp"
+    },
+    {
+      "path": "assets/73f1bdf436a930c8d2213886.webp",
+      "bytes": 25316,
+      "sha256": "73f1bdf436a930c8d22138862100f1ec6607a87b4fca13e333fa264e6d0cda51",
+      "sourcePath": "assets/illustrations/ants-diligence-v1-384.webp"
+    },
+    {
+      "path": "assets/9b7c2473ba2842ca9cd15443.webp",
+      "bytes": 54348,
+      "sha256": "9b7c2473ba2842ca9cd15443e8a9c0c404bd338a0d281da7d3a5ee2495e768fc",
+      "sourcePath": "assets/illustrations/school-needs-kenya-v1.webp"
+    },
+    {
+      "path": "assets/47d65e50a31da4b223734a26.webp",
+      "bytes": 18814,
+      "sha256": "47d65e50a31da4b223734a2696408d4bff4995ac6518e682e6243c88c3301375",
+      "sourcePath": "assets/illustrations/school-needs-kenya-v1-384.webp"
+    },
+    {
+      "path": "assets/7bb258001866b59898e7546b.webp",
+      "bytes": 46560,
+      "sha256": "7bb258001866b59898e7546bdca1afbb73fe5f548158087ede46d6a85a256834",
+      "sourcePath": "assets/illustrations/writing-goals-kenya-v1.webp"
+    },
+    {
+      "path": "assets/e8e691bab63203695d3b2dd7.webp",
+      "bytes": 17780,
+      "sha256": "e8e691bab63203695d3b2dd74b02b4f93c9986d96c2150398d8798fd19f13023",
+      "sourcePath": "assets/illustrations/writing-goals-kenya-v1-384.webp"
+    },
+    {
+      "path": "assets/d8cf8a266d087f10db66050f.webp",
+      "bytes": 39282,
+      "sha256": "d8cf8a266d087f10db66050f31c0e5355a8b4031a845ba2b609da23076966f1f",
+      "sourcePath": "assets/cms/new-vines/FGMM-01a15c09-1e35-726f-a49c-b0411bdbf53c/es-ni/01a16937-9d7c-7375-9eda-f605c73bf991-FGMM-M01-P015C/FGMM-M01-P015C-B002/0b72d1fc-f013-43cb-b759-e0c3105fc321.webp"
+    },
+    {
+      "path": "assets/d132c1b67b2de750cd9b556c.webp",
+      "bytes": 12260,
+      "sha256": "d132c1b67b2de750cd9b556ca4bc6a76bf73e386a959df6cfd48d8bd61c5769e",
+      "sourcePath": "assets/cms/new-vines/FGMM-01a15c09-1e35-726f-a49c-b0411bdbf53c/es-ni/01a16937-9d7c-7375-9eda-f605c73bf991-FGMM-M01-P015C/FGMM-M01-P015C-B002/0b72d1fc-f013-43cb-b759-e0c3105fc321-384.webp"
+    },
+    {
+      "path": "audio/67c5d9a498ea4456c5f18ad5.opus",
+      "bytes": 38515,
+      "sha256": "67c5d9a498ea4456c5f18ad5e397348cca8fb8851968fcfaea4e5a64a1da4097",
+      "sourcePath": "audio/cms/new-vines/FGMM-01a15c09-1e35-726f-a49c-b0411bdbf53c/es-ni/01a16937-9d7c-7375-9eda-f605c73bf991-FGMM-M01-P015C/FGMM-M01-P015C-B002/90af6dd6-63d9-41ec-9067-282a19c809eb.opus"
+    },
+    {
+      "path": "assets/2a3c445955da552571fbd282.png",
+      "bytes": 83645,
+      "sha256": "2a3c445955da552571fbd282a9d0cfacc667c9f42ee97c922f0619ad2d7c4790",
+      "sourcePath": "assets/NVI-logo-clear.png"
+    },
+    {
+      "path": "course.json",
+      "bytes": 32567,
+      "sha256": "995fa19ebef46815194c0d8f93129126d202f720c2fd7a7a78dfd99476a407a7",
+      "sourcePath": "course.json"
+    }
+  ],
+  "source": {
+    "url": "https://pub-99c5b6d16ed64e6283483cda548e55f5.r2.dev/new-vines/FGMM-01a15c09-1e35-726f-a49c-b0411bdbf53c/es-ni/modules/FGMM-M01/releases/228d4fc3-abdf-46cf-8023-c206b55009d2/course.json",
+    "manifestUrl": "https://pub-99c5b6d16ed64e6283483cda548e55f5.r2.dev/new-vines/FGMM-01a15c09-1e35-726f-a49c-b0411bdbf53c/es-ni/modules/FGMM-M01/releases/228d4fc3-abdf-46cf-8023-c206b55009d2/manifest.json",
+    "manifestSha256": "47414455bb62cd25bf910fb49c42dae5347c7db3319d22ef5334f78427ebdd5a"
+  }
+}

@@ -1,4 +1,4 @@
-# ADR 0008: Local CMS pilot with the existing Learning runtime
+# ADR 0011: Local CMS pilot with the existing Learning runtime
 
 Status: Accepted for the local milestone, explicitly selected by the user on 2026-10-20.
 
@@ -44,3 +44,11 @@ private operational data is deployed.
 
 No new public authentication model, tenant sync engine, R2 publishing, remote database,
 or deployment is introduced by this decision.
+
+## Follow-up (2026-10-21)
+
+Renumbered from the duplicate 0008 to 0011. This records the original pilot, not the
+current preview implementation. ADR 0009/0012 supersede its direct Learning-source
+imports: both hosts now use content-runtime, while Learning retains update/storage
+behavior. Provider/source-edition authoring precedes hosted identity per the user's
+updated priority; authenticated permissions are still required before hosted review.

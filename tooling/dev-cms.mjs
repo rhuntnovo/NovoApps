@@ -29,16 +29,18 @@ process.on('SIGINT', () => { stop(); process.exitCode=0; });
 process.on('SIGTERM', () => { stop(); process.exitCode=0; });
 try {
   await run(['run','cms:migrate']);
+  const media = start(['run','dev','--workspace','@novoapps/media-server']);
+  media.on('exit', code => { if (!stopping) { console.error('Media service stopped:', code); stop(); process.exitCode=1; } });
   const api = start(['run','dev','--workspace','@novoapps/api-worker']);
   api.on('exit', code => { if (!stopping) { console.error('CMS API stopped:', code); stop(); process.exitCode=1; } });
   const deadline = Date.now() + 60000;
   let ready = false;
   while (!stopping && Date.now() < deadline) {
-    try { ready = (await fetch('http://127.0.0.1:8787/health', { signal: AbortSignal.timeout(1000) })).ok; } catch {}
+    try { ready = (await fetch('http://127.0.0.1:8787/health', { signal: AbortSignal.timeout(1000) })).ok && (await fetch('http://127.0.0.1:8789/health', { signal: AbortSignal.timeout(1000) })).ok; } catch {}
     if (ready) break;
     await new Promise(resolve => setTimeout(resolve, 300));
   }
-  if (!ready) throw new Error('Local API did not start. Check that ports 8787, 5174 and 5175 are free.');
+  if (!ready) throw new Error('Local API did not start. Check that ports 8787, 8789, 5174 and 5175 are free.');
   await run(['run','cms:import']);
   for (const workspace of ['@novoapps/cms-web','@novoapps/cms-preview']) {
     const child = start(['run','dev','--workspace',workspace]);

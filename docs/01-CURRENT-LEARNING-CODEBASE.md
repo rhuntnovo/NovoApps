@@ -2,7 +2,7 @@
 
 ## Released baseline
 
-Current deployed baseline: **v0.8.3** (October 20, 2026). Stack: Vite + Preact +
+Current deployed baseline: **v0.8.4** (October 23, 2026). Stack: Vite + Preact +
 TypeScript + PWA/offline support + Cloudflare Workers Static Assets.
 Node/npm workflow. Worker: `novoapps-newvines`.
 
@@ -256,3 +256,16 @@ A local CMS milestone now uses this app's existing CourseViewer/CSS in a separat
 Preact iframe alongside a React editor; see docs/09. No Learning source/package,
 service worker or published content was changed for that milestone. The CMS does not
 publish drafts or require learners to query a content database.
+
+## Shared-runtime source extraction (2026-10-21, not published)
+
+Local source now consumes packages/content-runtime for Preact page presentation,
+styles and narration, and content-model for erased content types. Course loading,
+navigation state, updates, offline shell and session handoff remain app-owned.
+Module 1 JSON and audio assets are unchanged. English/Spanish controls and authored
+title rendering support CMS editions. The public release remains v0.8.3; no deployment
+or version bump accompanied this local extraction. Root npm installation supplies the
+shared packages. See docs/10 for the authoring/review milestone and its validation.
+## v0.8.4 bilingual publication (October 23, 2026)
+
+The deployed viewer now loads a provider/course/module/locale catalog of verified immutable R2 package snapshots. English and Spanish/Nicaragua Module 1 are bundled for offline selection. The host supplies app version 0.8.4 separately from content versions. Existing v0.8.3 online update and page/mode handoff were verified on the live Worker. See [docs/12](12-LEARNING-BILINGUAL-RELEASE-AND-CMS-HOSTING.md) for release IDs, staging workflow, validation and hosted CMS prerequisites. CMS and authoring D1 remain local.

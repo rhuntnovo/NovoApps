@@ -6,7 +6,7 @@ Learning's deployed baseline remains v0.8.3.
 ## Scope agreed for this milestone
 
 The user chose **Local CMS and preview first**, followed by registration/authenticated
-multi-user access before online deployment. See ADR 0008.
+multi-user access before online deployment. See ADR 0011.
 
 - React + TypeScript + Vite content editor on http://127.0.0.1:5174/.
 - Hono Worker API with Wrangler local D1 on http://127.0.0.1:8787/.
@@ -101,3 +101,20 @@ After that: review/approval, asset management, translations and localization tra
 versioned R2 course packages, catalog/download metadata, and controlled Learning publication.
 SQLite-backed Durable Objects remain the preferred future workspace operational store;
 they are not needed to run this content-authoring pilot.
+
+## Provider authoring and Spanish review update (2026-10-21)
+
+The user's next priority is authoring the remaining English Foundations modules,
+explicit AI translation to Spanish/Nicaragua, and human comparison/editing/review.
+The local implementation is in docs/10 and ADR 0012. Module/page/block/narration
+creation, provider-scoped editions, write-only translation settings, source revision
+tracking and shared content-runtime are implemented. No cloud publication or hosted
+reviewer access was added. The earlier direct Learning-source preview shortcut is
+superseded; historical pilot ADR 0008 has been renumbered 0011.
+
+Before remote reviewer access: implement platform-web, validated identity/control D1,
+provider permissions and audit attribution. Then controlled approval/assets/audio and
+immutable publication/catalog support. Existing v0.8.3 publication remains unchanged.
+## Editing/media/publication update (2026-10-23)
+
+The historical no-publication milestone above is extended by [docs/11](11-CMS-EDITING-MEDIA-PUBLISHING.md). Local recorded/AI narration, image authoring, structure history, and an explicit saved-module R2 Publish flow are now implemented. A dedicated public-content bucket is configured; no curriculum was uploaded during development. Hosted authoring and live Learning catalog activation remain separate.

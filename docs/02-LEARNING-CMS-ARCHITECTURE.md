@@ -143,7 +143,7 @@ without rewriting the teaching. Never put an image-generation credential in publ
 ## Local authoring milestone (October 20, 2026)
 
 The user approved local CMS and preview first, then registration/authenticated access
-before online deployment. The working pilot is documented in docs/09 and ADR 0008.
+before online deployment. The working pilot is documented in docs/09 and ADR 0011.
 It uses separate React CMS and Preact preview apps, Hono/local D1, Drizzle migrations,
 and shared Zod schema 0.3 validation. All 20 pages import without value changes.
 Preview uses the existing viewer/CSS/media; no duplicated participant wording or new
@@ -160,3 +160,17 @@ Next: Better Auth with separate nvi-control D1, authenticated editor identity an
 content permissions; then review/approval, media management, translation schema and
 controlled R2 publishing. Do not provision workspace Durable Objects just for the CMS.
 See ADR 0004 for accepted D1 separation and ADRs 0003/0005 for proposals to validate.
+
+## Provider authoring and Spanish review update (2026-10-21)
+
+The user's next priority is authoring the remaining English Foundations modules,
+explicit AI translation to Spanish/Nicaragua, and human comparison/editing/review.
+The local implementation is in docs/10 and ADR 0012. Module/page/block/narration
+creation, provider-scoped editions, write-only translation settings, source revision
+tracking and shared content-runtime are implemented. No cloud publication or hosted
+reviewer access was added. The earlier direct Learning-source preview shortcut is
+superseded; historical pilot ADR 0008 has been renumbered 0011.
+
+Before remote reviewer access: implement platform-web, validated identity/control D1,
+provider permissions and audit attribution. Then controlled approval/assets/audio and
+immutable publication/catalog support. Existing v0.8.3 publication remains unchanged.

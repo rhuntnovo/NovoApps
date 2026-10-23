@@ -28,7 +28,7 @@ export const pageSchema = z.looseObject({
   reflection: reflectionSchema.optional(),
   guided: z.looseObject({
     narration: z.string(), narration_mode: z.enum(['browser_tts', 'marin_opus']).optional(),
-    segments: z.array(z.looseObject({ block_id: id, text: z.string().min(1), audio: mediaPath('/audio/').optional() })).optional(),
+    segments: z.array(z.looseObject({ block_id: id, text: z.string().min(1), audio: mediaPath('/audio/').optional(),audio_source:z.enum(['human','ai']).optional() })).optional(),
     facilitator: reflectionSchema.optional()
   }).optional()
 }).superRefine((page, context) => {
@@ -51,6 +51,7 @@ export const pageSchema = z.looseObject({
     context.addIssue({ code: 'custom', message: 'Narration must cover every revealed block' });
 });
 export const courseSchema = z.looseObject({
+  provider: z.looseObject({id:z.string().uuid(),name:z.string().min(1)}).optional(),
   schema_version: z.literal('0.3'), course_id: id, title: z.string().min(1), track: z.string(),
   language: z.string().min(1), country: z.string().min(1),
   presentation_version: z.string().optional(),
@@ -74,6 +75,10 @@ export type ModuleDraft = {
 };
 export const savePageSchema = z.object({
   expectedRevision: z.number().int().positive(),
+  allowStructureChanges: z.boolean().default(false),
+  removedBlockIds: z.array(z.string()).default([]),
+  translationStatus: z.enum(['untranslated','draft','reviewed']).optional(),
+  reviewNote: z.string().max(5000).optional(),
   allowWordingChanges: z.boolean().default(false),
   page: pageSchema
 });
@@ -85,3 +90,5 @@ export function sameBlockIds(before: CoursePage, after: CoursePage): boolean {
   return before.id === after.id && before.blocks.length === after.blocks.length &&
     before.blocks.every(block => after.blocks.some(item => item.id === block.id));
 }
+
+export * from './authoring';

@@ -23,3 +23,7 @@ Desktop.ini
 .wrangler/
 .dev.vars
 .dev.vars.*
+
+# Python authoring tools
+__pycache__/
+*.pyc

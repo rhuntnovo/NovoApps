@@ -8,6 +8,27 @@
       "when": 1792545366951,
       "tag": "0000_bored_the_enforcers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792633569124,
+      "tag": "0001_careful_micromacro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792634838045,
+      "tag": "0002_flaky_master_mold",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792772786877,
+      "tag": "0003_puzzling_power_pack",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1234 @@
+{
+  "name": "New Vines Foundations - reviewed PowerPoint 2025-10-28",
+  "sourceSha256": "6413b0229320edcacaae864c89c5514e2e3e26af65e92e3992614d7baa067d6c",
+  "providerId": "019a0640-0000-7000-8000-000000000001",
+  "courseId": "FGMM",
+  "language": "en",
+  "country": "global",
+  "excludeText": [
+    "NewVines International, Inc.",
+    "Christ-Centered Community Development, Training, Micro-lending"
+  ],
+  "allowedPictures": [
+    "ppt/media/image1.png",
+    "ppt/media/image2.png"
+  ],
+  "protectedModules": [
+    1
+  ],
+  "maxPageCharacters": 560,
+  "maxPageBlocks": 4,
+  "modules": [
+    {
+      "number": 2,
+      "slides": [
+        25,
+        32
+      ]
+    },
+    {
+      "number": 3,
+      "slides": [
+        33,
+        44
+      ]
+    },
+    {
+      "number": 4,
+      "slides": [
+        45,
+        48
+      ]
+    },
+    {
+      "number": 5,
+      "slides": [
+        49,
+        56
+      ]
+    },
+    {
+      "number": 6,
+      "slides": [
+        57,
+        63
+      ]
+    },
+    {
+      "number": 7,
+      "slides": [
+        64,
+        70
+      ]
+    }
+  ],
+  "slides": {
+    "26": {
+      "sections": [
+        {
+          "refs": [
+            "340:0-1"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "340:2"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "340:4-5"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "340:6"
+          ],
+          "type": "concept"
+        }
+      ]
+    },
+    "27": {
+      "sections": [
+        {
+          "refs": [
+            "356:0-1"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "356:3"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "356:5"
+          ],
+          "type": "scripture"
+        }
+      ]
+    },
+    "28": {
+      "sections": [
+        {
+          "refs": [
+            "356:0"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "356:2"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "356:4"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "356:6"
+          ],
+          "type": "concept"
+        }
+      ]
+    },
+    "29": {
+      "sections": [
+        {
+          "refs": [
+            "372:0",
+            "372:2"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "372:4"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "372:6"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "372:8"
+          ],
+          "type": "concept"
+        }
+      ]
+    },
+    "30": {
+      "sections": [
+        {
+          "refs": [
+            "388:0-1"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "388:2"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "388:3-4"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "388:5"
+          ],
+          "type": "paragraph"
+        }
+      ]
+    },
+    "31": {
+      "sections": [
+        {
+          "refs": [
+            "388:0-2"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "388:3"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "388:4-6"
+          ],
+          "type": "list",
+          "format": "lines"
+        },
+        {
+          "refs": [
+            "388:7"
+          ],
+          "type": "paragraph"
+        }
+      ]
+    },
+    "32": {
+      "sections": [
+        {
+          "refs": [
+            "388:0"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "388:1-2"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "388:3"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "388:4"
+          ],
+          "type": "paragraph"
+        }
+      ]
+    },
+    "34": {
+      "sections": [
+        {
+          "refs": [
+            "437:0-1"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "437:2-3"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "438:0"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "438:2"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "2:0"
+          ],
+          "type": "concept"
+        }
+      ]
+    },
+    "35": {
+      "sections": [
+        {
+          "refs": [
+            "455:0"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "455:2"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "455:4-5"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "455:7"
+          ],
+          "type": "concept"
+        }
+      ]
+    },
+    "36": {
+      "sections": [
+        {
+          "refs": [
+            "472:1",
+            "472:3"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "472:5"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "472:7"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "472:9"
+          ],
+          "type": "paragraph"
+        }
+      ]
+    },
+    "37": {
+      "sections": [
+        {
+          "refs": [
+            "2:0"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "488:0",
+            "489:0-7"
+          ],
+          "type": "table",
+          "format": "keep-go"
+        },
+        {
+          "refs": [
+            "13:0"
+          ],
+          "type": "step"
+        }
+      ],
+      "title": [
+        "487:0"
+      ],
+      "template": "steps"
+    },
+    "53": {
+      "sections": [
+        {
+          "refs": [
+            "2:0"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "488:0",
+            "489:0-7"
+          ],
+          "type": "table",
+          "format": "keep-go"
+        }
+      ],
+      "title": [
+        "487:0"
+      ],
+      "template": "steps"
+    },
+    "38": {
+      "sections": [
+        {
+          "refs": [
+            "504:2"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "506:0-1",
+            "506:3-4"
+          ],
+          "type": "table",
+          "format": "table"
+        },
+        {
+          "refs": [
+            "506:6"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "506:8"
+          ],
+          "type": "paragraph"
+        }
+      ],
+      "title": [
+        "504:0"
+      ],
+      "template": "steps"
+    },
+    "39": {
+      "sections": [
+        {
+          "refs": [
+            "521:2"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "523:0-1",
+            "523:3-5"
+          ],
+          "type": "table",
+          "format": "table"
+        },
+        {
+          "refs": [
+            "523:7"
+          ],
+          "type": "paragraph"
+        }
+      ],
+      "title": [
+        "521:0"
+      ],
+      "template": "steps"
+    },
+    "40": {
+      "sections": [
+        {
+          "refs": [
+            "538:2"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "540:0-1",
+            "540:3-4",
+            "540:6"
+          ],
+          "type": "table",
+          "format": "table"
+        }
+      ],
+      "title": [
+        "538:0"
+      ],
+      "template": "steps"
+    },
+    "41": {
+      "sections": [
+        {
+          "refs": [
+            "555:2"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "557:0",
+            "557:2-4",
+            "557:6"
+          ],
+          "type": "table",
+          "format": "table"
+        }
+      ],
+      "title": [
+        "555:0"
+      ],
+      "template": "steps"
+    },
+    "42": {
+      "sections": [
+        {
+          "refs": [
+            "572:2"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "572:4",
+            "572:6",
+            "572:8"
+          ],
+          "type": "list",
+          "format": "lines"
+        }
+      ],
+      "title": [
+        "572:0"
+      ]
+    },
+    "43": {
+      "sections": [
+        {
+          "refs": [
+            "605:0"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "605:1-4"
+          ],
+          "type": "table",
+          "format": "table"
+        },
+        {
+          "refs": [
+            "606:0"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "606:1-5"
+          ],
+          "type": "table",
+          "format": "table"
+        },
+        {
+          "refs": [
+            "607:0"
+          ],
+          "type": "concept"
+        }
+      ],
+      "title": [
+        "604:0"
+      ]
+    },
+    "44": {
+      "sections": [
+        {
+          "refs": [
+            "622:1"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "622:3-7"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "622:9-10"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "622:12-13"
+          ],
+          "type": "question"
+        }
+      ],
+      "title": [
+        "622:0"
+      ]
+    },
+    "46": {
+      "sections": [
+        {
+          "refs": [
+            "654:0@48:224"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "655:0"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "655:2"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "655:4"
+          ],
+          "type": "paragraph"
+        }
+      ],
+      "title": [
+        "654:0@0:48"
+      ],
+      "issues": [
+        {
+          "type": "scripture_reference",
+          "note": "Source labels this quotation Proverbs 3:4. Retained exactly; curriculum owner should verify the reference and quotation."
+        }
+      ]
+    },
+    "48": {
+      "sections": [
+        {
+          "refs": [
+            "687:0@24:79"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "689:0",
+            "689:2-7"
+          ],
+          "type": "table",
+          "format": "table"
+        },
+        {
+          "refs": [
+            "689:9"
+          ],
+          "type": "concept"
+        }
+      ],
+      "title": [
+        "687:0@0:24"
+      ]
+    },
+    "50": {
+      "sections": [
+        {
+          "refs": [
+            "721:0@23:124"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "721:0@126:248"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "722:0-1"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "722:3-4"
+          ],
+          "type": "paragraph",
+          "format": "continuous"
+        }
+      ],
+      "title": [
+        "721:0@0:21"
+      ]
+    },
+    "58": {
+      "sections": [
+        {
+          "refs": [
+            "853:0@24:125"
+          ],
+          "type": "scripture"
+        },
+        {
+          "refs": [
+            "853:0@127:289"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "853:0@291:360"
+          ],
+          "type": "question"
+        }
+      ],
+      "title": [
+        "853:0@0:22"
+      ]
+    },
+    "65": {
+      "sections": [
+        {
+          "refs": [
+            "983:0@7:35"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "983:0@37:137"
+          ],
+          "type": "list",
+          "format": "lines"
+        },
+        {
+          "refs": [
+            "983:0@139:171"
+          ],
+          "type": "question"
+        }
+      ],
+      "title": [
+        "983:0@0:5"
+      ]
+    },
+    "47": {
+      "sections": [
+        {
+          "refs": [
+            "671:0"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "671:2",
+            "672:0-3",
+            "672:5"
+          ],
+          "type": "table",
+          "format": "malaria"
+        },
+        {
+          "refs": [
+            "672:7-8"
+          ],
+          "type": "question"
+        }
+      ],
+      "title": [
+        "670:0"
+      ]
+    },
+    "51": {
+      "sections": [
+        {
+          "refs": [
+            "739:0",
+            "739:2"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "739:4"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "739:6"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "739:8-9"
+          ],
+          "type": "concept",
+          "format": "continuous"
+        }
+      ]
+    },
+    "52": {
+      "sections": [
+        {
+          "refs": [
+            "756:0"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "756:2"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "756:4",
+            "756:6"
+          ],
+          "type": "question"
+        }
+      ]
+    },
+    "54": {
+      "sections": [
+        {
+          "refs": [
+            "504:2"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "506:0-1",
+            "506:3-4",
+            "506:6"
+          ],
+          "type": "table",
+          "format": "table"
+        },
+        {
+          "refs": [
+            "506:8"
+          ],
+          "type": "question"
+        }
+      ],
+      "title": [
+        "504:0"
+      ],
+      "template": "steps",
+      "issues": [
+        {
+          "type": "calculation",
+          "note": "Source shows Amount you can save as 7,500 alongside income 10,000 and required monthly balance 7,500. Numbers retained exactly; please verify the example."
+        }
+      ]
+    },
+    "55": {
+      "sections": [
+        {
+          "refs": [
+            "521:2"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "523:0-1",
+            "523:3-5"
+          ],
+          "type": "table",
+          "format": "table"
+        },
+        {
+          "refs": [
+            "523:7"
+          ],
+          "type": "paragraph"
+        }
+      ],
+      "title": [
+        "521:0"
+      ],
+      "template": "steps"
+    },
+    "56": {
+      "sections": [
+        {
+          "refs": [
+            "821:2"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "821:4"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "821:6"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "821:8"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "821:10"
+          ],
+          "type": "paragraph"
+        }
+      ],
+      "title": [
+        "821:0"
+      ]
+    },
+    "59": {
+      "sections": [
+        {
+          "refs": [
+            "869:0-2"
+          ],
+          "type": "list",
+          "format": "lines"
+        },
+        {
+          "refs": [
+            "869:4-7"
+          ],
+          "type": "list",
+          "format": "lines"
+        },
+        {
+          "refs": [
+            "869:9-10"
+          ],
+          "type": "question"
+        }
+      ]
+    },
+    "60": {
+      "sections": [
+        {
+          "refs": [
+            "885:0-3"
+          ],
+          "type": "scripture",
+          "format": "heading"
+        },
+        {
+          "refs": [
+            "885:5"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "885:6-9"
+          ],
+          "type": "list",
+          "format": "lines"
+        }
+      ]
+    },
+    "61": {
+      "sections": [
+        {
+          "refs": [
+            "918:0",
+            "918:2",
+            "918:4"
+          ],
+          "type": "list",
+          "format": "lines"
+        },
+        {
+          "refs": [
+            "918:6",
+            "918:8"
+          ],
+          "type": "list",
+          "format": "lines"
+        },
+        {
+          "refs": [
+            "918:10"
+          ],
+          "type": "concept"
+        }
+      ]
+    },
+    "62": {
+      "sections": [
+        {
+          "refs": [
+            "935:0-2"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "935:4"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "935:6"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "935:7-8"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "935:9-10"
+          ],
+          "type": "list",
+          "format": "lines"
+        },
+        {
+          "refs": [
+            "935:11-12"
+          ],
+          "type": "question"
+        }
+      ]
+    },
+    "63": {
+      "sections": [
+        {
+          "refs": [
+            "951:0",
+            "951:2",
+            "951:4"
+          ],
+          "type": "question"
+        },
+        {
+          "refs": [
+            "951:7"
+          ],
+          "type": "concept"
+        },
+        {
+          "refs": [
+            "951:9-11"
+          ],
+          "type": "paragraph",
+          "format": "continuous"
+        }
+      ]
+    },
+    "66": {
+      "sections": [
+        {
+          "refs": [
+            "999:0"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "999:2"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "999:4"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "999:6"
+          ],
+          "type": "step"
+        },
+        {
+          "refs": [
+            "2:0-1"
+          ],
+          "type": "concept",
+          "format": "continuous"
+        }
+      ],
+      "template": "steps"
+    },
+    "67": {
+      "sections": [
+        {
+          "refs": [
+            "1015:0@9:30",
+            "1016:0-4"
+          ],
+          "type": "concept",
+          "format": "heading"
+        },
+        {
+          "refs": [
+            "1015:0@30:61",
+            "1017:0-1"
+          ],
+          "type": "concept",
+          "format": "heading"
+        },
+        {
+          "refs": [
+            "1015:0@61:82",
+            "1018:0-1"
+          ],
+          "type": "concept",
+          "format": "heading"
+        },
+        {
+          "refs": [
+            "1019:0-2"
+          ],
+          "type": "list",
+          "format": "lines"
+        }
+      ],
+      "title": [
+        "1014:0"
+      ]
+    },
+    "68": {
+      "sections": [
+        {
+          "refs": [
+            "1036:0",
+            "1038:0-1",
+            "1039:0-1",
+            "1040:0-1",
+            "1041:0",
+            "1042:0"
+          ],
+          "type": "flow",
+          "format": "flow"
+        }
+      ],
+      "title": [
+        "1034:0"
+      ],
+      "issues": [
+        {
+          "type": "diagram_layout",
+          "note": "The budget/fund diagram is presented as responsive cards using all original labels. Review the relationship layout against slide 68."
+        }
+      ]
+    },
+    "69": {
+      "sections": [
+        {
+          "refs": [
+            "1059:0"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "1059:2-7"
+          ],
+          "type": "list",
+          "format": "lines"
+        },
+        {
+          "refs": [
+            "1059:9"
+          ],
+          "type": "concept"
+        }
+      ]
+    },
+    "70": {
+      "sections": [
+        {
+          "refs": [
+            "1074:0"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "1074:2"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "1074:4"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "1074:6"
+          ],
+          "type": "paragraph"
+        },
+        {
+          "refs": [
+            "1074:8"
+          ],
+          "type": "paragraph"
+        }
+      ],
+      "title": [
+        "2:0"
+      ],
+      "issues": [
+        {
+          "type": "module_count",
+          "note": "Source says all 5 Modules although the presentation has seven module dividers. Retained exactly; requires owner review."
+        }
+      ]
+    }
+  }
+}

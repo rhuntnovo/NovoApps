@@ -332,3 +332,17 @@ The first CMS milestone is successful when:
 > A local editor can import existing New Vines course content, modify it, preview it using the shared runtime, export valid course JSON, and load that JSON into the existing offline Learning PWA without requiring manual source-code edits.
 
 Authentication, D1 persistence, invitations, and multi-user editing come after this milestone.
+
+## Provider authoring and Spanish review update (2026-10-21)
+
+The user's next priority is authoring the remaining English Foundations modules,
+explicit AI translation to Spanish/Nicaragua, and human comparison/editing/review.
+The local implementation is in docs/10 and ADR 0012. Module/page/block/narration
+creation, provider-scoped editions, write-only translation settings, source revision
+tracking and shared content-runtime are implemented. No cloud publication or hosted
+reviewer access was added. The earlier direct Learning-source preview shortcut is
+superseded; historical pilot ADR 0008 has been renumbered 0011.
+
+Before remote reviewer access: implement platform-web, validated identity/control D1,
+provider permissions and audit attribution. Then controlled approval/assets/audio and
+immutable publication/catalog support. Existing v0.8.3 publication remains unchanged.

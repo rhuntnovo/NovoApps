@@ -133,7 +133,7 @@ closing/reopening in airplane mode on both iOS and Android. This completes the r
 device startup/update check; it is not a claim that every device/media/recovery case is tested.
 
 The user selected local CMS and preview first, with registration/authenticated access
-before hosted deployment (ADR 0008). A working React editor, Hono/local D1 service,
+before hosted deployment (ADR 0011). A working React editor, Hono/local D1 service,
 Drizzle migrations and separate Preact runtime preview are now available. Module 1
 imports/exports with every existing JSON value preserved. Draft revisions, explicit
 wording-review changes, conflict rejection, responsive preview, original media/icons,
@@ -144,3 +144,17 @@ identity/content permissions and audit attribution, then implement controlled re
 approval, R2 assets and immutable publishing. Do not expose the local authoring bypass.
 Keep workspace Durable Objects, Finance/Inventory sync and private-data crypto/recovery
 as later platform work. No remote CMS database or public CMS was provisioned/deployed.
+
+## Provider authoring and Spanish review update (2026-10-21)
+
+The user's next priority is authoring the remaining English Foundations modules,
+explicit AI translation to Spanish/Nicaragua, and human comparison/editing/review.
+The local implementation is in docs/10 and ADR 0012. Module/page/block/narration
+creation, provider-scoped editions, write-only translation settings, source revision
+tracking and shared content-runtime are implemented. No cloud publication or hosted
+reviewer access was added. The earlier direct Learning-source preview shortcut is
+superseded; historical pilot ADR 0008 has been renumbered 0011.
+
+Before remote reviewer access: implement platform-web, validated identity/control D1,
+provider permissions and audit attribution. Then controlled approval/assets/audio and
+immutable publication/catalog support. Existing v0.8.3 publication remains unchanged.

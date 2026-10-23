@@ -1,56 +1,124 @@
+import {mediaRoutes} from './media';
+import { pages } from '../../../database/content/schema';
+import { drizzle } from 'drizzle-orm/d1';
+import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { courseSchema, savePageSchema } from '@novoapps/content-model';
+import { z } from 'zod';
+import { courseSchema, savePageSchema, providerInput,courseInput,moduleInput,newPageInput,editionInput,
+  headingsInput,pageText,applyTranslation,type ModuleHeadings } from '@novoapps/content-model';
 import { ContentError, contentRepository } from './repository';
-type Bindings = { CONTENT_DB: D1Database; LOCAL_AUTHORING?: string; CMS_ORIGIN?: string };
-export const app = new Hono<{ Bindings: Bindings }>();
-app.onError((error, c) => {
-  if (error instanceof ContentError) return c.json({ error: error.message }, error.status);
-  if (error instanceof HTTPException) return c.json({ error: error.message }, error.status);
-  console.error('CMS request failed', { route: c.req.path });
-  return c.json({ error: 'The CMS could not complete this request.' }, 500);
+import { aiConfiguration,aiStatus,configureAI,translateFields,type AIEnvironment } from './translation';
+type Bindings={CONTENT_DB:D1Database;LOCAL_AUTHORING?:string;CMS_ORIGIN?:string}&AIEnvironment;
+export const app=new Hono<{Bindings:Bindings}>();
+app.onError((error,c)=>{
+  if(error instanceof ContentError)return c.json({error:error.message},error.status);
+  if(error instanceof HTTPException)return c.json({error:error.message},error.status);
+  if(error instanceof z.ZodError)return c.json({error:'Invalid content',issues:error.issues.map(issue=>issue.message)},400);
+  console.error('CMS request failed',{route:c.req.path});
+  return c.json({error:'The CMS could not complete this request.'},500);
 });
-app.use('*', async (c, next) => {
-  // Temporary local pilot only. Deploying the unconfigured Worker cannot expose authoring.
-  const host = new URL(c.req.url).hostname;
-  if (c.env.LOCAL_AUTHORING !== 'true' || !['127.0.0.1', 'localhost'].includes(host))
-    return c.json({ error: 'Local authoring only. Authenticated deployment is not configured.' }, 403);
-  const origin = c.req.header('Origin');
-  if (origin && origin !== c.env.CMS_ORIGIN) return c.json({ error: 'Origin not allowed' }, 403);
-  c.header('Cache-Control', 'no-store');
-  if (origin) {
-    c.header('Access-Control-Allow-Origin', origin);
-    c.header('Vary', 'Origin');
+app.use('*',async(c,next)=>{
+  c.header('X-Robots-Tag','noindex, nofollow, nosnippet, noimageindex');
+  const host=new URL(c.req.url).hostname;
+  if(c.env.LOCAL_AUTHORING!=='true'||!['127.0.0.1','localhost'].includes(host))
+    return c.json({error:'Local authoring only. Authenticated deployment is not configured.'},403);
+  const origin=c.req.header('Origin');
+  const allowedOrigins=new Set([c.env.CMS_ORIGIN]);
+  if(c.env.CMS_ORIGIN){const configured=new URL(c.env.CMS_ORIGIN);
+    if(['127.0.0.1','localhost'].includes(configured.hostname))for(const name of ['127.0.0.1','localhost']){const alias=new URL(configured);alias.hostname=name;allowedOrigins.add(alias.origin);}}
+  if(origin&&!allowedOrigins.has(origin))return c.json({error:'Origin not allowed'},403);
+  c.header('Cache-Control','no-store');
+  if(origin){c.header('Access-Control-Allow-Origin',origin);c.header('Vary','Origin');}
+  if(c.req.method==='OPTIONS'){
+    c.header('Access-Control-Allow-Methods','GET, POST, PUT, OPTIONS');
+    c.header('Access-Control-Allow-Headers','Content-Type');return c.body(null,204);
   }
-  if (c.req.method === 'OPTIONS') {
-    c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
-    c.header('Access-Control-Allow-Headers', 'Content-Type');
-    return c.body(null, 204);
-  }
+  // A browser mutation must be an application/json request. This prevents form
+  // posts from an unrelated local page while retaining the CLI importer.
+  if(!['GET','HEAD'].includes(c.req.method)&&!c.req.header('Content-Type')?.startsWith('application/json'))
+    return c.json({error:'Use application/json'},415);
   await next();
 });
-async function jsonBody(request: Request) {
-  const raw = await request.text();
-  if (new TextEncoder().encode(raw).byteLength > 1000000) throw new HTTPException(413, { message: 'Course input is too large' });
-  try { return JSON.parse(raw); } catch { throw new HTTPException(400, { message: 'Invalid JSON' }); }
+async function jsonBody(request:Request){
+  const raw=await request.text();
+  if(new TextEncoder().encode(raw).byteLength>1000000)throw new HTTPException(413,{message:'Course input is too large'});
+  try{return JSON.parse(raw);}catch{throw new HTTPException(400,{message:'Invalid JSON'});}
 }
-app.get('/health', c => c.json({ status: 'ok', mode: 'local-authoring' }));
-app.get('/api/v1/cms/modules', async c => c.json(await contentRepository(c.env.CONTENT_DB).listModules()));
-app.post('/api/v1/cms/import', async c => {
-  const parsed = courseSchema.safeParse(await jsonBody(c.req.raw));
-  if (!parsed.success) return c.json({ error: 'Invalid course', issues: parsed.error.issues.map(issue => issue.message) }, 400);
-  return c.json(await contentRepository(c.env.CONTENT_DB).importCourse(parsed.data), 201);
+const revisionInput=z.object({expectedRevision:z.number().int().positive()});
+app.route('/api/v1/cms',mediaRoutes);
+app.put('/api/v1/cms/modules/:id/page-order',async c=>{const input=z.object({expectedStructureRevision:z.number().int().positive(),pageIds:z.array(z.string().uuid()).min(1)}).parse(await jsonBody(c.req.raw));return c.json(await contentRepository(c.env.CONTENT_DB).reorderPages(c.req.param('id'),input.expectedStructureRevision,input.pageIds));});
+app.post('/api/v1/cms/modules/:id/pages/:pageId/delete',async c=>{const input=z.object({expectedStructureRevision:z.number().int().positive()}).parse(await jsonBody(c.req.raw));return c.json(await contentRepository(c.env.CONTENT_DB).deletePage(c.req.param('id'),c.req.param('pageId'),input.expectedStructureRevision));});
+app.get('/robots.txt',c=>c.text('User-agent: *\nDisallow: /\n'));
+app.get('/health',c=>c.json({status:'ok',mode:'local-authoring'}));
+app.get('/api/v1/cms/providers',async c=>c.json(await contentRepository(c.env.CONTENT_DB).listProviders()));
+app.post('/api/v1/cms/providers',async c=>c.json(await contentRepository(c.env.CONTENT_DB).createProvider(providerInput.parse(await jsonBody(c.req.raw))),201));
+app.get('/api/v1/cms/courses',async c=>c.json(await contentRepository(c.env.CONTENT_DB).listCourses()));
+app.post('/api/v1/cms/courses',async c=>c.json(await contentRepository(c.env.CONTENT_DB).createCourse(courseInput.parse(await jsonBody(c.req.raw))),201));
+app.get('/api/v1/cms/modules',async c=>c.json(await contentRepository(c.env.CONTENT_DB).listModules()));
+app.post('/api/v1/cms/modules',async c=>c.json(await contentRepository(c.env.CONTENT_DB).createModule(moduleInput.parse(await jsonBody(c.req.raw))),201));
+app.post('/api/v1/cms/import',async c=>{
+  const input=await jsonBody(c.req.raw);
+  const envelope=z.object({providerId:z.string().uuid(),course:courseSchema,reviewRequired:z.boolean().default(false)}).safeParse(input);
+  // Legacy body supported only for the existing New Vines bootstrap script.
+  return c.json(await contentRepository(c.env.CONTENT_DB).importCourse(
+    envelope.success?envelope.data.course:courseSchema.parse(input),envelope.success?envelope.data.providerId:undefined,
+    undefined,envelope.success?envelope.data.reviewRequired:false),201);
 });
-app.get('/api/v1/cms/modules/:id', async c => c.json(await contentRepository(c.env.CONTENT_DB).getModule(c.req.param('id'))));
-app.put('/api/v1/cms/pages/:id/draft', async c => {
-  const parsed = savePageSchema.safeParse(await jsonBody(c.req.raw));
-  if (!parsed.success) return c.json({ error: 'Invalid page', issues: parsed.error.issues.map(issue => issue.message) }, 400);
-  const body = parsed.data;
-  return c.json(await contentRepository(c.env.CONTENT_DB).savePage(c.req.param('id'), body.expectedRevision, body.page, body.allowWordingChanges));
+app.get('/api/v1/cms/modules/:id',async c=>c.json(await contentRepository(c.env.CONTENT_DB).getModule(c.req.param('id'))));
+app.post('/api/v1/cms/modules/:id/pages',async c=>c.json(await contentRepository(c.env.CONTENT_DB).createPage(c.req.param('id'),newPageInput.parse(await jsonBody(c.req.raw))),201));
+app.post('/api/v1/cms/modules/:id/editions',async c=>c.json(await contentRepository(c.env.CONTENT_DB).createEdition(c.req.param('id'),editionInput.parse(await jsonBody(c.req.raw))),201));
+app.post('/api/v1/cms/modules/:id/sync-source',async c=>c.json(await contentRepository(c.env.CONTENT_DB).syncEdition(c.req.param('id'))));
+app.put('/api/v1/cms/modules/:id/headings',async c=>{
+  const input=revisionInput.extend({headings:headingsInput}).parse(await jsonBody(c.req.raw));
+  return c.json(await contentRepository(c.env.CONTENT_DB).saveHeadings(c.req.param('id'),input.expectedRevision,input.headings));
 });
-app.get('/api/v1/cms/modules/:id/export', async c => {
-  const draft = await contentRepository(c.env.CONTENT_DB).getModule(c.req.param('id'));
-  c.header('Content-Disposition', 'attachment; filename="' + draft.course.module.id + '.draft.json"');
+app.put('/api/v1/cms/pages/:id/draft',async c=>{
+  const input=savePageSchema.extend({sourceRevision:z.number().int().positive().optional()}).parse(await jsonBody(c.req.raw));
+  return c.json(await contentRepository(c.env.CONTENT_DB).savePage(c.req.param('id'),input.expectedRevision,input.page,input.allowWordingChanges,input));
+});
+app.get('/api/v1/cms/translation-settings',c=>c.json(aiStatus(c.env)));
+app.put('/api/v1/cms/translation-settings',async c=>{
+  const input=z.object({apiKey:z.string().trim().min(20).max(500).optional(),
+    model:z.string().trim().regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]{1,99}$/).optional(),forget:z.boolean().optional()}).parse(await jsonBody(c.req.raw));
+  configureAI(input,c.env);return c.json(aiStatus(c.env));
+});
+app.post('/api/v1/cms/pages/:id/translate',async c=>{
+  const input=revisionInput.extend({overwrite:z.boolean().default(false)}).parse(await jsonBody(c.req.raw));
+  const repository=contentRepository(c.env.CONTENT_DB);
+  const summaries=await repository.listModules();
+  // UUID page -> owning module, not a user-supplied source document.
+
+
+  const pageRow=await drizzle(c.env.CONTENT_DB).select().from(pages).where(eq(pages.id,c.req.param('id'))).get();
+  if(!pageRow||!summaries.some(module=>module.id===pageRow.moduleId))throw new ContentError(404,'Page not found');
+  const target=await repository.getModule(pageRow.moduleId);
+  const summary=target.pages.find(page=>page.id===pageRow.id)!;
+  if(!target.sourceModuleId||!target.sourceCourse)throw new ContentError(400,'Create a language/region edition first.');
+  if(summary.revision!==input.expectedRevision)throw new ContentError(409,'The draft changed. Reload before generating.');
+  if(summary.translationStatus!=='untranslated'&&!input.overwrite)throw new ContentError(409,'This page already has translation edits. Explicit replacement is required.');
+  let source=target.sourceCourse.module.pages.find(page=>page.id===summary.canonicalId);
+  if(!source)throw new ContentError(409,'Source page not found. Synchronize this edition.');
+  const issue=target.sourceCourse.source_issues.find(item=>item.source_slide===source!.source_slide);
+  if(issue)source={...source,presentation:{...source.presentation,source_note:issue.note}};
+  const fields=await translateFields(pageText(source),target.course.language,target.course.country,aiConfiguration(c.env));
+  const page=applyTranslation(source,fields);
+  return c.json(await repository.savePage(summary.id,input.expectedRevision,page,true,{
+    translationStatus:'draft',sourceRevision:summary.sourceCurrentRevision!,reviewNote:summary.reviewNote}));
+});
+app.post('/api/v1/cms/modules/:id/translate-headings',async c=>{
+  const input=revisionInput.parse(await jsonBody(c.req.raw));
+  const repository=contentRepository(c.env.CONTENT_DB),target=await repository.getModule(c.req.param('id'));
+  if(!target.sourceCourse)throw new ContentError(400,'Create an edition first.');
+  if(target.metadataRevision!==input.expectedRevision)throw new ContentError(409,'Module headings changed. Reload first.');
+  const fields=await translateFields({courseTitle:target.sourceCourse.title,moduleTitle:target.sourceCourse.module.title,track:target.sourceCourse.track},
+    target.course.language,target.course.country,aiConfiguration(c.env));
+  return c.json(await repository.saveHeadings(target.id,input.expectedRevision,headingsInput.parse(fields) as ModuleHeadings));
+});
+app.get('/api/v1/cms/modules/:id/export',async c=>{
+  const draft=await contentRepository(c.env.CONTENT_DB).getModule(c.req.param('id'));
+  c.header('Content-Disposition','attachment; filename="'+draft.course.module.id+'.'+draft.course.language+'-'+draft.course.country.toLowerCase()+'.draft.json"');
+  // This remains a draft export, including unreviewed editions; never a publication.
   return c.json(draft.course);
 });
 export default app;

@@ -1175,7 +1175,7 @@ newvines-platform/
 │   ├── inventory-pwa/          # Preact
 │   ├── finance-pwa/            # Preact
 │   │
-│   ├── account-web/            # React
+│   ├── platform-web/            # React
 │   ├── cms-web/                # React
 │   └── admin-web/              # React
 │
@@ -1689,3 +1689,11 @@ Suggested first ADRs:
 0006-published-json-for-learning-runtime.md
 0007-offline-first-sync-model.md
 ```
+
+
+## Implementation precedence (2026-10-21)
+
+Accepted ADRs 0008–0010 and 0012, application/provider boundary documents, and docs/10
+refine this target proposal. Use platform-web for central identity UI. The local CMS
+and shared renderer precede hosted auth; the Learning folder remains in place. Root
+AGENTS.md and docs/04 sensitive-data encryption guidance remain binding.

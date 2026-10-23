@@ -1,82 +1,118 @@
 # NovoApps
 
-New Vines Learning is published at https://novoapps-newvines.rhuntnovo.workers.dev as v0.8.3.
-The local Content Studio imports and manages draft content without publishing it.
+New Vines Learning is published as v0.8.4 with English/Spanish offline selection at
+https://novoapps-newvines.rhuntnovo.workers.dev.
+The local NovoApps Content Studio supports multiple providers and source-linked
+language/regional drafts and explicit approved R2 publication. CMS and authoring D1 remain local pending authenticated hosting.
 
-Read [AGENTS.md](AGENTS.md), [the platform architecture](docs/NEW_VINES_PLATFORM_ARCHITECTURE.md),
-and [the architecture decisions](docs/ADR/) before changing the platform.
+Read [AGENTS.md](AGENTS.md), [the architecture entry point](docs/ARCHITECTURE.md),
+and relevant [ADRs](docs/ADR/) before changing the platform.
 
 ## Local Content Studio
 
-From this repository root, with Node 24 and npm:
+From C:\Development\NovoApps, with Node 24 and npm:
 
 ```powershell
 npm.cmd install
 npm.cmd run dev:cms
 ```
 
-Open **http://127.0.0.1:5174/**. Use this exact loopback address; the preview origin is explicit.
+Open **http://localhost:5174/** or **http://127.0.0.1:5174/**.
+Refresh an editor left open from the earlier pilot.
 
-The launcher applies migrations to **local** D1, starts the Hono API on 127.0.0.1:8787,
-imports the existing Module 1 once, and starts the editor and isolated preview.
-Subsequent starts keep existing drafts. Ctrl+C stops the development servers.
-No Cloudflare login, API key, remote database, or deployment is required for this milestone.
+The launcher migrates local D1, starts the Hono API on 8787, imports Module 1 once,
+and starts the React editor plus isolated Preact preview on 5175.
+Existing drafts are retained. Ctrl+C stops the development servers.
+No Cloudflare login, remote database or deployment is required.
 
-You can browse all 20 pages; edit layouts, block order, reflections, and narration scripts;
-explicitly unlock wording changes for review; save draft revisions; and preview the real
-Self Paced / Guided experience at phone, tablet, and desktop sizes. Export draft downloads
-JSON for review and does not publish it. Existing icons, image references, recordings,
-and canonical published IDs are preserved.
+- Add providers and source courses.
+- Add modules, pages and content blocks; reorder blocks while preserving stable IDs/icons.
+- Add narration mappings/scripts even to previously unmapped pages.
+- Preview Self Paced/Guided at phone, tablet and desktop sizes.
+- Create a Spanish/Nicaragua edition (es / NI), or another explicit language/region.
+- Initiate AI translation per page or for remaining untranslated pages.
+- Compare source/translation, edit it, keep reviewer notes and mark local review.
+- Export draft JSON for review.
 
-Local D1 state is in `services/api-worker/.wrangler/state/` and is ignored by Git.
-Keep this directory if you want to keep drafts. Git tracks the schema/migrations/source,
-not your local database. Re-importing never overwrites an existing module.
-The local draft history is append-only; a failed/stale save leaves existing revisions intact.
+Source wording is protected behind an explicit draft-editing unlock. Translation
+never changes the English source or automatically approves/publishes content.
+New scripts use browser voice until approved recordings are explicitly attached.
+Translation does not generate new Opus files.
 
-## Repository layout
+## OpenAI translation configuration
 
-- `newvines-learning/`: independent Preact learner app, existing package/lockfile.
-- `apps/cms-web/`: React authoring UI.
-- `apps/cms-preview/`: Preact iframe entry that uses the existing learner renderer and local media.
-- `services/api-worker/`: Hono API with a local D1 binding.
-- `packages/content-model/`: framework-neutral schema 0.3 validation and contracts.
-- `database/content/`: Drizzle schema and generated migrations.
-- `tooling/`: local launcher and curriculum importer.
-- `docs/`: architecture, decisions, and [CMS milestone details](docs/09-LOCAL-CMS-MILESTONE.md).
+Use **Translation settings** to submit a key through a masked, write-only field.
+The local Worker holds it in memory for at most 12 hours or until restart.
+Keys are not saved in browser storage, D1 or exports. Reopening settings shows no key.
+Do not paste a key into course content or send it in chat.
 
-The root npm workspace covers the new apps/services/packages. Learning remains independently
-buildable and deployable; it has not been moved or converted to React.
+For persistence across local restarts, the user may configure OPENAI_API_KEY in the
+ignored services/api-worker/.dev.vars.local file. OPENAI_TRANSLATION_MODEL is optional;
+the default is gpt-5-mini. A real API request occurs only after an explicit generation
+action and uses the user's OpenAI account. Automated tests stub paid calls.
 
-## Checks
+See the [complete authoring/translation runbook](docs/10-PROVIDERS-AUTHORING-TRANSLATION.md)
+for review rules, source-change handling and current limits.
+
+## Persistence and repository layout
+
+Local D1 lives in services/api-worker/.wrangler/state/ and is ignored by Git.
+Keep it to keep drafts. Git tracks schema/migrations/source, not local databases.
+A pre-upgrade copy was saved under ignored .wrangler/backups/.
+Repeated import never replaces an existing module or its drafts.
+
+- newvines-learning/: existing learner app, own package/lockfile/build.
+- apps/cms-web/: React authoring UI.
+- apps/cms-preview/: Preact preview host, no learner app imports/storage/service worker.
+- packages/content-model/: shared Zod contracts and a type-only learner entry.
+- packages/content-runtime/: shared Preact presentation, templates, narration and styles.
+- services/api-worker/: local Hono API.
+- database/content/: Drizzle schema/migrations.
+- tooling/: local launcher and bootstrap importer.
+
+Root installation supplies shared workspace dependencies. The Learning application
+remains independently built/deployed with npm.cmd run build from its existing folder.
+Its version/update UI, offline shell, storage and course loading stay app-owned.
+
+## Validation
 
 ```powershell
 npm.cmd run test:cms
 npm.cmd run build:cms
 ```
 
-The CMS tests cover exact content round-tripping, stable IDs, media paths, concurrent saves,
-wording protection/review flags, and local-only API access. The API tests use Node's SQLite
-with a small D1-binding adapter; the pilot is also exercised against Wrangler's actual local D1.
-Generate a migration after changing the schema:
+Learning checks (from newvines-learning):
+
+```powershell
+npm.cmd run build
+npm.cmd run test:offline
+npm.cmd run test:updates
+```
+
+After schema changes, generate/review a migration and apply it locally:
 
 ```powershell
 npm.cmd run db:generate --workspace @novoapps/api-worker
 npm.cmd run cms:migrate
 ```
 
-An explicit dependency override pins the legacy Drizzle loader's nested esbuild to 0.25.12
-to avoid its old development-server advisory. Schema generation was checked with this override.
+Review generated SQL. Migration 0002 uses an explicit SQLite JSON expression for
+module-number uniqueness; Drizzle's expression-index serializer required correction.
+The legacy Drizzle loader's nested esbuild is pinned to 0.25.12 to avoid its old
+development-server advisory. Dependency audit and schema generation are checked.
 
-## Before online deployment
+## Before shared or hosted use
 
-This milestone intentionally has no public authoring endpoint. The API requires both the
-local authoring opt-in and a loopback host, and rejects untrusted browser origins.
-A production deployment has no configured database or local-authoring opt-in.
+The API opt-in and loopback/origin checks are a local restriction, not authentication.
+No hosted reviewer account, content approval or publication pipeline is configured.
+The Nicaraguan reviewer will need the next authenticated-access milestone for remote
+collaboration. platform-web and central identity must remain separate from CMS editing.
 
-Next, implement and validate Better Auth with `nvi-control`, content permissions and audit
-identity; then add review/approval and immutable R2 publication. Asset upload/generation,
-translation workflow, creating/removing pages or blocks, and publication remain future work.
-Changing a narration script does not regenerate its existing recording.
+Provider assets, authenticated history/review, approved Scripture workflow, controlled
+audio generation, translations beyond the pilot and versioned R2 publication follow
+incrementally. Draft exports may include untranslated/unreviewed text and must not be
+treated as approved packages.
 
-Do not deploy the local authoring bypass or treat it as authentication. Shared authoring,
-real registration, and cloud database provisioning are separate implementation steps.
+CMS media and publishing: see [docs/11](docs/11-CMS-EDITING-MEDIA-PUBLISHING.md) for microphone/AI narration, images, page management, and the configured public R2 package destination.
+
+PowerPoint curriculum import: [docs/13](docs/13-POWERPOINT-COURSE-IMPORT.md) documents the reusable source-preserving tooling and the six new local English Foundations module drafts.

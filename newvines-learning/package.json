@@ -1,24 +1,28 @@
 {
-  "name": "newvines-learning-pwa",
-  "private": true,
-  "version": "0.8.3",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "npm run validate:course && tsc --noEmit && vite build && node scripts/build-service-worker.mjs",
-    "test:offline": "node --test tests/service-worker.test.mjs",
-    "test:updates": "node --test tests/update-manager.test.mjs",
-    "validate:course": "node scripts/validate-course.mjs",
-    "preview": "vite preview",
-    "generate:guided-audio": "node --env-file=.env scripts/generate-guided-audio.mjs"
-  },
-  "dependencies": {
-    "preact": "11.0.0"
-  },
-  "devDependencies": {
-    "@preact/preset-vite": "2.10.6",
-    "typescript": "7.0.2",
-    "vite": "8.3.4",
-    "openai": "^6.0.0"
-  }
+    "name":  "newvines-learning-pwa",
+    "private":  true,
+    "version":  "0.8.4",
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "vite",
+                    "build":  "npm run validate:course \u0026\u0026 npm run validate:delivery \u0026\u0026 tsc --noEmit \u0026\u0026 vite build \u0026\u0026 node scripts/build-service-worker.mjs",
+                    "test:offline":  "node --test tests/service-worker.test.mjs",
+                    "test:updates":  "node --test tests/update-manager.test.mjs",
+                    "validate:course":  "node scripts/validate-course.mjs",
+                    "preview":  "vite preview",
+                    "generate:guided-audio":  "node --env-file=.env scripts/generate-guided-audio.mjs",
+                    "validate:delivery":  "node scripts/validate-delivery.mjs",
+                    "test:catalog":  "node --test tests/catalog.test.mjs"
+                },
+    "dependencies":  {
+                         "preact":  "11.0.0",
+                         "@novoapps/content-runtime":  "file:../packages/content-runtime",
+                         "@novoapps/content-model":  "file:../packages/content-model"
+                     },
+    "devDependencies":  {
+                            "@preact/preset-vite":  "2.10.6",
+                            "typescript":  "7.0.2",
+                            "vite":  "8.3.4",
+                            "openai":  "^6.0.0"
+                        }
 }

@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@novoapps/content-model": "0.1.0",
-    "preact": "11.0.0"
+    "preact": "11.0.0",
+    "@novoapps/content-runtime": "0.1.0"
   },
   "devDependencies": {
     "@preact/preset-vite": "2.10.6",

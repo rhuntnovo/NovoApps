@@ -21,8 +21,11 @@ const hash = createHash('sha256').update(template);
 for (const file of files) {
   hash.update(file).update('\0').update(await readFile(join(output, file))).update('\0');
 }
-const urls = files.map(file => file === 'index.html' ? '/' : `/${file}`);
-const optionalMedia = url => /^\/(audio\/|assets\/illustrations\/)/.test(url);
+// Cloudflare consumes deployment directives; they are not downloadable assets.
+// Keep them in the release hash, but never require them for offline installation.
+const urls = files.filter(file => !['_headers', '_redirects'].includes(file))
+  .map(file => file === 'index.html' ? '/' : `/${file}`);
+const optionalMedia = url => /^\/(audio\/|assets\/illustrations\/)/.test(url) || /^\/delivery\/.*\/(audio|assets|icons)\//.test(url);
 const manifest = {
   revision: hash.digest('hex').slice(0, 20),
   core: urls.filter(url => !optionalMedia(url)),
