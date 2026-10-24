@@ -170,3 +170,11 @@ Disable the bootstrap workflow in hosted configuration. Validate real Safari/And
 sessions and invitation delivery before the hosted pilot. ADR 0003's broader account/PWA
 capabilities remain a proposal beyond this local validation. The public v0.8.4 learner
 PWA, its published curriculum and offline startup/update behavior are unchanged.
+
+
+Subsequent milestone: [Step 3 storage preparation](16-CLOUD-CMS-STORAGE-AND-PUBLISHING.md)
+now provides verified private cloud D1/R2 copies and a separate local storage
+sandbox with browser media processing and Worker publication. The original pilot
+above still uses its daily local D1/filesystem helper. No CMS is hosted. Email
+verification/recovery, hosted credential policy, abuse controls and staging
+deployment remain outstanding; the loopback boundary has not been relaxed.

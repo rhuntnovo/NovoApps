@@ -231,6 +231,26 @@ class BackupTest(unittest.TestCase):
                 backup.create_backup(self.repo, empty_destination, announce=lambda _: None)
         self.assertEqual(list(empty_destination.iterdir()), [])
 
+    def test_nested_storage_sandbox_is_included_and_compacted_without_replacing_primary_data(self):
+        nested = self.local / 'state/storage-sandbox/v3/d1/database/sandbox.sqlite'
+        nested.parent.mkdir(parents=True)
+        with sqlite3.connect(nested) as connection:
+            connection.execute('CREATE TABLE cms_pages(id TEXT PRIMARY KEY, text TEXT)')
+            connection.execute('INSERT INTO cms_pages VALUES (?,?)', ('sandbox-page', 'Sandbox copy'))
+        connection.close()
+        manifest = backup.verify_archive(Path(self.create(compact=True)['archive']))
+        entry = next(item for item in manifest['databases'] if item['path'].endswith('sandbox.sqlite'))
+        self.assertEqual(entry['method'], 'vacuum-into')
+        self.assertEqual(entry['rowCounts'], {'cms_pages': 1})
+        self.assertEqual(self.writer.execute('SELECT id FROM cms_pages').fetchone()[0], 'uuid-page')
+
+    def test_json_cli_returns_only_parseable_backup_metadata(self):
+        process = subprocess.run([sys.executable, '-B', str(Path(backup.__file__)), '--repo-root', str(self.repo), '--destination', str(self.destination), '--json'], capture_output=True, text=True)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        result = json.loads(process.stdout)
+        backup.verify_archive(Path(result['archive']))
+        self.assertNotIn('Exact Scripture', process.stdout)
+
     def test_symlink_or_junction_is_not_followed(self):
         original = backup.linked
         with patch.object(backup, 'linked', lambda path: str(path).endswith('image.webp') or original(path)):

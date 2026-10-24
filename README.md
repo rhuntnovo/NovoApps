@@ -3,7 +3,7 @@
 New Vines Learning is published as v0.8.4 with English/Spanish offline selection at
 https://novoapps-newvines.rhuntnovo.workers.dev.
 The local NovoApps Content Studio supports multiple providers and source-linked
-language/regional drafts and explicit approved R2 publication. CMS and authoring D1 remain local pending authenticated hosting.
+language/regional drafts and explicit approved R2 publication. The active CMS and authoring data remain local; a verified private staging copy of D1/media is prepared for future authenticated hosting.
 
 Read [AGENTS.md](AGENTS.md), [the architecture entry point](docs/ARCHITECTURE.md),
 and relevant [ADRs](docs/ADR/) before changing the platform.
@@ -152,3 +152,20 @@ They include SQLite snapshots (including metadata), media and import records. Ke
 second copy in private backup storage. Use `--destination "C:\NovoAppsBackups"` for a
 custom directory outside the repository. See [backup and recovery instructions](docs/14-LOCAL-CMS-BACKUP-AND-RECOVERY.md)
 for verification, consistency limits and restoration. Run `npm.cmd run test:backup` to check the tool.
+
+## Private Cloud Storage Preparation
+
+Step 3 provisions private staging D1/media and adds Worker-based publication and
+browser media conversion. It does not deploy the CMS or change the public learner.
+See the [storage and publishing runbook](docs/16-CLOUD-CMS-STORAGE-AND-PUBLISHING.md).
+
+To try the backend locally, save edits and stop the current CMS launcher, then run:
+
+```powershell
+npm.cmd run dev:cms:storage
+```
+
+This uses a separate **Storage Sandbox** copy, with emulated R2 and local-only
+publishing. Sign in at http://127.0.0.1:5176/ using your existing account credentials.
+Edits in this sandbox do not update the daily CMS or cloud copy. Return to the daily
+dataset by stopping it and running `npm.cmd run dev:cms:auth`.

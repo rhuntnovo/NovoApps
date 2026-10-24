@@ -36,6 +36,13 @@
       "when": 1792803129372,
       "tag": "0004_wandering_loki",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792806084876,
+      "tag": "0005_rich_bastion",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,5 @@
+import {r2Mode,publicationSettings,storePrepared,privateBucket,type StorageEnvironment} from './r2-storage';
+import {publishR2} from './r2-publishing';
 import {requestActor} from './authorization';
 import {Hono} from 'hono';
 import {z} from 'zod';
@@ -5,7 +7,7 @@ import {contentRepository,ContentError} from './repository';
 import {aiConfiguration,type AIEnvironment} from './translation';
 import {courseSchema,type AuthoringModule} from '@novoapps/content-model';
 
-type Env={CONTENT_DB:D1Database;CMS_MEDIA_URL?:string;CMS_MEDIA_SECRET?:string}&AIEnvironment;
+type Env={CONTENT_DB:D1Database;CMS_MEDIA_URL?:string;CMS_MEDIA_SECRET?:string}&AIEnvironment&StorageEnvironment;
 const base=(env:Env)=>env.CMS_MEDIA_URL||'http://127.0.0.1:8789';
 async function bridge(env:Env,path:string,body?:unknown){
  let result:Response;
@@ -15,9 +17,10 @@ async function bridge(env:Env,path:string,body?:unknown){
  if(!result.ok)throw new ContentError(400,data.error||'Media operation failed');
  return data;
 }
-async function body(request:Request){const text=await request.text();if(text.length>38*1024*1024)throw new ContentError(400,'Media input is too large');try{return JSON.parse(text);}catch{throw new ContentError(400,'Invalid media request');}}
+async function body(request:Request,limit=38*1024*1024){const text=await request.text();if(text.length>limit)throw new ContentError(400,'Media input is too large');try{return JSON.parse(text);}catch{throw new ContentError(400,'Invalid media request');}}
 const inputSchema=z.object({expectedRevision:z.number().int().positive(),blockId:z.string().min(1).max(150),
  script:z.string().max(4096).optional(),description:z.string().min(1).max(2000).optional(),
+ prepared:z.boolean().optional(),smallData:z.string().max(6*1024*1024).optional(),source:z.enum(['human','ai']).optional(),
  textContext:z.string().max(20000).optional(),data:z.string().max(35*1024*1024).optional()});
 async function ownership(env:Env,moduleId:string,pageId:string,input:z.infer<typeof inputSchema>){
  const repo=contentRepository(env.CONTENT_DB),module=await repo.getModule(moduleId),page=module.pages.find(page=>page.id===pageId);
@@ -26,7 +29,7 @@ async function ownership(env:Env,moduleId:string,pageId:string,input:z.infer<typ
  const document=module.course.module.pages.find(item=>item.id===page.canonicalId)!;
  if(!document.blocks.some(block=>block.id===input.blockId))throw new ContentError(400,'Save this block before creating media.');
  const primary=module.sourceModuleId?await repo.getModule(module.sourceModuleId):module;
- return {module,page,document,context:{provider:module.provider.slug,course:module.course.course_id.slice(0,70)+'-'+primary.courseId,
+ return {module,page,document,assetOwner:{providerId:module.provider.id,courseId:primary.courseId,moduleId:module.id,pageId:page.id,blockId:input.blockId,locale:module.course.language+'-'+module.course.country.toLowerCase()},context:{provider:module.provider.slug,course:module.course.course_id.slice(0,70)+'-'+primary.courseId,
   locale:module.course.language+'-'+module.course.country.toLowerCase(),page:page.id+'-'+page.canonicalId.slice(0,60),block:input.blockId}};
 }
 async function aiRequest(env:Env,url:string,payload:unknown){
@@ -39,10 +42,21 @@ async function aiRequest(env:Env,url:string,payload:unknown){
 }
 function encode(bytes:Uint8Array){let value='';for(let i=0;i<bytes.length;i+=8192)value+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(value);}
 export const mediaRoutes=new Hono<{Bindings:Env}>();
-mediaRoutes.get('/storage-settings',async c=>c.json(await bridge(c.env,'/settings')));
-mediaRoutes.put('/storage-settings',async c=>c.json(await bridge(c.env,'/settings',z.object({bucket:z.string().min(3).max(63),publicBaseUrl:z.string().url()}).parse(await body(c.req.raw)))));
+mediaRoutes.get('/media-capabilities',c=>c.json({backend:r2Mode(c.env)?'r2':'filesystem',processing:r2Mode(c.env)?'browser':'local-helper'}));
+mediaRoutes.get('/media-tools/:name',async c=>{
+ if(!r2Mode(c.env))throw new ContentError(404,'Browser conversion is not enabled.');
+ const name=c.req.param('name');if(!['ffmpeg-core.js','ffmpeg-core.wasm'].includes(name))throw new ContentError(404,'Tool not found.');
+ const object=await privateBucket(c.env).get('tools/ffmpeg/0.12.10/'+name);if(!object)throw new ContentError(503,'Import the private CMS conversion tools before recording.');
+ return c.newResponse(object.body,{headers:{'Content-Type':name.endsWith('.wasm')?'application/wasm':'application/javascript','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+});
+mediaRoutes.get('/storage-settings',async c=>c.json(r2Mode(c.env)?publicationSettings(c.env):await bridge(c.env,'/settings')));
+mediaRoutes.put('/storage-settings',async c=>{
+ const input=z.object({bucket:z.string().min(3).max(63),publicBaseUrl:z.string().url()}).parse(await body(c.req.raw));
+ if(r2Mode(c.env)){const config=publicationSettings(c.env);if(input.bucket!==config.bucket||input.publicBaseUrl.replace(/\/$/,'')!==config.publicBaseUrl)throw new ContentError(400,'Cloud publication destinations are managed in the Worker configuration.');return c.json(config);}
+ return c.json(await bridge(c.env,'/settings',input));
+});
 mediaRoutes.post('/modules/:moduleId/pages/:pageId/media/:kind',async c=>{
- const input=inputSchema.parse(await body(c.req.raw)),kind=c.req.param('kind');
+ const input=inputSchema.parse(await body(c.req.raw,r2Mode(c.env)?18*1024*1024:38*1024*1024)),kind=c.req.param('kind');
  if(!['recording','speech','image-upload','image-generate'].includes(kind))throw new ContentError(404,'Unknown media operation');
  if((kind==='image-upload'||kind==='image-generate')&&!input.description?.trim())throw new ContentError(400,'Enter an image description first.');
  const owner=await ownership(c.env,c.req.param('moduleId'),c.req.param('pageId'),input);
@@ -59,13 +73,19 @@ mediaRoutes.post('/modules/:moduleId/pages/:pageId/media/:kind',async c=>{
    prompt:'Create a context-appropriate educational illustration for this course. Country/region: '+owner.module.course.country+'. Language: '+owner.module.course.language+
     '. Teaching context: '+(input.textContext||block.text)+'. Requested image: '+input.description+'. No captions, lettering, watermarks or logos. Retain the meaning of the text; avoid adding claims.'});
   const output=await response.json() as {data?:{b64_json?:string}[]};data=output.data?.[0]?.b64_json;
+  if(r2Mode(c.env)){if(!data)throw new ContentError(502,'No image was generated.');await ownership(c.env,c.req.param('moduleId'),c.req.param('pageId'),input);return c.json({generatedImage:{data,mimeType:'image/webp'},requiresPreparation:true},201);}
  }
  if(!data)throw new ContentError(400,'No media was supplied.');
  // Recheck after lengthy generation; never attach stale output to a newer saved page.
  await ownership(c.env,c.req.param('moduleId'),c.req.param('pageId'),input);
  const audio=kind==='recording'||kind==='speech';
- const result=await bridge(c.env,audio?'/audio':'/image',{context:owner.context,data,description:input.description});
- return c.json({...result,source:kind==='speech'||kind==='image-generate'?'ai':'human',voice:kind==='speech'?'marin':undefined},201);
+ let result;
+ if(r2Mode(c.env)){
+  const actor=requestActor.get(c.req.raw);if(!actor)throw new ContentError(503,'Authenticated media author is required.');
+  if(kind!=='speech'&&!input.prepared)throw new ContentError(400,'Prepare media in the CMS browser before uploading.');
+  result=await storePrepared(c.env,owner.assetOwner,actor,{...input,data,source:kind==='speech'?'ai':input.source},audio);
+ }else result=await bridge(c.env,audio?'/audio':'/image',{context:owner.context,data,description:input.description});
+ return c.json({...result,source:kind==='speech'||kind==='image-generate'||input.source==='ai'?'ai':'human',voice:kind==='speech'?'marin':undefined},201);
 });
 function mediaPaths(module:AuthoringModule){
  const paths=new Set<string>();
@@ -88,8 +108,15 @@ mediaRoutes.post('/modules/:id/publish',async c=>{
  const primary=module.sourceModuleId?await contentRepository(c.env.CONTENT_DB).getModule(module.sourceModuleId):module;
  const course=courseSchema.parse({...module.course,provider:{id:module.provider.id,name:module.provider.name,
   ...(module.provider.slug==='new-vines'?{logo:'/assets/NVI-logo-clear.png'}:{})}});
- return c.json(await bridge(c.env,'/publish',{confirm:true,provider:module.provider.slug,
+ const publication={confirm:true,provider:module.provider.slug,
   courseId:module.course.course_id.slice(0,70)+'-'+primary.courseId,moduleId:module.course.module.id,
   locale:module.course.language+'-'+module.course.country.toLowerCase(),course,media:mediaPaths(module),
-  approval:{...input,at:new Date().toISOString(),mode:requestActor.has(c.req.raw)?'authenticated-owner':'local-author',actorId:requestActor.get(c.req.raw)}}),201);
+  approval:{...input,at:new Date().toISOString(),mode:requestActor.has(c.req.raw)?'authenticated-owner':'local-author',actorId:requestActor.get(c.req.raw)}};
+ if(r2Mode(c.env)){
+  const actor=requestActor.get(c.req.raw);if(!actor)throw new ContentError(503,'Authenticated publisher is required.');
+  const recheck=async()=>{const latest=await contentRepository(c.env.CONTENT_DB).getModule(module.id);
+   if(latest.structureRevision!==input.structureRevision||latest.metadataRevision!==input.metadataRevision||latest.pages.length!==module.pages.length||latest.pages.some(page=>input.pages[page.id]!==page.revision||latest.sourceModuleId&&page.needsUpdate))throw new ContentError(409,'Content or its primary source changed during publishing. Review the latest version.');};
+  return c.json(await publishR2(c.env,module.id,actor,publication,recheck),201);
+ }
+ return c.json(await bridge(c.env,'/publish',publication),201);
 });

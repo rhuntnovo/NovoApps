@@ -7,12 +7,13 @@ type Invite={id:string;email:string;locale:string;expires_at:number;consumed_at:
 const cms=import.meta.env.VITE_CMS_ORIGIN||'http://127.0.0.1:5174';
 async function request<T=any>(path:string,body?:unknown):Promise<T>{const response=await fetch('/api/'+path,{method:body===undefined?'GET':'POST',credentials:'same-origin',headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw new Error(data.error||'Request failed.');return data;}
 function App(){
+ const [datasetLabel,setDatasetLabel]=useState('');
  const [session,setSession]=useState<Session|null>(null),[setup,setSetup]=useState(false),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [name,setName]=useState(''),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[register,setRegister]=useState(true);
  const [token]=useState(()=>{const value=new URLSearchParams(location.hash.slice(1)).get('invite')||'';if(location.hash)history.replaceState(null,'',location.pathname);return value;});
  const [invitation,setInvitation]=useState<{email:string;locale:string}|null>(null),[accepted,setAccepted]=useState(false);
  const [courses,setCourses]=useState<Course[]>([]),[invites,setInvites]=useState<Invite[]>([]),[editionId,setEditionId]=useState(''),[inviteEmail,setInviteEmail]=useState(''),[inviteURL,setInviteURL]=useState('');
- async function refresh(){const status=await request<{setupRequired:boolean}>('v1/account/status');setSetup(status.setupRequired);
+ async function refresh(){const status=await request<{setupRequired:boolean;datasetLabel?:string}>('v1/account/status');setSetup(status.setupRequired);setDatasetLabel(status.datasetLabel||'');
   let who:Session|null=null;try{who=await request<Session>('v1/account/session');}catch{}setSession(who);
   if(who?.owner){setCourses(await request<Course[]>('v1/cms/courses'));setInvites(await request<Invite[]>('v1/account/invitations'));}
  }
@@ -24,7 +25,7 @@ function App(){
   await request('auth/sign-in/email',{email,password});await refresh();
  });}
  const editions=courses.filter(course=>course.sourceCourseId);
- return <main className="account-shell"><header><span className="logo">N</span><div><strong>NovoApps</strong><span>Account & Access</span></div><small>Local Authentication Pilot</small></header>
+ return <main className="account-shell"><header><span className="logo">N</span><div><strong>NovoApps</strong><span>Account & Access</span></div><small>{datasetLabel||'Local Authentication Pilot'}</small></header>
   {loading?<section><p>Loading Account…</p></section>:<>
    {error&&<p className="error" role="alert">{error}</p>}{notice&&<p className="notice" role="status">{notice}</p>}
    {!session?<section><span className="eyebrow">Content Studio</span><h1>{setup?'Create Your Owner Account':invitation&&register?'Accept Your Invitation':'Welcome Back'}</h1>

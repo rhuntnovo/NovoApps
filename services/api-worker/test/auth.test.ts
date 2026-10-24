@@ -80,7 +80,7 @@ test('invite acceptance restricts provider, primary course and language, audits 
   await c.data(await c.request(pageURL,'PUT',reviewed,reviewer),200);
   assert.equal((await c.request('/api/v1/cms/pages/'+original.pages[4].id+'/draft','PUT',{...body,page:original.course.module.pages[4]},reviewer)).status,403);
   assert.equal((await c.request(pageURL,'PUT',{...body,expectedRevision:2,page:{...page,layout:'prayer'}},reviewer)).status,403);
-  for(const [path,method] of [['/translation-settings','GET'],['/translation-settings','PUT'],['/providers','POST'],['/storage-settings','GET'],['/modules/'+spanish.id+'/publish','POST'],['/modules/'+spanish.id+'/sync-source','POST'],['/pages/'+spanish.pages[4].id+'/translate','POST']])assert.equal((await c.request('/api/v1/cms'+path,method,method==='GET'?undefined:{},reviewer)).status,403,path);
+  for(const [path,method] of [['/media-capabilities','GET'],['/media-tools/ffmpeg-core.wasm','GET'],['/translation-settings','GET'],['/translation-settings','PUT'],['/providers','POST'],['/storage-settings','GET'],['/modules/'+spanish.id+'/publish','POST'],['/modules/'+spanish.id+'/sync-source','POST'],['/pages/'+spanish.pages[4].id+'/translate','POST']])assert.equal((await c.request('/api/v1/cms'+path,method,method==='GET'?undefined:{},reviewer)).status,403,path);
   assert.equal((await c.request('/api/v1/account/invitations','GET',undefined,reviewer)).status,403);
   assert.equal((await c.request('/assets/cms/private/unrelated.webp','GET',undefined,reviewer)).status,403);
   const attached=structuredClone(page);attached.blocks[0].image={src:'/assets/cms/private/test.webp',alt:'Private test',width:120,height:80};

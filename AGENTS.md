@@ -163,3 +163,29 @@ ordinary read APIs. Invitation creation returns a private link once; do not log 
 Keep both API and media helper loopback-only. This local validation does not authorize
 hosting, public signup, email delivery, recovery, secret-policy or cloud media changes.
 The public learner PWA and its offline/update behavior remain independent.
+
+## Private cloud storage preparation (2026-10-23)
+
+Read docs/16-CLOUD-CMS-STORAGE-AND-PUBLISHING.md and ADR 0014 before cloud D1,
+R2, browser media processing or hosted publication work. The user approved a
+verified point-in-time private staging copy into nvi-control-staging,
+nvi-content-staging and novoapps-drafts. Sessions, verification tokens and API
+keys were excluded. These resources do not enable hosted authoring or synchronize
+subsequent local edits. Keep the draft bucket private. The deployed learner and
+public curriculum are unchanged by this milestone.
+
+npm.cmd run dev:cms:storage is an authenticated LOCAL R2/D1 emulator sandbox,
+with a separate copied dataset in .wrangler/state/storage-sandbox. Publish stays
+local there; edits do not flow back to the daily dev:cms:auth dataset. Stop one
+launcher before starting another. Never seed over existing sandbox databases.
+Backup covers nested sandbox state; cloud import selects only primary state/v3/d1.
+Restore and cloud refresh/cutover remain separately planned explicit operations.
+
+R2 mode uses browser Canvas/FFmpeg-WASM and Worker bindings, without the native
+Node helper. Keep its on-demand core out of learner bundles and static assets.
+Publication uses reviewed saved revisions, private ownership checks, a D1 lease,
+immutable release objects and a conditional latest.json update last. D1/R2 are
+not a global transaction: reconcile auditPending/crash records before hosting.
+Do not relax the loopback guard, provision public signup, send email or deploy
+the CMS as part of storage preparation. Hosted identity/recovery, credential policy,
+limits and device testing remain subsequent milestones.

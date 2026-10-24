@@ -1,3 +1,4 @@
+import {r2Mode,readPrivate} from './r2-storage';
 import type {Context,Next} from 'hono';
 import {HTTPException} from 'hono/http-exception';
 import {contentRepository} from './repository';
@@ -64,14 +65,15 @@ export async function draftMedia(c:Context<{Bindings:AuthEnvironment}>){
  const who=await principal(c.env,c.req.raw.headers);if(!who)throw new HTTPException(401);
  // Authenticate a concrete saved media reference, never a client-supplied owner path.
  const repo=contentRepository(c.env.CONTENT_DB),courses=await repo.listCourses(),modules=await repo.listModules(),path=c.req.path;
- let allowed=false;
+ let allowed=false,expected:{providerId:string;courseId:string;providerSlug:string}|undefined;
  for(const summary of modules){if(!courses.some(row=>row.id===summary.courseId&&canRead(who,row)))continue;
   const module=await repo.getModule(summary.id);
-  if(module.course.module.pages.some(page=>page.blocks.some(block=>block.image?.src===path||block.image?.small_src===path)||page.guided?.segments?.some(segment=>segment.audio===path))){allowed=true;break;}
+  if(module.course.module.pages.some(page=>page.blocks.some(block=>block.image?.src===path||block.image?.small_src===path)||page.guided?.segments?.some(segment=>segment.audio===path))){allowed=true;expected={providerId:module.provider.id,providerSlug:module.provider.slug,courseId:courses.find(row=>row.id===module.courseId)?.sourceCourseId||module.courseId};break;}
  }
  // Owners may preview newly uploaded, not-yet-attached files; the bridge secret
  // still prevents bypassing sign-in through the local media helper.
  if(!allowed&&!who.owner)deny();
+ if(r2Mode(c.env))return readPrivate(c.env,path,c.req.header('Range'),who.owner?undefined:expected);
  const response=await fetch((c.env.CMS_MEDIA_URL||'http://127.0.0.1:8789')+path,{headers:{'X-CMS-Bridge':c.env.CMS_MEDIA_SECRET||'',...(c.req.header('Range')?{Range:c.req.header('Range')!}:{})}});
  const headers=new Headers(response.headers);headers.set('Cache-Control','no-store');headers.set('X-Robots-Tag','noindex, nofollow');
  return new Response(response.body,{status:response.status,headers});

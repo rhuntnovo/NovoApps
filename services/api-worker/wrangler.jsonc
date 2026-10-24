@@ -40,6 +40,77 @@
           "migrations_dir": "../../database/control/migrations"
         }
       ]
+    },
+    "storage": {
+      "vars": {
+        "LOCAL_AUTHORING": "true",
+        "AUTH_REQUIRED": "true",
+        "CMS_ORIGIN": "http://127.0.0.1:5174",
+        "PLATFORM_ORIGIN": "http://127.0.0.1:5176",
+        "AUTH_ORIGIN": "http://127.0.0.1:8787",
+        "PREVIEW_ORIGIN": "http://127.0.0.1:5175",
+        "CMS_STORAGE": "r2",
+        "PUBLIC_CONTENT_BUCKET": "novoapps-content",
+        "PUBLIC_CONTENT_BASE_URL": "https://pub-99c5b6d16ed64e6283483cda548e55f5.r2.dev",
+        "CMS_DATASET_LABEL": "Storage Sandbox"
+      },
+      "d1_databases": [
+        {
+          "binding": "CONTENT_DB",
+          "database_name": "nvi-content-local",
+          "database_id": "00000000-0000-0000-0000-000000000001",
+          "migrations_dir": "../../database/content/migrations"
+        },
+        {
+          "binding": "CONTROL_DB",
+          "database_name": "nvi-control-local",
+          "database_id": "00000000-0000-0000-0000-000000000002",
+          "migrations_dir": "../../database/control/migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "DRAFT_MEDIA",
+          "bucket_name": "novoapps-drafts"
+        },
+        {
+          "binding": "PUBLISHED_CONTENT",
+          "bucket_name": "novoapps-content"
+        }
+      ]
+    },
+    "staging": {
+      "vars": {
+        "LOCAL_AUTHORING": "false",
+        "AUTH_REQUIRED": "true",
+        "CMS_STORAGE": "r2",
+        "PUBLIC_CONTENT_BUCKET": "novoapps-content",
+        "PUBLIC_CONTENT_BASE_URL": "https://pub-99c5b6d16ed64e6283483cda548e55f5.r2.dev"
+      },
+      "d1_databases": [
+        {
+          "binding": "CONTENT_DB",
+          "database_name": "nvi-content-staging",
+          "database_id": "08a9976f-4aa8-4818-8a0c-d65907654550",
+          "migrations_dir": "../../database/content/migrations"
+        },
+        {
+          "binding": "CONTROL_DB",
+          "database_name": "nvi-control-staging",
+          "database_id": "0e5304b1-6920-4503-b9e9-9920c51c5158",
+          "migrations_dir": "../../database/control/migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "DRAFT_MEDIA",
+          "bucket_name": "novoapps-drafts"
+        },
+        {
+          "binding": "PUBLISHED_CONTENT",
+          "bucket_name": "novoapps-content"
+        }
+      ]
     }
   },
   "compatibility_flags": [

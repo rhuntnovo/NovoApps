@@ -235,7 +235,7 @@ export function App({access}:{access:Access}){
   }
   return <div className="studio">
     <div className="studio-top"><header className="studio-header"><a href="/" className="studio-brand"><span className="brand-mark">N</span><span>NovoApps<strong>Content Studio</strong></span></a>
-      <span className="local-label">{access.mode==='local'?'Local Authoring':owner?'Owner':'Course Reviewer'}</span>{access.mode==='authenticated'&&<a href={platform} target="_blank" rel="noreferrer">Account & Access</a>}<span className="header-spacer"/>
+      <span className="local-label">{access.datasetLabel||(access.mode==='local'?'Local Authoring':owner?'Owner':'Course Reviewer')}</span>{access.mode==='authenticated'&&<a href={platform} target="_blank" rel="noreferrer">Account & Access</a>}<span className="header-spacer"/>
       {owner&&<button disabled={busy} onClick={()=>setShowAI(true)}>AI Settings</button>}
       <button disabled={!module||dirty||busy} onClick={()=>void exportDraft()}>Export Draft</button>
       <button className="primary" disabled={!owner||!module||dirty||busy||recording} onClick={()=>setShowPublish(true)}>Publish</button>
@@ -253,6 +253,7 @@ export function App({access}:{access:Access}){
       <p>{module?'Module '+module.course.module.number+' · '+module.course.module.title:'Add a provider, course and module to start authoring.'}</p>
       {module&&<div className="heading-actions"><button className="text-button" disabled={!owner||busy||recording} onClick={editHeadings}>Edit Headings</button><span>Language/Locale <strong>{module.course.language+'-'+module.course.country.toLowerCase()}</strong></span></div>}</div><span className="draft-label">Draft Authoring</span></div>
     </div>
+    {access.datasetLabel&&<div className="message" role="status">Storage Sandbox: this is a separate local copy. Changes and publications stay in this sandbox. Use your normal CMS to continue daily authoring.</div>}
     {error&&<div className="message error" role="alert">{error}{module&&<button disabled={busy} onClick={()=>mayLeave()&&void action(async()=>{await loadModule(module.id,pageId);})}>Reload latest draft</button>}</div>}
     {!owner&&module&&!writable&&<div className="message">Primary Language: Read Only. Choose your assigned language in Language/Context to edit and review.</div>}
     {notice&&<div className="message success" role="status">{notice}</div>}
@@ -351,8 +352,8 @@ export function App({access}:{access:Access}){
           <p className="preview-caption">Actual course rendering. Drafts and local review status do not publish content.</p>
         </section>
       </div>}
-    {published&&<a className="published-link" href={published} target="_blank" rel="noreferrer">Open Published Module JSON</a>}
-    {showPublish&&module&&<Publishing module={module} onClose={()=>setShowPublish(false)} onPublished={value=>{setPublished(value);setNotice('Module published to Cloudflare content storage.');}}/>}
+    {published&&!access.datasetLabel&&<a className="published-link" href={published} target="_blank" rel="noreferrer">Open Published Module JSON</a>}
+    {showPublish&&module&&<Publishing module={module} sandbox={!!access.datasetLabel} onClose={()=>setShowPublish(false)} onPublished={(value,auditPending)=>{setPublished(value);setNotice((access.datasetLabel?'Module published in the local storage sandbox. Public content is unchanged.':'Module published to Cloudflare content storage.')+(auditPending?' Publication completed, but audit bookkeeping needs reconciliation before publishing again.':''));}}/>}
     {form&&<CreateDialog key={form.title} spec={form} onClose={()=>setForm(null)}/>}
     {showAI&&<AISettings status={ai} onChange={setAI} onClose={()=>setShowAI(false)}/>}
   </div>;

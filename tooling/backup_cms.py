@@ -93,7 +93,7 @@ def inventory(local):
 
 
 def authoring(relative):
-    return relative.startswith('state/v3/d1/') and PurePosixPath(relative).name != 'metadata.sqlite'
+    return relative.startswith('state/') and '/v3/d1/' in relative and PurePosixPath(relative).name != 'metadata.sqlite'
 
 
 def connect_source(path):
@@ -124,7 +124,7 @@ def snapshot(connection, output, compact):
             raise BackupError('SQLite foreign-key check failed; no completed backup was created.')
         tables = {row[0] for row in target.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         counts = {name: target.execute('SELECT count(*) FROM "' + name + '"').fetchone()[0]
-                  for name in ('cms_providers', 'cms_courses', 'cms_modules', 'cms_pages', 'cms_page_revisions', 'auth_user', 'auth_session', 'cms_invitation', 'cms_grant', 'platform_audit') if name in tables}
+                  for name in ('cms_providers', 'cms_courses', 'cms_modules', 'cms_pages', 'cms_page_revisions', 'cms_media_assets', 'cms_publications', 'cms_publication_leases', 'auth_user', 'auth_session', 'cms_invitation', 'cms_grant', 'platform_audit') if name in tables}
     return {'method': 'vacuum-into' if compact else 'online-backup', 'integrityCheck': 'ok',
             'foreignKeyCheck': 'ok', **({'rowCounts': counts} if counts else {})}
 
@@ -252,7 +252,7 @@ def create_backup(repo, destination=None, compact=False, announce=print):
                     connection.close()
                     raise
                 held.append((relative, connection, version))
-        if not any(connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='cms_pages'").fetchone() for _, connection, _ in held):
+        if not any(relative.startswith('state/v3/d1/') and connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='cms_pages'").fetchone() for relative, connection, _ in held):
             raise BackupError('No curriculum D1 database was found; no backup was created.')
         snapshots, details = {}, []
         announce('Creating verified snapshots of ' + str(len(databases)) + ' SQLite databases...')
@@ -323,7 +323,14 @@ def main():
     parser.add_argument('--destination', type=Path, help='Backup directory; defaults to services/api-worker/.wrangler/backups')
     parser.add_argument('--compact', action='store_true', help='Use VACUUM INTO for content/control D1 databases (metadata still uses the backup API)')
     parser.add_argument('--verify', type=Path, metavar='ARCHIVE.zip', help='Verify an existing backup without accessing the live CMS')
+    parser.add_argument('--json', action='store_true', help='Return backup metadata as JSON; no credentials or table values')
     args = parser.parse_args()
+    if args.json and args.verify:
+        parser.error('--json is for backup creation, not verification')
+    if args.json:
+        result = create_backup(args.repo_root, args.destination, args.compact, announce=lambda message: print(message, file=sys.stderr))
+        print(json.dumps(result))
+        return
     if args.verify:
         if args.compact or args.destination:
             parser.error('--verify cannot be combined with --compact or --destination')

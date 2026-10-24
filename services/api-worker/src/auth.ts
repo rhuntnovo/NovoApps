@@ -1,3 +1,4 @@
+import type {StorageEnvironment} from './r2-storage';
 import {betterAuth} from 'better-auth';
 import {drizzleAdapter} from '@better-auth/drizzle-adapter';
 import {drizzle} from 'drizzle-orm/d1';
@@ -9,12 +10,12 @@ import * as schema from '../../../database/control/schema';
 import {contentRepository} from './repository';
 
 export type AuthEnvironment={AUTH_REQUIRED?:string;CONTROL_DB?:D1Database;BETTER_AUTH_SECRET?:string;
- AUTH_ORIGIN?:string;CMS_ORIGIN?:string;PLATFORM_ORIGIN?:string;PREVIEW_ORIGIN?:string;LOCAL_AUTHORING?:string;CONTENT_DB:D1Database;CMS_MEDIA_SECRET?:string;CMS_MEDIA_URL?:string};
+ AUTH_ORIGIN?:string;CMS_ORIGIN?:string;PLATFORM_ORIGIN?:string;PREVIEW_ORIGIN?:string;LOCAL_AUTHORING?:string;CONTENT_DB:D1Database;CMS_MEDIA_SECRET?:string;CMS_MEDIA_URL?:string}&StorageEnvironment;
 export type Grant={id:string;provider_id:string;course_id:string;locale:string;role:'reviewer'};
 export type Principal={user:{id:string;name:string;email:string};owner:boolean;grants:Grant[]};
 export const control=(env:AuthEnvironment)=>{if(!env.CONTROL_DB)throw new HTTPException(503,{message:'Control database is not configured.'});return env.CONTROL_DB;};
 export function identity(env:AuthEnvironment){
- if(!env.BETTER_AUTH_SECRET||env.BETTER_AUTH_SECRET.length<32||!env.CMS_MEDIA_SECRET||env.CMS_MEDIA_SECRET.length<32||!env.AUTH_ORIGIN||!env.PLATFORM_ORIGIN||!env.CMS_ORIGIN)
+ if(!env.BETTER_AUTH_SECRET||env.BETTER_AUTH_SECRET.length<32||(env.CMS_STORAGE!=='r2'&&(!env.CMS_MEDIA_SECRET||env.CMS_MEDIA_SECRET.length<32))||!env.AUTH_ORIGIN||!env.PLATFORM_ORIGIN||!env.CMS_ORIGIN)
   throw new HTTPException(503,{message:'Authentication configuration is incomplete.'});
  return betterAuth({appName:'NovoApps',baseURL:env.AUTH_ORIGIN,basePath:'/api/auth',secret:env.BETTER_AUTH_SECRET,
   database:drizzleAdapter(drizzle(control(env),{schema}),{provider:'sqlite',schema,transaction:false}),
@@ -65,9 +66,9 @@ accountRoutes.use('*',async(c,next)=>{
 });
 accountRoutes.get('/status',async c=>{
  const setup=await control(c.env).prepare("SELECT completed FROM platform_setup WHERE id='owner'").first<{completed:number}>();
- return c.json({setupRequired:!setup?.completed});
+ return c.json({setupRequired:!setup?.completed,datasetLabel:c.env.CMS_DATASET_LABEL});
 });
-accountRoutes.get('/session',async c=>{const who=await principal(c.env,c.req.raw.headers);return who?c.json({mode:'authenticated',...who}):c.json({error:'Sign in to continue.'},401);});
+accountRoutes.get('/session',async c=>{const who=await principal(c.env,c.req.raw.headers);return who?c.json({mode:'authenticated',datasetLabel:c.env.CMS_DATASET_LABEL,...who}):c.json({error:'Sign in to continue.'},401);});
 accountRoutes.post('/setup',async c=>{
  if(c.env.LOCAL_AUTHORING!=='true'||!['127.0.0.1','localhost'].includes(new URL(c.req.url).hostname))throw new HTTPException(403,{message:'Owner setup is local only.'});
  const input=credentials.parse(await json(c.req.raw)),db=control(c.env);

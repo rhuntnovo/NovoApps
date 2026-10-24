@@ -8,7 +8,8 @@
     "db:migrate": "wrangler d1 migrations apply CONTENT_DB --env local --local --persist-to .wrangler/state",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "dev:auth": "wrangler dev --env auth --local --ip 127.0.0.1 --port 8787 --persist-to .wrangler/state",
-    "db:migrate:auth": "wrangler d1 migrations apply CONTROL_DB --env auth --local --persist-to .wrangler/state"
+    "db:migrate:auth": "wrangler d1 migrations apply CONTROL_DB --env auth --local --persist-to .wrangler/state",
+    "dev:storage": "wrangler dev --env storage --local --ip 127.0.0.1 --port 8787 --persist-to .wrangler/state/storage-sandbox"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.12",

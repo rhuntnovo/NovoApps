@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 export default defineConfig({
   preview:{headers:{'X-Robots-Tag':'noindex, nofollow, nosnippet, noimageindex'}},
   plugins: [react()],
+  worker:{format:'es'},
+  optimizeDeps:{exclude:['@ffmpeg/ffmpeg']},
   server: { headers:{'X-Robots-Tag':'noindex, nofollow, nosnippet, noimageindex'},
     host: '127.0.0.1', port: 5174, strictPort: true,
     fs: { allow: [fileURLToPath(new URL('../..', import.meta.url))] },

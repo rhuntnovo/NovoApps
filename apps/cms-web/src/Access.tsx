@@ -1,5 +1,5 @@
 import {useEffect,useState,type ReactNode} from 'react';
-export type Access={mode:'local'|'authenticated';owner:boolean;user?:{name:string;email:string};grants:{provider_id:string;course_id:string;locale:string}[]};
+export type Access={mode:'local'|'authenticated';owner:boolean;datasetLabel?:string;user?:{name:string;email:string};grants:{provider_id:string;course_id:string;locale:string}[]};
 const platform=import.meta.env.VITE_PLATFORM_ORIGIN||'http://127.0.0.1:5176';
 export function AccessBoundary({children}:{children:(access:Access)=>ReactNode}){
  const [access,setAccess]=useState<Access|null>(null),[error,setError]=useState(''),[expired,setExpired]=useState(false);

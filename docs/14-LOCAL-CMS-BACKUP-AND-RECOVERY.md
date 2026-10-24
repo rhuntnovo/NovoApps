@@ -139,3 +139,15 @@ permissions and audit. Pause sign-in/invitation activity as well as editing, or 
 services. Backups are private credentials-bearing data. Generated .dev.vars.auth
 secrets remain excluded and need separate secure configuration storage. Restart
 restored account-enabled environments with npm.cmd run dev:cms:auth; see docs/15.
+
+
+Step 3 also includes nested `state/storage-sandbox/` D1 databases and emulated R2
+blobs in this same archive. They are a separate test dataset, not a replacement
+for the main `state/v3/d1/` authoring data. Compact mode recognizes nested D1
+snapshots too. The current backup suite has 15 tests. `--json` provides verified
+archive metadata for tooling; it does not return database contents or secrets.
+
+The local ZIP does not back up remote staging D1 or R2. Preserve the verified
+migration source ZIP/manifest privately and plan remote database exports plus
+private object backups before hosted authoring begins; see docs/16. A staging
+copy is not an ongoing backup or synchronization service.

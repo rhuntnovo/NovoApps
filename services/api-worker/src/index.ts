@@ -25,6 +25,7 @@ app.use('*',async(c,next)=>{
   const host=new URL(c.req.url).hostname;
   if(c.env.LOCAL_AUTHORING!=='true'||!['127.0.0.1','localhost'].includes(host))
     return c.json({error:'Local authoring only. Authenticated deployment is not configured.'},403);
+  if(c.env.CMS_STORAGE==='r2'&&c.env.AUTH_REQUIRED!=='true')return c.json({error:'R2 authoring requires authentication.'},503);
   const origin=c.req.header('Origin');
   const allowedOrigins=new Set([c.env.CMS_ORIGIN,...(c.env.AUTH_REQUIRED==='true'?[c.env.PLATFORM_ORIGIN,c.env.PREVIEW_ORIGIN]:[])]);
   if(c.env.CMS_ORIGIN){const configured=new URL(c.env.CMS_ORIGIN);
@@ -61,7 +62,7 @@ app.route('/api/v1/account',accountRoutes);
 app.all('/api/auth/*',async c=>c.env.AUTH_REQUIRED==='true'?authHandler(c.env,c.req.raw):c.json({error:'Authentication pilot is not enabled.'},404));
 app.get('/api/v1/access',async c=>{
  if(c.env.AUTH_REQUIRED!=='true')return c.json({mode:'local',owner:true,grants:[]});
- const who=await principal(c.env,c.req.raw.headers);return who?c.json({mode:'authenticated',...who}):c.json({error:'Sign in to continue.'},401);
+ const who=await principal(c.env,c.req.raw.headers);return who?c.json({mode:'authenticated',datasetLabel:c.env.CMS_DATASET_LABEL,...who}):c.json({error:'Sign in to continue.'},401);
 });
 app.get('/assets/cms/*',draftMedia);
 app.get('/audio/cms/*',draftMedia);

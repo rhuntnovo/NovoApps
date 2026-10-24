@@ -20,7 +20,14 @@
     "test:pptx": "tsx --test tooling/test/pptx-course.test.ts && python tooling/test/test_extract_pptx.py",
     "stage:learning": "tsx tooling/stage-learning-publications.ts",
     "test:delivery": "tsx --test tooling/test/stage-learning-publications.test.ts",
-    "dev:cms:auth": "node tooling/dev-cms.mjs --auth"
+    "dev:cms:auth": "node tooling/dev-cms.mjs --auth",
+    "dev:cms:storage": "node tooling/dev-cms.mjs --auth --storage",
+    "cms:storage:assets": "node tooling/cms-private-assets.mjs --persist-to services/api-worker/.wrangler/state/storage-sandbox",
+    "cms:cloud:prepare": "node tooling/prepare-cms-cloud.mjs",
+    "cms:cloud:d1": "node tooling/cms-cloud-d1.mjs",
+    "test:cloud-import": "python -B tooling/test/test_prepare_cms_cloud.py",
+    "test:cms-launcher": "node --test tooling/test/cms-process.test.mjs",
+    "cms:storage:init": "node tooling/init-cms-storage.mjs"
   },
   "devDependencies": {
     "@types/node": "24.10.0",
