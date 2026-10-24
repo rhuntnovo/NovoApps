@@ -43,6 +43,22 @@ test('provider credentials are authenticated ciphertext, write-only, revisioned 
  }finally{c.close();}
 });
 
+test('optional project routing accepts blank values and rejects invalid IDs without changing or exposing credentials',async()=>{
+ const c=await context();let mocked:ReturnType<typeof mock.method>|undefined;try{
+  const saved=await c.data(await c.request(c.base+'/ai-settings','PUT',c.settings({projectId:'   '}),c.admin));assert.equal(saved.configured,true);assert.equal(saved.projectId,'');
+  const stored=c.control.sqlite.prepare('SELECT * FROM cms_ai_settings').get() as any;
+  for(const projectId of ['My Billing Project',apiKey]){
+   const rejected=await c.data(await c.request(c.base+'/ai-settings','PUT',c.settings({revision:1,projectId,apiKey:'replacement-test-key-not-a-real-key'}),c.admin),400);
+   const message=JSON.stringify(rejected);assert.match(message,/OpenAI Project ID/);assert.match(message,/Leave it blank/);assert.equal(message.includes(projectId),false);assert.equal(message.includes('replacement-test-key-not-a-real-key'),false);assert.equal(message.includes('must match pattern'),false);
+   assert.deepEqual(c.control.sqlite.prepare('SELECT * FROM cms_ai_settings').get(),stored);
+  }
+  mocked=mock.method(globalThis,'fetch',async(_input:any,init:any)=>{const headers=new Headers(init.headers);assert.equal(headers.get('OpenAI-Project'),null);assert.equal(headers.get('Authorization'),'Bearer '+apiKey);return translated(init);});
+  await c.data(await c.request('/api/v1/cms/pages/'+c.edition.pages[4].id+'/translate','POST',{expectedRevision:1},c.admin));
+  const noProject=c.settings({revision:1,apiKey:undefined});delete noProject.projectId;
+  const updated=await c.data(await c.request(c.base+'/ai-settings','PUT',noProject,c.admin));assert.equal(updated.projectId,'');assert.equal(updated.configured,true);assert.equal(updated.revision,2);
+ }finally{mocked?.mock.restore();c.close();}
+});
+
 test('selected reviewer translation records exact upstream usage and IDs, saves drafts, and cannot manage credentials/history',async()=>{
  const c=await context();let mocked:ReturnType<typeof mock.method>|undefined;try{
   await c.data(await c.request(c.base+'/ai-settings','PUT',c.settings(),c.admin));const who=await c.reviewer(),page=c.edition.pages[4],url='/api/v1/cms/pages/'+page.id+'/translate';

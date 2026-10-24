@@ -27,6 +27,11 @@ The dialog has three tabs:
   and reconciliation; review metadata, add an invoice/period note, mark/unmark
   reconciliation and export matching records to CSV.
 
+When saving a key, usually leave **OpenAI Project ID (Optional)** blank to use
+the key's default project. To specify one, enter its actual ID beginning with
+`proj_`, not the project name or API key. An invalid Project ID prevents the
+whole settings save; clear or correct that field, then save again.
+
 Reviewers have no generation access by default. They never manage settings,
 credentials, activity history, permissions or publication. Revoking base course
 access cascades AI grants; feature revocation is also checked on subsequent API
