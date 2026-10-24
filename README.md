@@ -116,3 +116,20 @@ treated as approved packages.
 CMS media and publishing: see [docs/11](docs/11-CMS-EDITING-MEDIA-PUBLISHING.md) for microphone/AI narration, images, page management, and the configured public R2 package destination.
 
 PowerPoint curriculum import: [docs/13](docs/13-POWERPOINT-COURSE-IMPORT.md) documents the reusable source-preserving tooling and the six new local English Foundations module drafts.
+
+## Back up the local CMS
+
+Save pending edits, finish generation/publishing, and pause editing while the backup runs.
+From C:\Development\NovoApps:
+
+```powershell
+npm.cmd run cms:backup
+# Optional compact curriculum snapshots using VACUUM INTO:
+npm.cmd run cms:backup -- --compact
+```
+
+Verified ZIPs and checksum files are written to `services/api-worker/.wrangler/backups/`.
+They include SQLite snapshots (including metadata), media and import records. Keep a
+second copy in private backup storage. Use `--destination "C:\NovoAppsBackups"` for a
+custom directory outside the repository. See [backup and recovery instructions](docs/14-LOCAL-CMS-BACKUP-AND-RECOVERY.md)
+for verification, consistency limits and restoration. Run `npm.cmd run test:backup` to check the tool.

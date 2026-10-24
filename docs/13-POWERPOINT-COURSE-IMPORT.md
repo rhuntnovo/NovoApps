@@ -138,7 +138,7 @@ Before import, a consistent SQLite online backup and verified media ZIP were sav
 Use ZIP or Windows extended paths for media backups: existing provider-scoped publication
 filenames can exceed MAX_PATH when nested inside a backup directory. Source archives,
 raw input files, local databases and backups are not Git history and must not enter
-the public content bucket. Include them in the user's private backup strategy.
+the public content bucket. Include them in the user's private backup strategy. Routine backups are now available through `npm.cmd run cms:backup`; see [docs/14](14-LOCAL-CMS-BACKUP-AND-RECOVERY.md).
 
 ## Validation
 

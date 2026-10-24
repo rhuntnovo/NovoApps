@@ -39,3 +39,5 @@ ADR 0008 is now uniquely numbered 0011; the monorepo decision retains 0008.
 [12-LEARNING-BILINGUAL-RELEASE-AND-CMS-HOSTING.md](12-LEARNING-BILINGUAL-RELEASE-AND-CMS-HOSTING.md) records the published v0.8.4 English/Spanish viewer, immutable offline staging, and requirements before hosted CMS/D1.
 
 [13-POWERPOINT-COURSE-IMPORT.md](13-POWERPOINT-COURSE-IMPORT.md) describes the reusable source-preserving PowerPoint workflow, local Foundations Modules 2-7, source-review items, backups and validation.
+
+[14-LOCAL-CMS-BACKUP-AND-RECOVERY.md](14-LOCAL-CMS-BACKUP-AND-RECOVERY.md) documents the manual npm backup command, metadata/WAL handling, Windows long paths, verification and recovery.
