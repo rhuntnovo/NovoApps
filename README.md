@@ -182,3 +182,14 @@ its private encryption secret. Save pending edits first.
 See the [AI settings and reconciliation runbook](docs/17-SUPER-ADMIN-AI-AND-ACTIVITY.md)
 for setup, usage limitations and separate encryption-key backup/recovery. The
 ledger does not calculate your invoice or query OpenAI billing automatically.
+
+### Local Account Email and Password Recovery
+
+Authenticated local modes now include **Forgot Password?**, email verification,
+**Resend Invitation** and a Super Admin-only **Local Email Previews** inbox at
+http://127.0.0.1:5176/. No external email is sent. Previews disappear when the API
+restarts; new invitation acceptance requires verification. Keep an administrator
+session open in one profile when testing recovery in a second profile.
+
+See [account email and recovery](docs/18-ACCOUNT-EMAIL-AND-RECOVERY.md) for testing,
+link expiry, session revocation and remaining hosted-email requirements.

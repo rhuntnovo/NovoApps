@@ -210,3 +210,21 @@ unknown, not zero; timed-out requests may still be billed. Never auto-retry paid
 calls or claim the ledger is an invoice. CSV/reconciliation events retain history.
 Tests stub paid calls; browser validation uses disposable identities and fake keys.
 This milestone authorizes neither hosted deployment nor email/recovery rollout.
+
+## Local Account Email and Recovery (2026-10-24)
+
+Read docs/18-ACCOUNT-EMAIL-AND-RECOVERY.md and ADR 0016 before account email,
+verification, recovery or hosted identity work. Auth/storage modes now enable a
+Super Admin-only LOCAL email-preview inbox, not external sending. Preserve closed
+registration, fixed-origin POST confirmations, fragment removal, hashed reset
+identifiers and session revocation. Never log/read/expose actual user email bodies,
+tokens or links in agent output; browser tests use disposable accounts only.
+
+Previews are temporary Worker memory, bounded and loopback-only; they are not a
+recovery bypass or durable outbox. New invitation acceptance requires verification
+in preview mode; existing local owner/accepted grants retain access. Future cloud
+preparation clears copied email_verified flags because local previews prove no real
+mailbox ownership. Preserve original local data/IDs and the dated staging snapshot.
+Hosted verified-account enforcement, real email delivery, distributed limits and
+deployment remain later work. This user-approved local milestone supersedes older
+no-email/recovery guidance only within this development scope.

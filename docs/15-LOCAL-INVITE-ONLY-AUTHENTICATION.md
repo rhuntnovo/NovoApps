@@ -178,3 +178,12 @@ sandbox with browser media processing and Worker publication. The original pilot
 above still uses its daily local D1/filesystem helper. No CMS is hosted. Email
 verification/recovery, hosted credential policy, abuse controls and staging
 deployment remain outstanding; the loopback boundary has not been relaxed.
+
+## Account Email and Recovery Update (2026-10-24)
+
+The [local email/recovery milestone](18-ACCOUNT-EMAIL-AND-RECOVERY.md) supersedes
+the earlier no-reset/no-verification UI boundary for authenticated local modes.
+Super Admin email previews simulate invitation/verification/reset delivery without
+external sending. Existing local accounts retain access; new invitation acceptance
+requires verification. Hosted delivery, mandatory verified sessions and distributed
+limits remain later work. Account previews are not an emergency owner-recovery bypass.

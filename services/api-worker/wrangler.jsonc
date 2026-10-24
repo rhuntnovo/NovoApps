@@ -24,7 +24,8 @@
         "CMS_ORIGIN": "http://127.0.0.1:5174",
         "PLATFORM_ORIGIN": "http://127.0.0.1:5176",
         "AUTH_ORIGIN": "http://127.0.0.1:8787",
-        "PREVIEW_ORIGIN": "http://127.0.0.1:5175"
+        "PREVIEW_ORIGIN": "http://127.0.0.1:5175",
+        "ACCOUNT_EMAIL_MODE": "preview"
       },
       "d1_databases": [
         {
@@ -52,7 +53,8 @@
         "CMS_STORAGE": "r2",
         "PUBLIC_CONTENT_BUCKET": "novoapps-content",
         "PUBLIC_CONTENT_BASE_URL": "https://pub-99c5b6d16ed64e6283483cda548e55f5.r2.dev",
-        "CMS_DATASET_LABEL": "Storage Sandbox"
+        "CMS_DATASET_LABEL": "Storage Sandbox",
+        "ACCOUNT_EMAIL_MODE": "preview"
       },
       "d1_databases": [
         {

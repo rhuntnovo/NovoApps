@@ -37,6 +37,19 @@ class CloudPreparationTest(unittest.TestCase):
     self.assertEqual(expected,cloud.fingerprint(restored,('auth_user','auth_session','auth_verification')))
     restored.execute('INSERT INTO auth_session VALUES(?,?)',('unexpected','unexpected-session'))
     self.assertNotEqual(expected,cloud.fingerprint(restored,('auth_user','auth_session','auth_verification')))
+ def test_local_mail_preview_verification_is_not_trusted_by_hosted_imports(self):
+  with closing(sqlite3.connect(':memory:')) as source:
+   source.row_factory=sqlite3.Row
+   source.executescript('CREATE TABLE auth_user(id TEXT PRIMARY KEY,email TEXT,email_verified INTEGER);')
+   source.execute('INSERT INTO auth_user VALUES(?,?,?)',('stable-user-id','owner@example.test',1))
+   sql=cloud.sql_export(source,('auth_user',))
+   with closing(sqlite3.connect(':memory:')) as restored:
+    restored.row_factory=sqlite3.Row;restored.executescript(sql)
+    self.assertEqual(restored.execute('SELECT id FROM auth_user').fetchone()[0],'stable-user-id')
+    self.assertEqual(restored.execute('SELECT email_verified FROM auth_user').fetchone()[0],0)
+    self.assertEqual(source.execute('SELECT email_verified FROM auth_user').fetchone()[0],1)
+    self.assertEqual(cloud.fingerprint(source,('auth_user',),omit_ephemeral=True),cloud.fingerprint(restored,('auth_user',)))
+
  def test_cyclic_source_dependencies_fail_before_any_remote_execution(self):
   with closing(sqlite3.connect(':memory:')) as source:
    source.row_factory=sqlite3.Row;source.executescript('CREATE TABLE cms_pages(id TEXT PRIMARY KEY,source_page_id TEXT);')

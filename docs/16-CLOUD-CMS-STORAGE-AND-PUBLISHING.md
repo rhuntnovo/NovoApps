@@ -169,3 +169,9 @@ control D1. It has not been copied to remote staging. Cloud-copy preparation
 preserves activity but excludes current credential ciphertext/nonce/key-version
 and credential reference; configure credentials separately after a future import.
 The staged snapshot remains dated and must not overwrite newer local authoring.
+
+The [local account email/recovery milestone](18-ACCOUNT-EMAIL-AND-RECOVERY.md)
+adds verification/reset/invitation previews without external sending or deployment.
+Future cloud preparation resets copied account email-verification flags so local
+preview actions are not trusted as proof of actual mailbox ownership. Stable user
+IDs/passwords/grants remain preserved; current local/staging data is not refreshed.

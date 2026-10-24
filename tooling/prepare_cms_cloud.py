@@ -11,6 +11,11 @@ def quote(name):return '"'+name.replace('"','""')+'"'
 def rows(connection,table,omit_ephemeral=False):
     if omit_ephemeral and table in EPHEMERAL:return []
     values=[dict(row) for row in connection.execute('SELECT * FROM '+quote(table))]
+    # Local preview verification does not prove access to a real mailbox.
+    # Hosted cutover must reverify every copied identity using real delivery.
+    if omit_ephemeral and table=='auth_user':
+        for row in values:
+            if 'email_verified' in row:row['email_verified']=0
     if omit_ephemeral and table=='cms_ai_settings':
         for row in values:
             for name in ['encrypted_key','key_nonce','key_version','credential_id']:row[name]=None
