@@ -14,6 +14,8 @@
                     "test:cms":  "tsx --test packages/content-model/test/*.test.ts services/api-worker/test/*.test.ts \u0026\u0026 npm run test --workspace @novoapps/media-server",
                     "cms:migrate":  "npm run db:migrate --workspace @novoapps/api-worker",
                     "cms:import":  "tsx tooling/import-learning.ts",
+                    "cms:backup":  "node tooling/backup-cms.mjs",
+                    "test:backup":  "python -B tooling/test/test_backup_cms.py",
                     "cms:pptx":  "tsx tooling/pptx-course.ts",
                     "test:pptx":  "tsx --test tooling/test/pptx-course.test.ts && python tooling/test/test_extract_pptx.py",
                     "stage:learning":  "tsx tooling/stage-learning-publications.ts",
