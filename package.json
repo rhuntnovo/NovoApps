@@ -1,34 +1,36 @@
 {
-    "name":  "novoapps-workspace",
-    "private":  true,
-    "type":  "module",
-    "workspaces":  [
-                       "apps/*",
-                       "services/*",
-                       "packages/*"
-                   ],
-    "scripts":  {
-                    "dev:cms":  "node tooling/dev-cms.mjs",
-                    "build:cms":  "npm run check:cms \u0026\u0026 npm run build --workspace @novoapps/cms-web \u0026\u0026 npm run build --workspace @novoapps/cms-preview",
-                    "check:cms":  "tsc -p services/api-worker/tsconfig.json --noEmit \u0026\u0026 tsc -p apps/cms-web/tsconfig.json --noEmit \u0026\u0026 tsc -p apps/cms-preview/tsconfig.json --noEmit",
-                    "test:cms":  "tsx --test packages/content-model/test/*.test.ts services/api-worker/test/*.test.ts \u0026\u0026 npm run test --workspace @novoapps/media-server",
-                    "cms:migrate":  "npm run db:migrate --workspace @novoapps/api-worker",
-                    "cms:import":  "tsx tooling/import-learning.ts",
-                    "cms:backup":  "node tooling/backup-cms.mjs",
-                    "test:backup":  "python -B tooling/test/test_backup_cms.py",
-                    "cms:pptx":  "tsx tooling/pptx-course.ts",
-                    "test:pptx":  "tsx --test tooling/test/pptx-course.test.ts && python tooling/test/test_extract_pptx.py",
-                    "stage:learning":  "tsx tooling/stage-learning-publications.ts",
-                    "test:delivery":  "tsx --test tooling/test/stage-learning-publications.test.ts"
-                },
-    "devDependencies":  {
-                            "@types/node":  "24.10.0",
-                            "tsx":  "4.23.15",
-                            "typescript":  "7.0.2"
-                        },
-    "overrides":  {
-                      "@esbuild-kit/core-utils":  {
-                                                      "esbuild":  "0.25.12"
-                                                  }
-                  }
+  "name": "novoapps-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:cms": "node tooling/dev-cms.mjs",
+    "build:cms": "npm run check:cms && npm run build --workspace @novoapps/cms-web && npm run build --workspace @novoapps/cms-preview && npm run build --workspace @novoapps/platform-web",
+    "check:cms": "tsc -p services/api-worker/tsconfig.json --noEmit && tsc -p apps/cms-web/tsconfig.json --noEmit && tsc -p apps/cms-preview/tsconfig.json --noEmit && tsc -p apps/platform-web/tsconfig.json --noEmit",
+    "test:cms": "tsx --test packages/content-model/test/*.test.ts services/api-worker/test/*.test.ts && npm run test --workspace @novoapps/media-server",
+    "cms:migrate": "npm run db:migrate --workspace @novoapps/api-worker",
+    "cms:import": "tsx tooling/import-learning.ts",
+    "cms:backup": "node tooling/backup-cms.mjs",
+    "test:backup": "python -B tooling/test/test_backup_cms.py",
+    "cms:pptx": "tsx tooling/pptx-course.ts",
+    "test:pptx": "tsx --test tooling/test/pptx-course.test.ts && python tooling/test/test_extract_pptx.py",
+    "stage:learning": "tsx tooling/stage-learning-publications.ts",
+    "test:delivery": "tsx --test tooling/test/stage-learning-publications.test.ts",
+    "dev:cms:auth": "node tooling/dev-cms.mjs --auth"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    },
+    "undici": "7.30.1"
+  }
 }

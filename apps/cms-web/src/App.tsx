@@ -1,6 +1,7 @@
 import { useEffect,useMemo,useRef,useState } from 'react';
 import { courseSchema,templateSchema,appendBlock,newAuthoringId,sameBlockIds,
   type AuthoringModule,type CoursePage,type Provider } from '@novoapps/content-model';
+import type {Access} from './Access';
 import { api } from './api';
 import { CreateDialog,AISettings,type FormSpec,type AIStatus } from './Forms';
 import { PromptFields,TranslationFields } from './PageFields';
@@ -14,7 +15,9 @@ type ModuleSummary={id:string;courseId:string;providerId:string;providerName:str
 type CourseSummary={id:string;providerId:string;canonicalId:string;locale:string;sourceCourseId:string|null;
   metadata:{title:string;language:string;country:string}};
 const previewOrigin=new URL(import.meta.env.VITE_PREVIEW_ORIGIN||'http://127.0.0.1:5175').origin;
-export function App(){
+export function App({access}:{access:Access}){
+  const owner=access.owner;
+  const platform=import.meta.env.VITE_PLATFORM_ORIGIN||'http://127.0.0.1:5176';
   const [providers,setProviders]=useState<Provider[]>([]),[courses,setCourses]=useState<CourseSummary[]>([]);
   const [modules,setModules]=useState<ModuleSummary[]>([]),[providerId,setProviderId]=useState('');
   const [courseId,setCourseId]=useState(''),[module,setModule]=useState<AuthoringModule|null>(null);
@@ -45,6 +48,7 @@ export function App(){
   const editions=visibleCourses.filter(item=>(item.sourceCourseId||item.id)===primaryCourseId);
   function contextLabel(course:CourseSummary){try{return new Intl.DisplayNames(['en'],{type:'language'}).of(course.metadata.language)+' · '+(course.metadata.country.toLowerCase()==='global'?'Global':new Intl.DisplayNames(['en'],{type:'region'}).of(course.metadata.country.toUpperCase()))+(!course.sourceCourseId?' (Primary)':'');}catch{return course.locale;}}
   function chooseCourse(id:string){if(!mayLeave())return;setCourseId(id);const selected=modules.find(item=>item.courseId===id&&item.canonicalId===module?.course.module.id)||modules.find(item=>item.courseId===id);if(selected)void action(async()=>{await loadModule(selected.id,pageId);});else{setModule(null);setDraft(null);}}
+  const writable=owner||!!module?.sourceModuleId&&access.grants.some(grant=>grant.provider_id===module.provider.id&&grant.locale===module.course.language+'-'+module.course.country.toLowerCase()&&grant.course_id===primaryCourseId);
   const mediaOwner=(blockId:string)=>({moduleId:module!.id,pageId:summary!.id,blockId,expectedRevision:summary!.revision});
   function mayLeave(){return !busy&&!recording&&(!dirty||window.confirm('Discard unsaved draft changes?'));}
   function selectPage(selected:AuthoringModule,id:string){
@@ -67,9 +71,9 @@ export function App(){
     try{
       const {providerRows,moduleRows}=await library();
       const last=sessionStorage.getItem('novoapps.cms.last-module');
-      if(moduleRows.length)await loadModule(moduleRows.find(item=>item.id===last)?.id||moduleRows[0].id);
+      if(moduleRows.length)await loadModule(moduleRows.find(item=>item.id===last)?.id||moduleRows.find(item=>!owner&&item.sourceModuleId&&access.grants.some(grant=>grant.provider_id===item.providerId&&grant.locale===item.locale))?.id||moduleRows[0].id);
       else setProviderId(providerRows[0]?.id||'');
-      setAI(await api<AIStatus>('/translation-settings'));
+      if(owner)setAI(await api<AIStatus>('/translation-settings'));
     }catch(error){setError(String(error));}
   })();},[]);
   useEffect(()=>{
@@ -231,10 +235,10 @@ export function App(){
   }
   return <div className="studio">
     <div className="studio-top"><header className="studio-header"><a href="/" className="studio-brand"><span className="brand-mark">N</span><span>NovoApps<strong>Content Studio</strong></span></a>
-      <span className="local-label">Local authoring</span><span className="header-spacer"/>
-      <button disabled={busy} onClick={()=>setShowAI(true)}>AI Settings</button>
+      <span className="local-label">{access.mode==='local'?'Local Authoring':owner?'Owner':'Course Reviewer'}</span>{access.mode==='authenticated'&&<a href={platform} target="_blank" rel="noreferrer">Account & Access</a>}<span className="header-spacer"/>
+      {owner&&<button disabled={busy} onClick={()=>setShowAI(true)}>AI Settings</button>}
       <button disabled={!module||dirty||busy} onClick={()=>void exportDraft()}>Export Draft</button>
-      <button className="primary" disabled={!module||dirty||busy||recording} onClick={()=>setShowPublish(true)}>Publish</button>
+      <button className="primary" disabled={!owner||!module||dirty||busy||recording} onClick={()=>setShowPublish(true)}>Publish</button>
     </header>
 
     <div className="library-toolbar">
@@ -243,98 +247,99 @@ export function App(){
         <option value="">Choose A Course</option>{visibleCourses.filter(course=>!course.sourceCourseId).map(course=><option key={course.id} value={course.id}>{course.metadata.title}</option>)}</select></label>
       <label>Language/Context<select value={courseId} disabled={!courseId||busy||recording} onChange={event=>chooseCourse(event.target.value)}>
         {!courseId&&<option value="">Choose A Course First</option>}{editions.map(course=><option key={course.id} value={course.id}>{contextLabel(course)}</option>)}</select></label>
-      <details className="creation-menu" onClick={event=>{if((event.target as HTMLElement).closest('button'))event.currentTarget.open=false;}}><summary>Add To Library</summary><div><button disabled={busy||recording} onClick={createProvider}>Add Provider</button><button disabled={busy||recording||!providerId} onClick={createCourse}>Add Course</button><button disabled={busy||recording||!providerId} onClick={createModule}>Add Module</button></div></details>
+      {owner&&<details className="creation-menu" onClick={event=>{if((event.target as HTMLElement).closest('button'))event.currentTarget.open=false;}}><summary>Add To Library</summary><div><button disabled={busy||recording} onClick={createProvider}>Add Provider</button><button disabled={busy||recording||!providerId} onClick={createCourse}>Add Course</button><button disabled={busy||recording||!providerId} onClick={createModule}>Add Module</button></div></details>}
     </div>
     <div className="studio-context"><div><h1>{module?.course.title||'Choose Or Create A Course'}</h1>
       <p>{module?'Module '+module.course.module.number+' · '+module.course.module.title:'Add a provider, course and module to start authoring.'}</p>
-      {module&&<div className="heading-actions"><button className="text-button" disabled={busy||recording} onClick={editHeadings}>Edit Headings</button><span>Language/Locale <strong>{module.course.language+'-'+module.course.country.toLowerCase()}</strong></span></div>}</div><span className="draft-label">Draft Authoring</span></div>
+      {module&&<div className="heading-actions"><button className="text-button" disabled={!owner||busy||recording} onClick={editHeadings}>Edit Headings</button><span>Language/Locale <strong>{module.course.language+'-'+module.course.country.toLowerCase()}</strong></span></div>}</div><span className="draft-label">Draft Authoring</span></div>
     </div>
     {error&&<div className="message error" role="alert">{error}{module&&<button disabled={busy} onClick={()=>mayLeave()&&void action(async()=>{await loadModule(module.id,pageId);})}>Reload latest draft</button>}</div>}
+    {!owner&&module&&!writable&&<div className="message">Primary Language: Read Only. Choose your assigned language in Language/Context to edit and review.</div>}
     {notice&&<div className="message success" role="status">{notice}</div>}
     {batch&&<div className="translation-progress message" role="status"><strong>{batch.label}</strong><div><progress aria-label="Translation Progress" max={batch.total} value={batch.completed}/><span>{Math.round(batch.completed/batch.total*100)}%</span></div>{busy?<button onClick={()=>{cancelBatch.current=true;}}>Stop After This Page</button>:<button onClick={()=>setBatch(null)}>Dismiss</button>}</div>}
     {!module?<main className="empty"><h2>Your content library</h2><p>Select a course or use Add module to create the next part of your course.</p></main>:
       <div className={'workspace '+(collapsed?'editor-collapsed':'')}>
         <aside className="page-sidebar"><label className="module-select">Module<select value={module.id} disabled={busy} onChange={event=>{if(mayLeave())void action(async()=>{await loadModule(event.target.value);});}}>
           {visibleModules.map(item=><option key={item.id} value={item.id}>{item.module.number+' · '+item.module.title}</option>)}</select></label>
-          {!module.sourceModuleId?<button className="sidebar-action" disabled={busy} onClick={createEdition}>Create Language Edition</button>:
+          {!module.sourceModuleId?<button className="sidebar-action" disabled={!owner||busy} onClick={createEdition}>Create Language Edition</button>:
             <button className="sidebar-action" disabled={busy} onClick={()=>mayLeave()&&void action(async()=>{await loadModule(module.sourceModuleId!,pageId);})}>Open Primary Language</button>}
           <div className="sidebar-heading"><strong>Pages</strong><span>{module.pages.length}</span></div>
-          {!module.sourceModuleId&&<button className="sidebar-action" disabled={busy} onClick={createPage}>Add Page Below</button>}
+          {owner&&!module.sourceModuleId&&<button className="sidebar-action" disabled={busy} onClick={createPage}>Add Page Below</button>}
           <nav aria-label="Course Pages">{module.course.module.pages.map((page,index)=>{
             const state=module.pages.find(item=>item.canonicalId===page.id)!;
-            return <div className="page-row" key={page.id} draggable={!busy&&!recording&&!module.sourceModuleId} onDragStart={event=>{draggedPage.current=state.id;event.dataTransfer.setData('text/plain',state.id);event.dataTransfer.effectAllowed='move';}} onDragEnd={()=>{draggedPage.current='';}} onDragOver={event=>{if(!module.sourceModuleId){event.preventDefault();event.dataTransfer.dropEffect='move';}}} onDrop={event=>{event.preventDefault();const box=event.currentTarget.getBoundingClientRect();dropPage(state.id,event.clientY>box.top+box.height/2);}}>
+            return <div className="page-row" key={page.id} draggable={owner&&!busy&&!recording&&!module.sourceModuleId} onDragStart={event=>{draggedPage.current=state.id;event.dataTransfer.setData('text/plain',state.id);event.dataTransfer.effectAllowed='move';}} onDragEnd={()=>{draggedPage.current='';}} onDragOver={event=>{if(!module.sourceModuleId){event.preventDefault();event.dataTransfer.dropEffect='move';}}} onDrop={event=>{event.preventDefault();const box=event.currentTarget.getBoundingClientRect();dropPage(state.id,event.clientY>box.top+box.height/2);}}>
               <button disabled={busy||recording} className={'page-link '+(pageId===page.id?'selected':'')}
               onClick={()=>{if(mayLeave())selectPage(module,page.id);}}>
-              <span className="page-number">{index+1}</span><span>{page.title}{state.translationStatus&&<small className={'page-state '+(state.needsUpdate?'stale':'')}>{state.needsUpdate?'Source changed':state.translationStatus}</small>}</span></button>{!module.sourceModuleId&&<div className="page-order-controls"><button aria-label={'Move Page '+(index+1)+' Up'} disabled={busy||recording||index===0} onClick={()=>{const ids=module.pages.map(page=>page.id);[ids[index],ids[index-1]]=[ids[index-1],ids[index]];void reorderPages(ids);}}>↑</button><button aria-label={'Move Page '+(index+1)+' Down'} disabled={busy||recording||index===module.pages.length-1} onClick={()=>{const ids=module.pages.map(page=>page.id);[ids[index],ids[index+1]]=[ids[index+1],ids[index]];void reorderPages(ids);}}>↓</button></div>}</div>;
+              <span className="page-number">{index+1}</span><span>{page.title}{state.translationStatus&&<small className={'page-state '+(state.needsUpdate?'stale':'')}>{state.needsUpdate?'Source changed':state.translationStatus}</small>}</span></button>{owner&&!module.sourceModuleId&&<div className="page-order-controls"><button aria-label={'Move Page '+(index+1)+' Up'} disabled={busy||recording||index===0} onClick={()=>{const ids=module.pages.map(page=>page.id);[ids[index],ids[index-1]]=[ids[index-1],ids[index]];void reorderPages(ids);}}>↑</button><button aria-label={'Move Page '+(index+1)+' Down'} disabled={busy||recording||index===module.pages.length-1} onClick={()=>{const ids=module.pages.map(page=>page.id);[ids[index],ids[index+1]]=[ids[index+1],ids[index]];void reorderPages(ids);}}>↓</button></div>}</div>;
           })}</nav>
-          {!module.sourceModuleId&&<button className="sidebar-action danger" disabled={busy||recording||module.pages.length<2} onClick={()=>void deletePage()}>Delete Selected Page</button>}
+          {owner&&!module.sourceModuleId&&<button className="sidebar-action danger" disabled={busy||recording||module.pages.length<2} onClick={()=>void deletePage()}>Delete Selected Page</button>}
         </aside>
         {collapsed?<div className="editor-rail"><button aria-label="Expand Content Editor" onClick={()=>setCollapsed(false)}>›<span>Edit Content</span></button></div>:<main className="editor">
 
           <div className="editor-heading"><div><span className="eyebrow">Page {module.course.module.pages.findIndex(page=>page.id===pageId)+1} Of {module.pages.length}</span><button className="text-button" aria-label="Collapse Content Editor" onClick={()=>setCollapsed(true)}>‹ Collapse Editor</button></div>
-            <div className="save-controls"><div><button disabled={!dirty||busy||recording} onClick={()=>{if(window.confirm('Discard unsaved changes on this page?'))selectPage(module,pageId);}}>Cancel</button><button className="primary" disabled={!dirty||busy||recording||!validated.success} onClick={()=>void save()}>Save</button></div><small role="status">{dirty?'Unsaved Changes':'Saved · Revision '+summary?.revision}</small></div></div>
+            <div className="save-controls"><div><button disabled={!dirty||busy||recording} onClick={()=>{if(window.confirm('Discard unsaved changes on this page?'))selectPage(module,pageId);}}>Cancel</button><button className="primary" disabled={!writable||!dirty||busy||recording||!validated.success} onClick={()=>void save()}>Save</button></div><small role="status">{dirty?'Unsaved Changes':'Saved · Revision '+summary?.revision}</small></div></div>
           <h2>{savedPage?.title}</h2>
           {importInfo&&<p className="muted">PowerPoint Source: Slide {savedPage?.source_slide} · {importInfo.filename}</p>}
           {importInfo?.issues?.filter(issue=>issue.source_slide===savedPage?.source_slide).map((issue,index)=><p className="review-note" key={index}>Source Review: {issue.note}</p>)}
-          {summary?.wordingReviewRequired&&!module.sourceModuleId&&<p className="review-note">This draft requires content review before publication.</p>}
+          {summary?.wordingReviewRequired&&owner&&!module.sourceModuleId&&<p className="review-note">This draft requires content review before publication.</p>}
           {module.sourceModuleId&&<div className="translation-banner"><strong>{summary?.needsUpdate?'Source changed — compare again':summary?.translationStatus}</strong>
             <p>{module.course.language} · {module.course.country} · linked to source revision {summary?.sourceRevision}{summary?.sourceCurrentRevision!==summary?.sourceRevision?' (current '+summary?.sourceCurrentRevision+')':''}</p>
-            <button disabled={busy||dirty} onClick={()=>void translatePage()}>{summary?.translationStatus==='untranslated'?'Auto-Translate Page':'Regenerate Page Translation'}</button>
-            <button disabled={busy||dirty} onClick={()=>void translateModule()}>Translate Remaining Pages</button>
-            {module.missingSourcePages>0&&<button disabled={busy||dirty} onClick={()=>void action(async()=>{await api('/modules/'+module.id+'/sync-source','POST',{});await loadModule(module.id,pageId);})}>Add {module.missingSourcePages} new source pages</button>}
+            <button disabled={!owner||busy||dirty} onClick={()=>void translatePage()}>{summary?.translationStatus==='untranslated'?'Auto-Translate Page':'Regenerate Page Translation'}</button>
+            <button disabled={!owner||busy||dirty} onClick={()=>void translateModule()}>Translate Remaining Pages</button>
+            {module.missingSourcePages>0&&<button disabled={!owner||busy||dirty} onClick={()=>void action(async()=>{await api('/modules/'+module.id+'/sync-source','POST',{});await loadModule(module.id,pageId);})}>Add {module.missingSourcePages} new source pages</button>}
           </div>}
           <div className="editor-tabs" role="tablist" aria-label="Page editor">{[['content','Content'],['reflections','Reflections'],['narration','Narration'],...(module.sourceModuleId?[['translation','Translation']]:[])].map(([value,label])=>
             <button key={value} role="tab" aria-selected={tab===value} onClick={()=>setTab(value)}>{label}</button>)}</div>
-          <fieldset disabled={busy}>
+          <fieldset disabled={busy||!writable}>
             {draft&&tab==='content'&&<>
-              {!module.sourceModuleId&&<label className="wording-lock"><input type="checkbox" checked={unlock} onChange={event=>setUnlock(event.target.checked)}/><span>Create Wording Changes For Review<small>Original imported wording and previous revisions are retained.</small></span></label>}
-              <label>Page Title<input value={draft.title} readOnly={!module.sourceModuleId&&!unlock} onChange={event=>edit({title:event.target.value})}/></label>
-              <label>Page Layout<select value={draft.template||'teaching'} onChange={event=>edit({template:event.target.value as CoursePage['template'],layout:event.target.value,presentation:{...draft.presentation,reveal_blocks:!['title','prayer'].includes(event.target.value)}})}>{templateSchema.options.map(value=><option key={value} value={value}>{titleCase(value)}</option>)}</select></label>
-              <label className="wording-lock"><input type="checkbox" checked={!!draft.presentation?.reveal_blocks} onChange={event=>edit({presentation:{...draft.presentation,reveal_blocks:event.target.checked}})}/><span>Reveal Content Section By Section</span></label>
-              <div className="section-heading"><h3>Content Blocks</h3>{!module.sourceModuleId&&<button onClick={createBlock}>Add Content Block</button>}</div>
+              {owner&&!module.sourceModuleId&&<label className="wording-lock"><input type="checkbox" checked={unlock} onChange={event=>setUnlock(event.target.checked)}/><span>Create Wording Changes For Review<small>Original imported wording and previous revisions are retained.</small></span></label>}
+              <label>Page Title<input value={draft.title} readOnly={owner&&!module.sourceModuleId&&!unlock} onChange={event=>edit({title:event.target.value})}/></label>
+              <label>Page Layout<select disabled={!owner} value={draft.template||'teaching'} onChange={event=>edit({template:event.target.value as CoursePage['template'],layout:event.target.value,presentation:{...draft.presentation,reveal_blocks:!['title','prayer'].includes(event.target.value)}})}>{templateSchema.options.map(value=><option key={value} value={value}>{titleCase(value)}</option>)}</select></label>
+              <label className="wording-lock"><input type="checkbox" disabled={!owner} checked={!!draft.presentation?.reveal_blocks} onChange={event=>edit({presentation:{...draft.presentation,reveal_blocks:event.target.checked}})}/><span>Reveal Content Section By Section</span></label>
+              <div className="section-heading"><h3>Content Blocks</h3>{owner&&!module.sourceModuleId&&<button onClick={createBlock}>Add Content Block</button>}</div>
               {draft.blocks.map((block,index)=><section className="block-card" key={block.id}>
-                <div className="block-heading"><strong>{block.type==='title'?'Title':'Section '+draft.blocks.slice(0,index+1).filter(item=>item.type!=='title').length}</strong><select aria-label={'Content Block Type For Section '+(index+1)} value={block.type} onChange={event=>changeBlockType(block.id,event.target.value)}>{Array.from(new Set(['paragraph','scripture','concept','step','list','table','flow','question','prayer','title',block.type])).map(type=><option key={type} value={type}>{titleCase(type)}</option>)}</select>
-                  <button aria-label={'Move block '+(index+1)+' up'} disabled={index===0} onClick={()=>moveBlock(index,-1)}>↑</button><button aria-label={'Move block '+(index+1)+' down'} disabled={index===draft.blocks.length-1} onClick={()=>moveBlock(index,1)}>↓</button></div>
-                <textarea aria-label={'Text for '+block.id} rows={Math.min(12,Math.max(3,block.text.split('\n').length+1))} readOnly={!module.sourceModuleId&&!unlock} value={block.text}
+                <div className="block-heading"><strong>{block.type==='title'?'Title':'Section '+draft.blocks.slice(0,index+1).filter(item=>item.type!=='title').length}</strong><select disabled={!owner} aria-label={'Content Block Type For Section '+(index+1)} value={block.type} onChange={event=>changeBlockType(block.id,event.target.value)}>{Array.from(new Set(['paragraph','scripture','concept','step','list','table','flow','question','prayer','title',block.type])).map(type=><option key={type} value={type}>{titleCase(type)}</option>)}</select>
+                  <button aria-label={'Move block '+(index+1)+' up'} disabled={!owner||index===0} onClick={()=>moveBlock(index,-1)}>↑</button><button aria-label={'Move block '+(index+1)+' down'} disabled={!owner||index===draft.blocks.length-1} onClick={()=>moveBlock(index,1)}>↓</button></div>
+                <textarea aria-label={'Text for '+block.id} rows={Math.min(12,Math.max(3,block.text.split('\n').length+1))} readOnly={owner&&!module.sourceModuleId&&!unlock} value={block.text}
                   onChange={event=>edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,text:event.target.value}:item)})}/>
                 <small className="stable-id">{block.id}{block.icon?' · '+block.icon+' icon retained':''}</small>
                 {block.type==='table'&&<p className="editor-help">Table rows use one line each, with tabs between columns. Empty cells preserve the column positions.</p>}
 
-                <BlockImage text={block.text} owner={mediaOwner(block.id)} alt={block.image?.alt||''} src={block.image?.src} disabled={busy||!savedPage?.blocks.some(item=>item.id===block.id)} onDescription={value=>{if(block.image)edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,image:{...item.image!,alt:value}}:item)});}} onImage={image=>edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,image}:item)})}/>
-                {!module.sourceModuleId&&<button className="text-button danger" disabled={draft.blocks.length<2} onClick={()=>deleteBlock(block.id)}>Delete Content Block</button>}
+                {owner&&<BlockImage text={block.text} owner={mediaOwner(block.id)} alt={block.image?.alt||''} src={block.image?.src} disabled={busy||!savedPage?.blocks.some(item=>item.id===block.id)} onDescription={value=>{if(block.image)edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,image:{...item.image!,alt:value}}:item)});}} onImage={image=>edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,image}:item)})}/>}
+                {owner&&!module.sourceModuleId&&<button className="text-button danger" disabled={draft.blocks.length<2} onClick={()=>deleteBlock(block.id)}>Delete Content Block</button>}
 
               </section>)}
             </>}
             {draft&&tab==='reflections'&&<>
               <p className="editor-help">Individual and group questions work in both Self Paced and Guided.</p>
-              <PromptFields label="Individual Reflection" value={draft.reflection} onChange={value=>edit({reflection:value})}/>
-              <PromptFields label="Group / Facilitator Question" value={draft.guided?.facilitator} onChange={value=>edit({guided:{...draft.guided,narration:draft.guided?.narration||'',facilitator:value}})}/>
+              <PromptFields textOnly={!owner} label="Individual Reflection" value={draft.reflection} onChange={value=>edit({reflection:value})}/>
+              <PromptFields textOnly={!owner} label="Group / Facilitator Question" value={draft.guided?.facilitator} onChange={value=>edit({guided:{...draft.guided,narration:draft.guided?.narration||'',facilitator:value}})}/>
             </>}
             {draft&&tab==='narration'&&<>
               <p className="editor-help">Narration maps to canonical content blocks. Adding a script uses browser voice until a recording is explicitly attached. Editing a recorded script detaches its old audio reference; the original file is retained.</p>
-              <button disabled={!draft.blocks.some(block=>block.type!=='title')} onClick={()=>{
+              <button disabled={!owner||!draft.blocks.some(block=>block.type!=='title')} onClick={()=>{
                 const existing=new Map(draft.guided?.segments?.map(segment=>[segment.block_id,segment]));
                 edit({guided:{...draft.guided,narration:draft.guided?.narration||'',narration_mode:draft.guided?.narration_mode||'browser_tts',
                   segments:draft.blocks.filter(block=>block.type!=='title').map(block=>existing.get(block.id)||{block_id:block.id,text:block.text||'Add narration'})}});
               }}>{draft.guided?.segments?.length?'Add Mappings For New Blocks':'Add Narration For Content Blocks'}</button>
               {draft.guided&&<label>Page Narration Notes<textarea rows={3} value={draft.guided.narration} onChange={event=>edit({guided:{...draft.guided!,narration:event.target.value}})}/></label>}
-              {!!draft.guided?.segments?.length&&<label>Playback<select value={draft.guided.narration_mode||'marin_opus'} onChange={event=>edit({guided:{...draft.guided!,narration_mode:event.target.value as 'browser_tts'|'marin_opus'}})}><option value="browser_tts">Browser Voice</option><option value="marin_opus">Recorded Opus Audio</option></select></label>}
+              {!!draft.guided?.segments?.length&&<label>Playback<select disabled={!owner} value={draft.guided.narration_mode||'marin_opus'} onChange={event=>edit({guided:{...draft.guided!,narration_mode:event.target.value as 'browser_tts'|'marin_opus'}})}><option value="browser_tts">Browser Voice</option><option value="marin_opus">Recorded Opus Audio</option></select></label>}
               {draft.guided?.segments?.map((segment,index)=><section className="narration-card" key={segment.block_id}><label>Section {index+1}
                 <textarea rows={4} value={segment.text} onChange={event=>edit({guided:{...draft.guided!,segments:draft.guided!.segments!.map(item=>{if(item.block_id!==segment.block_id)return item;const {audio:_audio,audio_source:_source,...rest}=item;return {...rest,text:event.target.value};})}})}/>
                 <small>{segment.audio||'No recording attached'}</small>
-                <span className="media-location-label">Narration File Location</span><input aria-label={'Narration File Location For '+segment.block_id} placeholder="/audio/approved-recording.opus (optional)" value={segment.audio||''} onChange={event=>edit({guided:{...draft.guided!,segments:draft.guided!.segments!.map(item=>{if(item.block_id!==segment.block_id)return item;const next={...item};if(event.target.value)next.audio=event.target.value;else delete next.audio;return next;})}})}/>
+                <span className="media-location-label">Narration File Location</span><input readOnly={!owner} aria-label={'Narration File Location For '+segment.block_id} placeholder="/audio/approved-recording.opus (optional)" value={segment.audio||''} onChange={event=>edit({guided:{...draft.guided!,segments:draft.guided!.segments!.map(item=>{if(item.block_id!==segment.block_id)return item;const next={...item};if(event.target.value)next.audio=event.target.value;else delete next.audio;return next;})}})}/>
               </label>
                 {segment.audio&&<audio controls preload="none" src={segment.audio}/>}
-                <NarrationMedia owner={mediaOwner(segment.block_id)} text={segment.text} disabled={busy||!savedPage?.blocks.some(block=>block.id===segment.block_id)} onRecording={setRecording} onAudio={(audio,source)=>edit({guided:{...draft.guided!,narration_mode:'marin_opus',segments:draft.guided!.segments!.map(item=>item.block_id===segment.block_id?{...item,audio,audio_source:source}:item)}})}/>
+                {owner&&<NarrationMedia owner={mediaOwner(segment.block_id)} text={segment.text} disabled={busy||!savedPage?.blocks.some(block=>block.id===segment.block_id)} onRecording={setRecording} onAudio={(audio,source)=>edit({guided:{...draft.guided!,narration_mode:'marin_opus',segments:draft.guided!.segments!.map(item=>item.block_id===segment.block_id?{...item,audio,audio_source:source}:item)}})}/>}
               </section>)}
             </>}
             {draft&&tab==='translation'&&sourcePage&&<>
               <p className="editor-help">Source on the left; editable translation on the right. Check Scripture against the authorized Spanish Bible text. Automatic translation does not establish an official NTV quotation. Image adaptation and new recordings require separate review.</p>
-              <div className="translation-tools"><button disabled={dirty} onClick={()=>void translateHeadings()}>Auto-translate headings</button><button onClick={editHeadings}>Edit Headings</button></div>
+              {owner&&<div className="translation-tools"><button disabled={dirty} onClick={()=>void translateHeadings()}>Auto-translate headings</button><button onClick={editHeadings}>Edit Headings</button></div>}
               <TranslationFields source={sourcePage} draft={draft} onChange={value=>{setDraft(value);setNotice('');}}/>
               <label>Reviewer Notes<textarea rows={3} value={reviewNote} onChange={event=>setReviewNote(event.target.value)}/></label>
               <button className="primary" disabled={!validated.success} onClick={()=>void save(true)}>Save and mark reviewed</button>
-              <p className="editor-help">Local review status only. Reviewer accounts and hosted access will follow authentication.</p>
+              <p className="editor-help">Review status is saved with the current source revision. Publication requires the owner.</p>
             </>}
           </fieldset>
           {!validated.success&&<p className="validation-note" role="status">Complete the fields before saving. Preview keeps the last valid draft. {validated.error.issues[0]?.message}</p>}

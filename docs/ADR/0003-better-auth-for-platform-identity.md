@@ -80,3 +80,10 @@ Before final acceptance, validate:
 - Multiple-device support
 - Lost-device recovery
 - MFA/passkey support
+
+## Local validation update (2026-10-23)
+
+Better Auth 1.7.12 with Hono/Drizzle/local control D1 and real browser cookies is now
+validated for the invite-only CMS pilot (ADR 0013; docs/15). Broader email/recovery,
+hosted deployment, MFA, learner sessions and operational workspace integration remain
+unvalidated proposals. This update does not declare the entire platform identity design complete.

@@ -1,14 +1,15 @@
+import {requestActor} from './authorization';
 import {Hono} from 'hono';
 import {z} from 'zod';
 import {contentRepository,ContentError} from './repository';
 import {aiConfiguration,type AIEnvironment} from './translation';
 import {courseSchema,type AuthoringModule} from '@novoapps/content-model';
 
-type Env={CONTENT_DB:D1Database;CMS_MEDIA_URL?:string}&AIEnvironment;
+type Env={CONTENT_DB:D1Database;CMS_MEDIA_URL?:string;CMS_MEDIA_SECRET?:string}&AIEnvironment;
 const base=(env:Env)=>env.CMS_MEDIA_URL||'http://127.0.0.1:8789';
 async function bridge(env:Env,path:string,body?:unknown){
  let result:Response;
- try{result=await fetch(base(env)+path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
+ try{result=await fetch(base(env)+path,body===undefined?{headers:{'X-CMS-Bridge':env.CMS_MEDIA_SECRET||''}}:{method:'POST',headers:{'Content-Type':'application/json','X-CMS-Bridge':env.CMS_MEDIA_SECRET||''},body:JSON.stringify(body)});}
  catch{throw new ContentError(503,'Start the local CMS media service using npm run dev:cms.');}
  const data=await result.json() as any;
  if(!result.ok)throw new ContentError(400,data.error||'Media operation failed');
@@ -90,5 +91,5 @@ mediaRoutes.post('/modules/:id/publish',async c=>{
  return c.json(await bridge(c.env,'/publish',{confirm:true,provider:module.provider.slug,
   courseId:module.course.course_id.slice(0,70)+'-'+primary.courseId,moduleId:module.course.module.id,
   locale:module.course.language+'-'+module.course.country.toLowerCase(),course,media:mediaPaths(module),
-  approval:{...input,at:new Date().toISOString(),mode:'local-author'}}),201);
+  approval:{...input,at:new Date().toISOString(),mode:requestActor.has(c.req.raw)?'authenticated-owner':'local-author',actorId:requestActor.get(c.req.raw)}}),201);
 });

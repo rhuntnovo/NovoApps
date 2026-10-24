@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "wrangler dev --env local --local --ip 127.0.0.1 --port 8787 --persist-to .wrangler/state",
     "db:migrate": "wrangler d1 migrations apply CONTENT_DB --env local --local --persist-to .wrangler/state",
-    "db:generate": "drizzle-kit generate --config drizzle.config.ts"
+    "db:generate": "drizzle-kit generate --config drizzle.config.ts",
+    "dev:auth": "wrangler dev --env auth --local --ip 127.0.0.1 --port 8787 --persist-to .wrangler/state",
+    "db:migrate:auth": "wrangler d1 migrations apply CONTROL_DB --env auth --local --persist-to .wrangler/state"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "1.7.12",
     "@novoapps/content-model": "0.1.0",
-    "hono": "4.13.13",
+    "better-auth": "1.7.12",
     "drizzle-orm": "0.45.4",
+    "hono": "4.13.13",
     "uuid": "14.0.3",
     "zod": "4.6.7"
   },

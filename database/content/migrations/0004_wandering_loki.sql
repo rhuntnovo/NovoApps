@@ -1,0 +1,1 @@
+ALTER TABLE `cms_page_revisions` ADD `created_by` text;

@@ -11,7 +11,7 @@ export class ContentError extends Error {
 }
 const digest = async (value:unknown) => [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value))))]
   .map(byte=>byte.toString(16).padStart(2,'0')).join('');
-export function contentRepository(binding:D1Database) {
+export function contentRepository(binding:D1Database,actorUserId?:string) {
   const db=drizzle(binding);
   const latest=db.select({pageId:pageRevisions.pageId,revision:sql<number>`max(${pageRevisions.revision})`.as('latest_revision')})
     .from(pageRevisions).groupBy(pageRevisions.pageId).as('latest');
@@ -72,7 +72,7 @@ export function contentRepository(binding:D1Database) {
     const pageRows=sourcePages.map((page,position)=>({id:v7(),moduleId,canonicalId:page.id,position,
       sourcePageId:source?.pages.find(item=>item.canonicalId===page.id)?.id||null}));
     const revisions=pageRows.map((page,index)=>({id:v7(),pageId:page.id,revision:1,document:sourcePages[index],
-      wordingReviewRequired:reviewRequired,createdAt,sourceRevision:source?.pages[index]?.revision||null,
+      wordingReviewRequired:reviewRequired,createdAt,createdBy:actorUserId||null,sourceRevision:source?.pages[index]?.revision||null,
       translationStatus:source?'untranslated' as const:null,reviewNote:''}));
     const sourceHash=await digest(course);
     try {
@@ -103,7 +103,7 @@ export function contentRepository(binding:D1Database) {
       await db.batch([
         db.insert(pages).values({id:pageId,moduleId,canonicalId:page.id,position:(last?.position??-1)+1,sourcePageId}),
         db.insert(pageRevisions).values({id:v7(),pageId,revision:1,document:page,wordingReviewRequired:!sourcePageId,
-          createdAt:new Date().toISOString(),sourceRevision,translationStatus:sourcePageId?'untranslated':null,reviewNote:''}),
+          createdAt:new Date().toISOString(),createdBy:actorUserId||null,sourceRevision,translationStatus:sourcePageId?'untranslated':null,reviewNote:''}),
         structureInsert(moduleId,module.structureRevision+1,order)
       ]);
     }catch(error) {
@@ -256,7 +256,7 @@ export function contentRepository(binding:D1Database) {
       } else if(options.translationStatus)throw new ContentError(400,'Only editions have translation status.');
       try {
         await db.insert(pageRevisions).values({id:v7(),pageId,revision:expectedRevision+1,document:page,
-          wordingReviewRequired:canonicalChanged(baseline!.document,page),createdAt:new Date().toISOString(),
+          wordingReviewRequired:canonicalChanged(baseline!.document,page),createdAt:new Date().toISOString(),createdBy:actorUserId||null,
           sourceRevision,translationStatus,reviewNote:options.reviewNote??before.reviewNote});
       }catch(error){
         if((await currentPage(pageId))?.revision!==expectedRevision)throw new ContentError(409,'Another editor saved this page. Reload the latest draft before saving again.');

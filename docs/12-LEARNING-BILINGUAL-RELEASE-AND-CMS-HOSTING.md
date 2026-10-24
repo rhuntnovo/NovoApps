@@ -120,3 +120,8 @@ reviewer. Keep the public viewer independent and working offline throughout this
   and viewer Worker deployment were explicitly authorized cloud changes.
 
 Final Windows/Git verification: generated media paths are content-addressed and at most 202 characters including the current workspace root. Source course/media bytes remain identical to approved R2 publications. Both the original v0.8.3 upgrade and the compact-path v0.8.4 update were exercised. All 106 final deployed files and their noindex headers were compared with dist. No Git long-path setting or OS configuration was changed.
+
+Local hosting-prerequisite update (2026-10-23): invite-only Better Auth/control D1,
+course/locale reviewer permissions and authenticated revision attribution are now
+implemented and locally validated; see docs/15 and ADR 0013. This does not deploy
+the CMS or remove the remaining cloud media, email/recovery, secrets and hosting work.

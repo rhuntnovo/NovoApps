@@ -7,6 +7,6 @@ export default defineConfig({
   server: { headers:{'X-Robots-Tag':'noindex, nofollow, nosnippet, noimageindex'},
     host: '127.0.0.1', port: 5174, strictPort: true,
     fs: { allow: [fileURLToPath(new URL('../..', import.meta.url))] },
-    proxy: { '/assets/cms/':process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789','/audio/cms/':process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789', '/assets/':process.env.CMS_PREVIEW_TARGET||'http://127.0.0.1:5175','/audio/':process.env.CMS_PREVIEW_TARGET||'http://127.0.0.1:5175', '/api': process.env.CMS_API_TARGET || 'http://127.0.0.1:8787' }
+    proxy: { '/assets/cms/':(process.env.CMS_AUTH_MODE==='true'?(process.env.CMS_API_TARGET||'http://127.0.0.1:8787'):(process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789')),'/audio/cms/':(process.env.CMS_AUTH_MODE==='true'?(process.env.CMS_API_TARGET||'http://127.0.0.1:8787'):(process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789')), '/assets/':process.env.CMS_PREVIEW_TARGET||'http://127.0.0.1:5175','/audio/':process.env.CMS_PREVIEW_TARGET||'http://127.0.0.1:5175', '/api': process.env.CMS_API_TARGET || 'http://127.0.0.1:8787' }
   }
 });

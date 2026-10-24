@@ -34,5 +34,5 @@ export default defineConfig({
   preview:{headers:{'X-Robots-Tag':'noindex, nofollow, nosnippet, noimageindex'}},
   plugins: [preact(), existingMedia()], publicDir: 'public',
   resolve: { dedupe: ['preact'] },
-  server: { headers:{'X-Robots-Tag':'noindex, nofollow, nosnippet, noimageindex'}, proxy:{'/assets/cms/':process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789','/audio/cms/':process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789'}, host:'127.0.0.1', port:5175, strictPort:true, fs:{allow:[repository]} }
+  server: { headers:{'X-Robots-Tag':'noindex, nofollow, nosnippet, noimageindex'}, proxy:{'/assets/cms/':(process.env.CMS_AUTH_MODE==='true'?(process.env.CMS_API_TARGET||'http://127.0.0.1:8787'):(process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789')),'/audio/cms/':(process.env.CMS_AUTH_MODE==='true'?(process.env.CMS_API_TARGET||'http://127.0.0.1:8787'):(process.env.CMS_MEDIA_TARGET||'http://127.0.0.1:8789'))}, host:'127.0.0.1', port:5175, strictPort:true, fs:{allow:[repository]} }
 });

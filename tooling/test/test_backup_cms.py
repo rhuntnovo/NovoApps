@@ -97,6 +97,39 @@ class BackupTest(unittest.TestCase):
             self.assertEqual(saved.read('imports/course/source.pptx'), b'original-private-pptx')
             self.assertIn(b'Stop ALL', saved.read('RESTORE.txt'))
 
+    def test_control_database_alone_cannot_hide_missing_curriculum(self):
+        self.writer.execute('DROP TABLE cms_pages')
+        self.writer.commit()
+        with sqlite3.connect(self.content.parent / 'control.sqlite') as connection:
+            connection.execute('CREATE TABLE auth_user(id TEXT PRIMARY KEY)')
+        connection.close()
+        with self.assertRaisesRegex(backup.BackupError, 'No curriculum D1'):
+            self.create()
+        self.assert_no_completed_backup()
+
+    def test_control_identity_and_permissions_are_backed_up_without_secret_configuration(self):
+        control = self.content.parent / 'control.sqlite'
+        with sqlite3.connect(control) as connection:
+            connection.execute('CREATE TABLE auth_user(id TEXT PRIMARY KEY, email TEXT)')
+            connection.execute('CREATE TABLE cms_grant(id TEXT PRIMARY KEY, user_id TEXT REFERENCES auth_user(id))')
+            connection.execute('INSERT INTO auth_user VALUES (?,?)', ('test-user', 'private@example.test'))
+            connection.execute('INSERT INTO cms_grant VALUES (?,?)', ('test-grant', 'test-user'))
+        connection.close()
+        secret = self.repo / 'services/api-worker/.dev.vars.auth'
+        secret.write_text('BETTER_AUTH_SECRET=not-in-a-backup')
+        result = self.create(compact=True)
+        manifest = backup.verify_archive(Path(result['archive']))
+        information = next(db for db in manifest['databases'] if db['path'].endswith('control.sqlite'))
+        self.assertEqual(information['rowCounts'], {'auth_user': 1, 'cms_grant': 1})
+        self.assertEqual(information['method'], 'vacuum-into')
+        with zipfile.ZipFile(result['archive']) as saved:
+            self.assertFalse(any('.dev.vars' in name for name in saved.namelist()))
+            restored = Path(self.temporary.name) / 'restored-control.sqlite'
+            restored.write_bytes(saved.read('state/v3/d1/database/control.sqlite'))
+        with sqlite3.connect(restored) as connection:
+            self.assertEqual(connection.execute('SELECT * FROM cms_grant').fetchall(), [('test-grant', 'test-user')])
+        connection.close()
+
     def test_compact_uses_vacuum_into_only_for_curriculum_and_does_not_change_source(self):
         initial = backup.hash_file(self.content)
         result = self.create(compact=True)
@@ -139,7 +172,7 @@ class BackupTest(unittest.TestCase):
                 self.writer.execute('INSERT INTO cms_pages VALUES (?,?)', ('new-page', 'New saved text'))
                 self.writer.commit()
             return record
-        with patch.object(backup, 'stream_file', changing), self.assertRaisesRegex(backup.BackupError, 'Curriculum changed'):
+        with patch.object(backup, 'stream_file', changing), self.assertRaisesRegex(backup.BackupError, 'Content/control data changed'):
             self.create()
         self.assert_no_completed_backup()
         self.assertEqual(self.writer.execute('SELECT count(*) FROM cms_pages').fetchone()[0], 2)

@@ -44,6 +44,7 @@ export async function handle(request,response){
  try{
   const url=new URL(request.url,'http://127.0.0.1:'+port),host=(request.headers.host||'').split(':')[0];
   if(!['127.0.0.1','localhost'].includes(host))return send(403,{error:'Local media service only'});
+  if(process.env.CMS_MEDIA_SECRET&&url.pathname!=='/health'&&url.pathname!=='/robots.txt'&&request.headers['x-cms-bridge']!==process.env.CMS_MEDIA_SECRET)return send(401,{error:'Use the authenticated CMS API.'});
   if(request.headers.origin&&!origins.has(request.headers.origin))return send(403,{error:'Origin not allowed'});
   if(request.method==='GET'&&(url.pathname.startsWith('/audio/cms/')||url.pathname.startsWith('/assets/cms/'))){
    const key=decodeURIComponent(url.pathname).replace(/^\//,'');const data=await readFile(safeFile(state,key));
@@ -54,7 +55,7 @@ export async function handle(request,response){
    response.writeHead(200,{...headers,'Content-Length':data.length});response.end(data);return;
   }
   if(request.method==='GET'&&url.pathname==='/robots.txt'){response.writeHead(200,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});response.end(await readFile(new URL('../public/robots.txt',import.meta.url)));return;}
-  if(request.method==='GET'&&url.pathname==='/health')return send(200,{status:'ok',ffmpeg:!!ffmpeg});
+  if(request.method==='GET'&&url.pathname==='/health')return send(200,{status:'ok',ffmpeg:!!ffmpeg,authenticatedBridge:!!process.env.CMS_MEDIA_SECRET});
   if(request.method==='GET'&&url.pathname==='/settings')return send(200,await settings());
   if(request.method!=='POST'||!request.headers['content-type']?.startsWith('application/json'))return send(415,{error:'Use JSON authoring requests'});
   const input=await json(request);

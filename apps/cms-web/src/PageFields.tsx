@@ -1,8 +1,8 @@
 import { pageText,type CoursePage } from '@novoapps/content-model';
 
-export function PromptFields({label,value,onChange}:{label:string;value:{title:string;prompt:string;time?:string}|undefined;onChange:(value:{title:string;prompt:string;time?:string}|undefined)=>void}){
+export function PromptFields({label,value,onChange,textOnly=false}:{textOnly?:boolean;label:string;value:{title:string;prompt:string;time?:string}|undefined;onChange:(value:{title:string;prompt:string;time?:string}|undefined)=>void}){
   return <section className="field-section"><div className="section-heading"><h3>{label}</h3>
-    <button className="text-button" onClick={()=>onChange(value?undefined:{title:'Pause and reflect',prompt:''})}>{value?'Remove':'Add prompt'}</button></div>
+    <button disabled={textOnly} className="text-button" onClick={()=>onChange(value?undefined:{title:'Pause and reflect',prompt:''})}>{value?'Remove':'Add prompt'}</button></div>
     {value?<><label>Heading<input value={value.title} onChange={event=>onChange({...value,title:event.target.value})}/></label>
       <label>Question Or Activity<textarea rows={4} value={value.prompt} onChange={event=>onChange({...value,prompt:event.target.value})}/></label>
       <label>Suggested Time<input value={value.time||''} onChange={event=>onChange({...value,time:event.target.value})}/></label></>:<p className="muted">No separate prompt.</p>}

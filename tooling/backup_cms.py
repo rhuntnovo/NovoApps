@@ -124,7 +124,7 @@ def snapshot(connection, output, compact):
             raise BackupError('SQLite foreign-key check failed; no completed backup was created.')
         tables = {row[0] for row in target.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         counts = {name: target.execute('SELECT count(*) FROM "' + name + '"').fetchone()[0]
-                  for name in ('cms_providers', 'cms_courses', 'cms_modules', 'cms_pages', 'cms_page_revisions') if name in tables}
+                  for name in ('cms_providers', 'cms_courses', 'cms_modules', 'cms_pages', 'cms_page_revisions', 'auth_user', 'auth_session', 'cms_invitation', 'cms_grant', 'platform_audit') if name in tables}
     return {'method': 'vacuum-into' if compact else 'online-backup', 'integrityCheck': 'ok',
             'foreignKeyCheck': 'ok', **({'rowCounts': counts} if counts else {})}
 
@@ -197,11 +197,12 @@ To restore:
 5. Use Git to restore compatible project code; manifest.json records the commit.
    Git supplies the existing tracked learner images/audio, which are not duplicated
    here unless also present in local media. Configure credentials separately.
-6. Run npm.cmd run dev:cms, then inspect providers, modules, translations, and media.
+6. Run npm.cmd run dev:cms:auth for the account pilot (or dev:cms for trusted local
+   authoring), then inspect permissions, providers, modules, translations, and media.
 
 SQLite snapshots are individually consistent. For a coordinated backup, save all
 changes, finish generation/publication, and pause editing until backup completes.
-The command rejects detected curriculum/media changes, but is not a global
+The command rejects detected content/control/media changes, but is not a global
 transaction across databases and files. Stop the CMS for the strongest guarantee.
 No automatic restore or old-backup deletion is performed by this tool.
 """
@@ -251,6 +252,8 @@ def create_backup(repo, destination=None, compact=False, announce=print):
                     connection.close()
                     raise
                 held.append((relative, connection, version))
+        if not any(connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='cms_pages'").fetchone() for _, connection, _ in held):
+            raise BackupError('No curriculum D1 database was found; no backup was created.')
         snapshots, details = {}, []
         announce('Creating verified snapshots of ' + str(len(databases)) + ' SQLite databases...')
         for index, relative in enumerate(databases):
@@ -289,7 +292,7 @@ def create_backup(repo, destination=None, compact=False, announce=print):
             raise BackupError('Source files changed during backup. Pause editing/generation and retry.')
         for _relative, connection, version in held:
             if connection.execute('PRAGMA data_version').fetchone()[0] != version:
-                raise BackupError('Curriculum changed during backup. Pause editing and retry.')
+                raise BackupError('Content/control data changed during backup. Pause editing and retry.')
         announce('Verifying every archived file against its SHA-256 checksum...')
         verify_archive(partial)
         with open(long_path(partial), 'r+b') as writer:
@@ -318,7 +321,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo-root', type=Path, default=Path(__file__).resolve().parents[1], help=argparse.SUPPRESS)
     parser.add_argument('--destination', type=Path, help='Backup directory; defaults to services/api-worker/.wrangler/backups')
-    parser.add_argument('--compact', action='store_true', help='Use VACUUM INTO for curriculum databases (metadata still uses the backup API)')
+    parser.add_argument('--compact', action='store_true', help='Use VACUUM INTO for content/control D1 databases (metadata still uses the backup API)')
     parser.add_argument('--verify', type=Path, metavar='ARCHIVE.zip', help='Verify an existing backup without accessing the live CMS')
     args = parser.parse_args()
     if args.verify:

@@ -48,5 +48,7 @@ export const pageRevisions = sqliteTable('cms_page_revisions', {
   createdAt: text('created_at').notNull(),
   sourceRevision: integer('source_revision'),
   translationStatus: text('translation_status', {enum:['untranslated','draft','reviewed']}),
-  reviewNote: text('review_note').notNull().default('')
+  reviewNote: text('review_note').notNull().default(''),
+  // Identity belongs to the separate control DB, so no cross-database foreign key.
+  createdBy: text('created_by')
 }, table => [uniqueIndex('cms_page_revision').on(table.pageId, table.revision)]);

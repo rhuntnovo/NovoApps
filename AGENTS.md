@@ -144,4 +144,22 @@ Read docs/13-POWERPOINT-COURSE-IMPORT.md before importing PowerPoint curriculum.
 
 ## Local CMS backups
 
-Read docs/14-LOCAL-CMS-BACKUP-AND-RECOVERY.md before backup/restore work. From the repository root, npm.cmd run cms:backup creates verified SQLite snapshots plus media/import/state archives in ignored .wrangler/backups. --compact uses VACUUM INTO only for curriculum snapshots; metadata uses the Backup API. Save and pause authoring/generation for coordinated backups; per-database snapshots are not a global filesystem transaction. Never copy a live SQLite file alone, overwrite current data during a restore without preserving it, or put private backups in Git/public R2. Verification is non-destructive; restoration is a separate explicit action. The tool does not delete older backups or stop/restart services.
+Read docs/14-LOCAL-CMS-BACKUP-AND-RECOVERY.md before backup/restore work. From the repository root, npm.cmd run cms:backup creates verified SQLite snapshots plus media/import/state archives in ignored .wrangler/backups. --compact uses VACUUM INTO for content/control D1 snapshots; metadata uses the Backup API. Save and pause authoring/generation for coordinated backups; per-database snapshots are not a global filesystem transaction. Never copy a live SQLite file alone, overwrite current data during a restore without preserving it, or put private backups in Git/public R2. Verification is non-destructive; restoration is a separate explicit action. The tool does not delete older backups or stop/restart services.
+
+## Local invite-only authentication (2026-10-23)
+
+Read docs/15-LOCAL-INVITE-ONLY-AUTHENTICATION.md and ADR 0013 before identity,
+permissions, control D1 or hosted CMS work. npm.cmd run dev:cms:auth is an opt-in
+local Better Auth pilot; dev:cms retains trusted local authoring. Stop one before
+starting the other. platform-web owns account/invitation UI, not CMS editing.
+The initial platform administrator has global provider access; invited reviewers
+receive provider/primary-course/exact-locale grants. Enforce these at the API,
+including exports, arbitrary JSON saves, paid AI actions and private media reads.
+Recheck revocations on each request. Preserve unsaved editor state through session
+expiry. Existing page revisions remain unassigned; authenticated revisions record
+created_by. Control D1 is separate from content D1 and both must be backed up.
+Never commit/read/expose .dev.vars.auth or return session/invitation tokens in
+ordinary read APIs. Invitation creation returns a private link once; do not log it.
+Keep both API and media helper loopback-only. This local validation does not authorize
+hosting, public signup, email delivery, recovery, secret-policy or cloud media changes.
+The public learner PWA and its offline/update behavior remain independent.

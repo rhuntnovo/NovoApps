@@ -16,6 +16,33 @@
           "migrations_dir": "../../database/content/migrations"
         }
       ]
+    },
+    "auth": {
+      "vars": {
+        "LOCAL_AUTHORING": "true",
+        "AUTH_REQUIRED": "true",
+        "CMS_ORIGIN": "http://127.0.0.1:5174",
+        "PLATFORM_ORIGIN": "http://127.0.0.1:5176",
+        "AUTH_ORIGIN": "http://127.0.0.1:8787",
+        "PREVIEW_ORIGIN": "http://127.0.0.1:5175"
+      },
+      "d1_databases": [
+        {
+          "binding": "CONTENT_DB",
+          "database_name": "nvi-content-local",
+          "database_id": "00000000-0000-0000-0000-000000000001",
+          "migrations_dir": "../../database/content/migrations"
+        },
+        {
+          "binding": "CONTROL_DB",
+          "database_name": "nvi-control-local",
+          "database_id": "00000000-0000-0000-0000-000000000002",
+          "migrations_dir": "../../database/control/migrations"
+        }
+      ]
     }
-  }
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
 }

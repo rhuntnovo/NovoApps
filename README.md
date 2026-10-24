@@ -62,12 +62,14 @@ A pre-upgrade copy was saved under ignored .wrangler/backups/.
 Repeated import never replaces an existing module or its drafts.
 
 - newvines-learning/: existing learner app, own package/lockfile/build.
+- apps/platform-web/: central account/sign-in/invitation UI (local pilot).
 - apps/cms-web/: React authoring UI.
 - apps/cms-preview/: Preact preview host, no learner app imports/storage/service worker.
 - packages/content-model/: shared Zod contracts and a type-only learner entry.
 - packages/content-runtime/: shared Preact presentation, templates, narration and styles.
 - services/api-worker/: local Hono API.
 - database/content/: Drizzle schema/migrations.
+- database/control/: separate local identity, sessions, grants and audit.
 - tooling/: local launcher and bootstrap importer.
 
 Root installation supplies shared workspace dependencies. The Learning application
@@ -101,10 +103,27 @@ module-number uniqueness; Drizzle's expression-index serializer required correct
 The legacy Drizzle loader's nested esbuild is pinned to 0.25.12 to avoid its old
 development-server advisory. Dependency audit and schema generation are checked.
 
+## Local Invite-Only Authentication
+
+Save edits and stop the current CMS/API/media processes, then run from the repository root:
+
+```powershell
+npm.cmd run dev:cms:auth
+```
+
+Open http://127.0.0.1:5176/ to create your owner account and sign in. Content Studio
+remains at http://127.0.0.1:5174/. The owner can create and revoke reviewer links
+scoped to a provider, primary course and language/region. Reviewers can compare
+English and edit/review their assigned translation, without publishing or AI-key access.
+Local links work on this computer only; remote collaboration remains a later phase.
+See [the authentication runbook](docs/15-LOCAL-INVITE-ONLY-AUTHENTICATION.md) for
+permissions, session recovery, backup and deployment limits. The original dev:cms
+command remains trusted local authoring; never run both modes together.
+
 ## Before shared or hosted use
 
 The API opt-in and loopback/origin checks are a local restriction, not authentication.
-No hosted reviewer account, content approval or publication pipeline is configured.
+Invite-only identity/provider/course/locale permissions are validated locally. Hosted reviewer access is not configured.
 The Nicaraguan reviewer will need the next authenticated-access milestone for remote
 collaboration. platform-web and central identity must remain separate from CMS editing.
 
@@ -124,7 +143,7 @@ From C:\Development\NovoApps:
 
 ```powershell
 npm.cmd run cms:backup
-# Optional compact curriculum snapshots using VACUUM INTO:
+# Optional compact content/control D1 snapshots using VACUUM INTO:
 npm.cmd run cms:backup -- --compact
 ```
 

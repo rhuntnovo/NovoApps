@@ -26,7 +26,7 @@ Each invocation creates a new, UTC-dated ZIP and `.zip.sha256` sidecar. Filename
 also include a random suffix, so repeated backups do not overwrite previous copies.
 The command prints the completed archive path, checksum, snapshot count and size.
 
-For a compact curriculum snapshot using `VACUUM INTO`:
+For compact content/control D1 snapshots using `VACUUM INTO`:
 
 ```powershell
 npm.cmd run cms:backup -- --compact
@@ -52,7 +52,7 @@ The archive preserves paths relative to `services/api-worker/.wrangler/`:
 | `state/` | SQLite snapshots for all discovered local databases, including Wrangler metadata, plus other state files |
 | `media/` | Locally recorded/generated/uploaded images and narration, publication files and settings |
 | `imports/` | Private PowerPoint originals, inventories, stable-ID registries and prepared course drafts |
-| `manifest.json` | File sizes and SHA-256 hashes, database checks, curriculum row counts, included roots and Git commit |
+| `manifest.json` | File sizes and SHA-256 hashes, database checks, curriculum/identity/access row counts, included roots and Git commit |
 | `RESTORE.txt` | Recovery instructions |
 
 Missing optional media/import roots are recorded in the manifest. A missing state
@@ -63,7 +63,7 @@ this version supports the default local media directory only.
 SQLite is read through read-only connections. The default method is SQLite's Online
 Backup API; committed WAL transactions are incorporated into each standalone snapshot.
 Raw live `-wal`, `-shm` and rollback-journal sidecars are omitted when their database
-exists. `--compact` applies `VACUUM INTO` only to curriculum D1 databases; Wrangler
+exists. `--compact` applies `VACUUM INTO` to content/control D1 databases with explicit primary keys; Wrangler
 metadata and other internal databases always use the Backup API to preserve internal
 row identities. The original databases are never vacuumed or replaced.
 
@@ -72,7 +72,7 @@ The ZIP is streamed with Windows extended-path support rather than copying the d
 media hierarchy into another long directory. Every archived file is read back and
 matched against its size and SHA-256 hash before the final archive is exposed.
 
-The tool detects curriculum commits while it is copying, and media/import/supporting
+The tool detects content/control commits while it is copying, and media/import/supporting
 files added, removed or changed during the backup. Detected changes fail the command
 without publishing a completed archive; pause work and retry. Symlinks and junctions
 are rejected rather than following files outside the selected roots.
@@ -132,3 +132,10 @@ Official behavior references:
 - [SQLite WAL persistence](https://www.sqlite.org/wal.html#the_wal_file)
 
 Live validation created and independently verified a backup containing seven SQLite snapshots and 176 archived files. An isolated restore of its curriculum database passed integrity checking and recovered two course editions, eight modules, 95 stored page records (including archived pages), and 150 page revisions. The original running CMS data was not replaced.
+
+The invite-only pilot adds a separate local control D1 to the same state tree;
+it is included automatically with accounts, password hashes, sessions, invitations,
+permissions and audit. Pause sign-in/invitation activity as well as editing, or stop
+services. Backups are private credentials-bearing data. Generated .dev.vars.auth
+secrets remain excluded and need separate secure configuration storage. Restart
+restored account-enabled environments with npm.cmd run dev:cms:auth; see docs/15.
