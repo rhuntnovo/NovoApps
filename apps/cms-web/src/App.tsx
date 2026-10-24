@@ -7,6 +7,7 @@ import { CreateDialog,AISettings,type FormSpec,type AIStatus } from './Forms';
 import { PromptFields,TranslationFields } from './PageFields';
 import {NarrationMedia,BlockImage} from './MediaAuthoring';
 import {Publishing} from './Publishing';
+import {ProviderAISettings} from './ProviderAISettings';
 const titleCase=(value:string)=>value.replace(/[_-]/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase());
 const screens={phonePortrait:{label:'Phone - Portrait',width:390,height:844},phoneLandscape:{label:'Phone - Landscape',width:844,height:390},tabletPortrait:{label:'Tablet - Portrait',width:768,height:1024},tabletLandscape:{label:'Tablet - Landscape',width:1024,height:768},desktop:{label:'Desktop',width:1280,height:800}};
 
@@ -29,6 +30,8 @@ export function App({access}:{access:Access}){
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [form,setForm]=useState<FormSpec|null>(null),[showAI,setShowAI]=useState(false);
   const [ai,setAI]=useState<AIStatus>({configured:false,model:'gpt-5-mini',source:'none'});
+  const [aiRevision,setAIRevision]=useState(0),[aiCaps,setAICaps]=useState({configured:false,translate:false,narration:false,images:false});
+  useEffect(()=>{let active=true;setAICaps({configured:false,translate:false,narration:false,images:false});const refresh=()=>{if(module)void api<typeof aiCaps>('/modules/'+module.id+'/ai-capabilities').then(value=>{if(active)setAICaps(value);}).catch(()=>{});};refresh();window.addEventListener('focus',refresh);return()=>{active=false;window.removeEventListener('focus',refresh);};},[module?.id,aiRevision,ai.configured,access]);
   const [reviewNote,setReviewNote]=useState(''),[batch,setBatch]=useState<{label:string;completed:number;total:number}|null>(null);
   const cancelBatch=useRef(false),frame=useRef<HTMLIFrameElement>(null),latestPreview=useRef<unknown>(null);
   const savedPage=module?.course.module.pages.find(page=>page.id===pageId);
@@ -73,7 +76,7 @@ export function App({access}:{access:Access}){
       const last=sessionStorage.getItem('novoapps.cms.last-module');
       if(moduleRows.length)await loadModule(moduleRows.find(item=>item.id===last)?.id||moduleRows.find(item=>!owner&&item.sourceModuleId&&access.grants.some(grant=>grant.provider_id===item.providerId&&grant.locale===item.locale))?.id||moduleRows[0].id);
       else setProviderId(providerRows[0]?.id||'');
-      if(owner)setAI(await api<AIStatus>('/translation-settings'));
+      if(owner&&access.mode==='local')setAI(await api<AIStatus>('/translation-settings'));
     }catch(error){setError(String(error));}
   })();},[]);
   useEffect(()=>{
@@ -235,8 +238,8 @@ export function App({access}:{access:Access}){
   }
   return <div className="studio">
     <div className="studio-top"><header className="studio-header"><a href="/" className="studio-brand"><span className="brand-mark">N</span><span>NovoApps<strong>Content Studio</strong></span></a>
-      <span className="local-label">{access.datasetLabel||(access.mode==='local'?'Local Authoring':owner?'Owner':'Course Reviewer')}</span>{access.mode==='authenticated'&&<a href={platform} target="_blank" rel="noreferrer">Account & Access</a>}<span className="header-spacer"/>
-      {owner&&<button disabled={busy} onClick={()=>setShowAI(true)}>AI Settings</button>}
+      <span className="local-label">{access.datasetLabel||(access.mode==='local'?'Local Authoring':owner?'Super Admin':'Course Reviewer')}</span>{access.mode==='authenticated'&&<a href={platform} target="_blank" rel="noreferrer">Account & Access</a>}<span className="header-spacer"/>
+      {owner&&<button disabled={busy||!providerId} onClick={()=>setShowAI(true)}>AI Settings</button>}
       <button disabled={!module||dirty||busy} onClick={()=>void exportDraft()}>Export Draft</button>
       <button className="primary" disabled={!owner||!module||dirty||busy||recording} onClick={()=>setShowPublish(true)}>Publish</button>
     </header>
@@ -285,8 +288,8 @@ export function App({access}:{access:Access}){
           {summary?.wordingReviewRequired&&owner&&!module.sourceModuleId&&<p className="review-note">This draft requires content review before publication.</p>}
           {module.sourceModuleId&&<div className="translation-banner"><strong>{summary?.needsUpdate?'Source changed — compare again':summary?.translationStatus}</strong>
             <p>{module.course.language} · {module.course.country} · linked to source revision {summary?.sourceRevision}{summary?.sourceCurrentRevision!==summary?.sourceRevision?' (current '+summary?.sourceCurrentRevision+')':''}</p>
-            <button disabled={!owner||busy||dirty} onClick={()=>void translatePage()}>{summary?.translationStatus==='untranslated'?'Auto-Translate Page':'Regenerate Page Translation'}</button>
-            <button disabled={!owner||busy||dirty} onClick={()=>void translateModule()}>Translate Remaining Pages</button>
+            <button disabled={!aiCaps.translate||busy||dirty} onClick={()=>void translatePage()}>{summary?.translationStatus==='untranslated'?'Auto-Translate Page':'Regenerate Page Translation'}</button>
+            <button disabled={!aiCaps.translate||busy||dirty} onClick={()=>void translateModule()}>Translate Remaining Pages</button>
             {module.missingSourcePages>0&&<button disabled={!owner||busy||dirty} onClick={()=>void action(async()=>{await api('/modules/'+module.id+'/sync-source','POST',{});await loadModule(module.id,pageId);})}>Add {module.missingSourcePages} new source pages</button>}
           </div>}
           <div className="editor-tabs" role="tablist" aria-label="Page editor">{[['content','Content'],['reflections','Reflections'],['narration','Narration'],...(module.sourceModuleId?[['translation','Translation']]:[])].map(([value,label])=>
@@ -306,7 +309,7 @@ export function App({access}:{access:Access}){
                 <small className="stable-id">{block.id}{block.icon?' · '+block.icon+' icon retained':''}</small>
                 {block.type==='table'&&<p className="editor-help">Table rows use one line each, with tabs between columns. Empty cells preserve the column positions.</p>}
 
-                {owner&&<BlockImage text={block.text} owner={mediaOwner(block.id)} alt={block.image?.alt||''} src={block.image?.src} disabled={busy||!savedPage?.blocks.some(item=>item.id===block.id)} onDescription={value=>{if(block.image)edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,image:{...item.image!,alt:value}}:item)});}} onImage={image=>edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,image}:item)})}/>}
+                {(owner||aiCaps.images)&&<BlockImage allowUpload={owner} allowAI={aiCaps.images} text={block.text} owner={mediaOwner(block.id)} alt={block.image?.alt||''} src={block.image?.src} disabled={busy||!savedPage?.blocks.some(item=>item.id===block.id)} onDescription={value=>{if(block.image)edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,image:{...item.image!,alt:value}}:item)});}} onImage={image=>edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,image}:item)})}/>}
                 {owner&&!module.sourceModuleId&&<button className="text-button danger" disabled={draft.blocks.length<2} onClick={()=>deleteBlock(block.id)}>Delete Content Block</button>}
 
               </section>)}
@@ -331,12 +334,12 @@ export function App({access}:{access:Access}){
                 <span className="media-location-label">Narration File Location</span><input readOnly={!owner} aria-label={'Narration File Location For '+segment.block_id} placeholder="/audio/approved-recording.opus (optional)" value={segment.audio||''} onChange={event=>edit({guided:{...draft.guided!,segments:draft.guided!.segments!.map(item=>{if(item.block_id!==segment.block_id)return item;const next={...item};if(event.target.value)next.audio=event.target.value;else delete next.audio;return next;})}})}/>
               </label>
                 {segment.audio&&<audio controls preload="none" src={segment.audio}/>}
-                {owner&&<NarrationMedia owner={mediaOwner(segment.block_id)} text={segment.text} disabled={busy||!savedPage?.blocks.some(block=>block.id===segment.block_id)} onRecording={setRecording} onAudio={(audio,source)=>edit({guided:{...draft.guided!,narration_mode:'marin_opus',segments:draft.guided!.segments!.map(item=>item.block_id===segment.block_id?{...item,audio,audio_source:source}:item)}})}/>}
+                {(owner||aiCaps.narration)&&<NarrationMedia allowRecording={owner} allowAI={aiCaps.narration} owner={mediaOwner(segment.block_id)} text={segment.text} disabled={busy||!savedPage?.blocks.some(block=>block.id===segment.block_id)} onRecording={setRecording} onAudio={(audio,source)=>edit({guided:{...draft.guided!,narration_mode:'marin_opus',segments:draft.guided!.segments!.map(item=>item.block_id===segment.block_id?{...item,audio,audio_source:source}:item)}})}/>}
               </section>)}
             </>}
             {draft&&tab==='translation'&&sourcePage&&<>
               <p className="editor-help">Source on the left; editable translation on the right. Check Scripture against the authorized Spanish Bible text. Automatic translation does not establish an official NTV quotation. Image adaptation and new recordings require separate review.</p>
-              {owner&&<div className="translation-tools"><button disabled={dirty} onClick={()=>void translateHeadings()}>Auto-translate headings</button><button onClick={editHeadings}>Edit Headings</button></div>}
+              {(owner||aiCaps.translate)&&<div className="translation-tools"><button disabled={dirty||!aiCaps.translate} onClick={()=>void translateHeadings()}>Auto-translate headings</button>{owner&&<button onClick={editHeadings}>Edit Headings</button>}</div>}
               <TranslationFields source={sourcePage} draft={draft} onChange={value=>{setDraft(value);setNotice('');}}/>
               <label>Reviewer Notes<textarea rows={3} value={reviewNote} onChange={event=>setReviewNote(event.target.value)}/></label>
               <button className="primary" disabled={!validated.success} onClick={()=>void save(true)}>Save and mark reviewed</button>
@@ -355,7 +358,7 @@ export function App({access}:{access:Access}){
     {published&&!access.datasetLabel&&<a className="published-link" href={published} target="_blank" rel="noreferrer">Open Published Module JSON</a>}
     {showPublish&&module&&<Publishing module={module} sandbox={!!access.datasetLabel} onClose={()=>setShowPublish(false)} onPublished={(value,auditPending)=>{setPublished(value);setNotice((access.datasetLabel?'Module published in the local storage sandbox. Public content is unchanged.':'Module published to Cloudflare content storage.')+(auditPending?' Publication completed, but audit bookkeeping needs reconciliation before publishing again.':''));}}/>}
     {form&&<CreateDialog key={form.title} spec={form} onClose={()=>setForm(null)}/>}
-    {showAI&&<AISettings status={ai} onChange={setAI} onClose={()=>setShowAI(false)}/>}
+    {showAI&&owner&&(access.mode==='authenticated'?<ProviderAISettings providerId={providerId} providerName={providers.find(provider=>provider.id===providerId)?.name||'Provider'} courses={courses} onSaved={()=>setAIRevision(value=>value+1)} onClose={()=>setShowAI(false)}/>:<AISettings status={ai} onChange={setAI} onClose={()=>setShowAI(false)}/>)}
   </div>;
 }
 function documentElement<K extends keyof HTMLElementTagNameMap>(tag:K){return document.createElement(tag);}

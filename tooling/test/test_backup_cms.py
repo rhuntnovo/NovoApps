@@ -244,6 +244,31 @@ class BackupTest(unittest.TestCase):
         self.assertEqual(entry['rowCounts'], {'cms_pages': 1})
         self.assertEqual(self.writer.execute('SELECT id FROM cms_pages').fetchone()[0], 'uuid-page')
 
+    def test_compact_backup_restores_encrypted_ai_settings_and_usage_without_the_master_secret(self):
+        control = self.content.parent / 'control.sqlite'
+        with sqlite3.connect(control) as connection:
+            for migration in sorted((Path(__file__).resolve().parents[2] / 'database/control/migrations').glob('*.sql')):
+                connection.executescript(migration.read_text(encoding='utf-8'))
+            connection.execute("INSERT INTO auth_user VALUES('user-id','Test Admin','test@example.test',0,NULL,1,1)")
+            connection.execute("INSERT INTO cms_ai_settings(provider_id,encrypted_key,key_nonce,key_version,credential_id,updated_by,updated_at) VALUES('provider-id','ciphertext-only','nonce-only','v1','credential-reference','user-id',1)")
+            connection.execute("INSERT INTO cms_ai_activity(id,provider_id,credential_id,project_id,actor_id,actor_name,course_id,module_id,locale,feature,endpoint,requested_model,input_characters,started_at,request_id,usage_json,outcome) VALUES('activity-id','provider-id','credential-reference','proj_test','user-id','Test Admin','course-id','module-id','es-ni','translate','responses','gpt-5-mini',123,1,'req_test','{\"input_tokens\":101}', 'succeeded')")
+        connection.close()
+        (self.local / 'media/.dev.vars.auth').write_text('AI_CREDENTIAL_MASTER_KEY=master-value-must-stay-private', encoding='utf-8')
+        result = self.create(compact=True)
+        manifest = backup.verify_archive(Path(result['archive']))
+        metadata = next(item for item in manifest['databases'] if item['path'].endswith('control.sqlite'))
+        self.assertEqual(metadata['rowCounts']['cms_ai_settings'], 1)
+        self.assertEqual(metadata['rowCounts']['cms_ai_activity'], 1)
+        with zipfile.ZipFile(result['archive']) as saved:
+            self.assertFalse(any('.dev.vars' in name for name in saved.namelist()))
+            restored = Path(self.temporary.name) / 'restore-ai.sqlite'
+            restored.write_bytes(saved.read(metadata['path']))
+        with sqlite3.connect(restored) as connection:
+            self.assertEqual(connection.execute('SELECT encrypted_key FROM cms_ai_settings').fetchone()[0], 'ciphertext-only')
+            self.assertEqual(connection.execute('SELECT request_id FROM cms_ai_activity').fetchone()[0], 'req_test')
+            self.assertEqual(connection.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+        connection.close()
+
     def test_json_cli_returns_only_parseable_backup_metadata(self):
         process = subprocess.run([sys.executable, '-B', str(Path(backup.__file__)), '--repo-root', str(self.repo), '--destination', str(self.destination), '--json'], capture_output=True, text=True)
         self.assertEqual(process.returncode, 0, process.stderr)

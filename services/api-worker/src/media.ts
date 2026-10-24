@@ -4,10 +4,13 @@ import {requestActor} from './authorization';
 import {Hono} from 'hono';
 import {z} from 'zod';
 import {contentRepository,ContentError} from './repository';
-import {aiConfiguration,type AIEnvironment} from './translation';
+import type {AIEnvironment} from './translation';
+import type {AuthEnvironment} from './auth';
+import {control,principal} from './auth';
+import {aiOperation,rememberArtifact,textHash} from './ai';
 import {courseSchema,type AuthoringModule} from '@novoapps/content-model';
 
-type Env={CONTENT_DB:D1Database;CMS_MEDIA_URL?:string;CMS_MEDIA_SECRET?:string}&AIEnvironment&StorageEnvironment;
+type Env={CONTENT_DB:D1Database;CMS_MEDIA_URL?:string;CMS_MEDIA_SECRET?:string}&AIEnvironment&StorageEnvironment&AuthEnvironment;
 const base=(env:Env)=>env.CMS_MEDIA_URL||'http://127.0.0.1:8789';
 async function bridge(env:Env,path:string,body?:unknown){
  let result:Response;
@@ -20,7 +23,7 @@ async function bridge(env:Env,path:string,body?:unknown){
 async function body(request:Request,limit=38*1024*1024){const text=await request.text();if(text.length>limit)throw new ContentError(400,'Media input is too large');try{return JSON.parse(text);}catch{throw new ContentError(400,'Invalid media request');}}
 const inputSchema=z.object({expectedRevision:z.number().int().positive(),blockId:z.string().min(1).max(150),
  script:z.string().max(4096).optional(),description:z.string().min(1).max(2000).optional(),
- prepared:z.boolean().optional(),smallData:z.string().max(6*1024*1024).optional(),source:z.enum(['human','ai']).optional(),
+ generationId:z.string().uuid().optional(),prepared:z.boolean().optional(),smallData:z.string().max(6*1024*1024).optional(),source:z.enum(['human','ai']).optional(),
  textContext:z.string().max(20000).optional(),data:z.string().max(35*1024*1024).optional()});
 async function ownership(env:Env,moduleId:string,pageId:string,input:z.infer<typeof inputSchema>){
  const repo=contentRepository(env.CONTENT_DB),module=await repo.getModule(moduleId),page=module.pages.find(page=>page.id===pageId);
@@ -31,14 +34,6 @@ async function ownership(env:Env,moduleId:string,pageId:string,input:z.infer<typ
  const primary=module.sourceModuleId?await repo.getModule(module.sourceModuleId):module;
  return {module,page,document,assetOwner:{providerId:module.provider.id,courseId:primary.courseId,moduleId:module.id,pageId:page.id,blockId:input.blockId,locale:module.course.language+'-'+module.course.country.toLowerCase()},context:{provider:module.provider.slug,course:module.course.course_id.slice(0,70)+'-'+primary.courseId,
   locale:module.course.language+'-'+module.course.country.toLowerCase(),page:page.id+'-'+page.canonicalId.slice(0,60),block:input.blockId}};
-}
-async function aiRequest(env:Env,url:string,payload:unknown){
- const {apiKey}=aiConfiguration(env);if(!apiKey)throw new ContentError(503,'No OpenAI key is saved in this API session. Open AI Settings, paste your key, and click Save Settings. Restarting the local API clears session keys.');
- let response:Response;
- try{response=await fetch('https://api.openai.com/v1/'+url,{method:'POST',headers:{Authorization:'Bearer '+apiKey,'Content-Type':'application/json'},
- body:JSON.stringify(payload),signal:AbortSignal.timeout(180000)});}catch{throw new ContentError(502,'OpenAI generation timed out. Existing media was retained.');}
- if(!response.ok)throw new ContentError(502,response.status===401?'OpenAI did not accept the configured key.':response.status===429?'OpenAI quota or rate limit reached.':'OpenAI could not generate this media. Existing media was retained.');
- return response;
 }
 function encode(bytes:Uint8Array){let value='';for(let i=0;i<bytes.length;i+=8192)value+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(value);}
 export const mediaRoutes=new Hono<{Bindings:Env}>();
@@ -60,32 +55,50 @@ mediaRoutes.post('/modules/:moduleId/pages/:pageId/media/:kind',async c=>{
  if(!['recording','speech','image-upload','image-generate'].includes(kind))throw new ContentError(404,'Unknown media operation');
  if((kind==='image-upload'||kind==='image-generate')&&!input.description?.trim())throw new ContentError(400,'Enter an image description first.');
  const owner=await ownership(c.env,c.req.param('moduleId'),c.req.param('pageId'),input);
- let data=input.data;
+ let data=input.data,operation:Awaited<ReturnType<typeof aiOperation>>|undefined,generationId:string|undefined,outputBytes:number|undefined;
+ const who=c.env.AUTH_REQUIRED==='true'?await principal(c.env,c.req.raw.headers):null;
+ if(kind==='image-upload'&&who&&(input.generationId||!who.owner)){
+  if(!input.generationId)throw new ContentError(403,'A generated-image activity reference is required.');
+  const receipt=await control(c.env).prepare("SELECT id FROM cms_ai_activity WHERE id=? AND actor_id=? AND module_id=? AND page_id=? AND block_id=? AND feature='images' AND outcome='succeeded' AND application_status IN ('generated','saved')").bind(input.generationId,who.user.id,owner.module.id,owner.page.id,input.blockId).first();
+  if(!receipt)throw new ContentError(403,'This generated image does not belong to your current page.');
+  generationId=input.generationId;
+  const existing=await control(c.env).prepare('SELECT metadata_json FROM cms_ai_artifact WHERE activity_id=? AND actor_id=?').bind(generationId,who.user.id).first<{metadata_json:string}>();
+  if(existing)return c.json({...JSON.parse(existing.metadata_json),generationId,source:'ai'},201);
+ }
  if(kind==='speech'){
   if(!input.script?.trim())throw new ContentError(400,'Enter narration text first.');
-  const response=await aiRequest(c.env,'audio/speech',{model:'gpt-4o-mini-tts',voice:'marin',input:input.script,response_format:'opus',
-   instructions:'Read this educational narration clearly and naturally in '+owner.module.course.language+' for '+owner.module.course.country+'. Do not add any words.'});
-  data=encode(new Uint8Array(await response.arrayBuffer()));
+  operation=await aiOperation(c.env,c.req.raw,owner.module,'narration',{pageId:owner.page.id,blockId:input.blockId});
+  const response=await operation.request('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(180000),body:JSON.stringify({model:'gpt-4o-mini-tts',voice:'marin',input:input.script,response_format:'opus',
+   instructions:'Read this educational narration clearly and naturally in '+owner.module.course.language+' for '+owner.module.course.country+'. Do not add any words.'})});
+  if(!response.ok)throw new ContentError(502,'OpenAI could not generate narration. Check AI Activity before retrying.');
+  const bytes=new Uint8Array(await response.arrayBuffer());outputBytes=bytes.length;data=encode(bytes);generationId=operation.id;
  }
  if(kind==='image-generate'){
   const block=owner.document.blocks.find(item=>item.id===input.blockId)!;
-  const response=await aiRequest(c.env,'images/generations',{model:'gpt-image-2',n:1,size:'1536x1024',quality:'medium',output_format:'webp',
+  operation=await aiOperation(c.env,c.req.raw,owner.module,'images',{pageId:owner.page.id,blockId:input.blockId});
+  const response=await operation.request('https://api.openai.com/v1/images/generations',{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(180000),body:JSON.stringify({model:'gpt-image-2',n:1,size:'1536x1024',quality:'medium',output_format:'webp',
    prompt:'Create a context-appropriate educational illustration for this course. Country/region: '+owner.module.course.country+'. Language: '+owner.module.course.language+
-    '. Teaching context: '+(input.textContext||block.text)+'. Requested image: '+input.description+'. No captions, lettering, watermarks or logos. Retain the meaning of the text; avoid adding claims.'});
-  const output=await response.json() as {data?:{b64_json?:string}[]};data=output.data?.[0]?.b64_json;
-  if(r2Mode(c.env)){if(!data)throw new ContentError(502,'No image was generated.');await ownership(c.env,c.req.param('moduleId'),c.req.param('pageId'),input);return c.json({generatedImage:{data,mimeType:'image/webp'},requiresPreparation:true},201);}
+    '. Teaching context: '+(input.textContext||block.text)+'. Requested image: '+input.description+'. No captions, lettering, watermarks or logos. Retain the meaning of the text; avoid adding claims.'})});
+  if(!response.ok)throw new ContentError(502,'OpenAI could not generate this image. Check AI Activity before retrying.');
+  const output=await response.json() as {data?:{b64_json?:string}[]};data=output.data?.[0]?.b64_json;generationId=operation.id;
+  if(r2Mode(c.env)){if(!data)throw new ContentError(502,'No image was generated.');await ownership(c.env,c.req.param('moduleId'),c.req.param('pageId'),input);await operation.recheck();await operation.finish('generated');return c.json({generatedImage:{data,mimeType:'image/webp'},generationId,requiresPreparation:true},201);}
  }
  if(!data)throw new ContentError(400,'No media was supplied.');
  // Recheck after lengthy generation; never attach stale output to a newer saved page.
  await ownership(c.env,c.req.param('moduleId'),c.req.param('pageId'),input);
+ if(operation)await operation.recheck();
  const audio=kind==='recording'||kind==='speech';
  let result;
  if(r2Mode(c.env)){
   const actor=requestActor.get(c.req.raw);if(!actor)throw new ContentError(503,'Authenticated media author is required.');
   if(kind!=='speech'&&!input.prepared)throw new ContentError(400,'Prepare media in the CMS browser before uploading.');
-  result=await storePrepared(c.env,owner.assetOwner,actor,{...input,data,source:kind==='speech'?'ai':input.source},audio);
+  result=await storePrepared(c.env,owner.assetOwner,actor,{...input,data,source:kind==='speech'||generationId?'ai':input.source},audio);
  }else result=await bridge(c.env,audio?'/audio':'/image',{context:owner.context,data,description:input.description});
- return c.json({...result,source:kind==='speech'||kind==='image-generate'||input.source==='ai'?'ai':'human',voice:kind==='speech'?'marin':undefined},201);
+ const actor=requestActor.get(c.req.raw);
+ if(kind==='image-upload'&&input.generationId)generationId=input.generationId;
+ await rememberArtifact(c.env,generationId,actor,owner.module.id,owner.page.id,input.blockId,audio?{audio:(result as any).audio,scriptHash:await textHash(input.script||''),source:'ai'}:{image:(result as any).image});
+ if(operation)await operation.finish('generated',outputBytes);
+ return c.json({...result,generationId,source:kind==='speech'||kind==='image-generate'||generationId||input.source==='ai'?'ai':'human',voice:kind==='speech'?'marin':undefined},201);
 });
 function mediaPaths(module:AuthoringModule){
  const paths=new Set<string>();

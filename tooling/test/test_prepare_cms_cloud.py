@@ -43,4 +43,19 @@ class CloudPreparationTest(unittest.TestCase):
    source.execute('INSERT INTO cms_pages VALUES(?,?)',('a','b'));source.execute('INSERT INTO cms_pages VALUES(?,?)',('b','a'))
    with self.assertRaisesRegex(ValueError,'Unresolved source dependency'):cloud.sql_export(source,('cms_pages',))
 
+ def test_ai_key_ciphertext_is_excluded_from_cloud_copy_but_usage_and_identity_are_preserved(self):
+  with closing(sqlite3.connect(':memory:')) as source:
+   source.row_factory=sqlite3.Row
+   source.executescript('CREATE TABLE cms_ai_settings(provider_id TEXT PRIMARY KEY,encrypted_key TEXT,key_nonce TEXT,key_version TEXT,credential_id TEXT,project_id TEXT);CREATE TABLE cms_ai_activity(id TEXT PRIMARY KEY,request_id TEXT,usage_json TEXT);')
+   source.execute('INSERT INTO cms_ai_settings VALUES(?,?,?,?,?,?)',('provider-id','private-ciphertext','private-nonce','v1','key-reference','proj_test'))
+   source.execute('INSERT INTO cms_ai_activity VALUES(?,?,?)',('stable-activity-id','req_test','{"input_tokens":123}'))
+   sql=cloud.sql_export(source,('cms_ai_settings','cms_ai_activity'))
+   self.assertNotIn('private-ciphertext',sql)
+   self.assertNotIn('private-nonce',sql)
+   with closing(sqlite3.connect(':memory:')) as restored:
+    restored.row_factory=sqlite3.Row;restored.executescript(sql)
+    self.assertIsNone(restored.execute('SELECT encrypted_key FROM cms_ai_settings').fetchone()[0])
+    self.assertEqual(restored.execute('SELECT request_id FROM cms_ai_activity').fetchone()[0],'req_test')
+    self.assertEqual(cloud.fingerprint(source,('cms_ai_settings','cms_ai_activity'),omit_ephemeral=True),cloud.fingerprint(restored,('cms_ai_settings','cms_ai_activity')))
+
 if __name__=='__main__':unittest.main()

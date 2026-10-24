@@ -4,7 +4,7 @@ export type MediaOwner={moduleId:string;pageId:string;blockId:string;expectedRev
 async function base64(blob:Blob){return new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('Could not read the file'));reader.readAsDataURL(blob);});}
 async function browserProcessing(){return (await api<{processing:string}>('/media-capabilities')).processing==='browser';}
 const endpoint=(owner:MediaOwner,kind:string)=>'/modules/'+owner.moduleId+'/pages/'+owner.pageId+'/media/'+kind;
-export function NarrationMedia({owner,text,disabled,onAudio,onRecording}:{owner:MediaOwner;text:string;disabled:boolean;onAudio:(path:string,source:'human'|'ai')=>void;onRecording:(value:boolean)=>void}){
+export function NarrationMedia({owner,text,disabled,onAudio,onRecording,allowRecording=true,allowAI=true}:{allowRecording?:boolean;allowAI?:boolean;owner:MediaOwner;text:string;disabled:boolean;onAudio:(path:string,source:'human'|'ai')=>void;onRecording:(value:boolean)=>void}){
  const [status,setStatus]=useState('');
  const [open,setOpen]=useState(false),[recording,setRecording]=useState(false),[working,setWorking]=useState(false),[error,setError]=useState(''),[preview,setPreview]=useState(''),[blob,setBlob]=useState<Blob|null>(null);
  const dialog=useRef<HTMLDialogElement>(null),recorder=useRef<MediaRecorder|null>(null),stream=useRef<MediaStream|null>(null),chunks=useRef<Blob[]>([]),limit=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -36,8 +36,8 @@ export function NarrationMedia({owner,text,disabled,onAudio,onRecording}:{owner:
   setWorking(true);setError('');try{const result=await api<{audio:string}>(endpoint(owner,'speech'),'POST',{...owner,script:text});onAudio(result.audio,'ai');}
   catch(error){setError(String(error));}finally{setWorking(false);}}
  return <div className="media-authoring"><div className="media-actions">
-  <button type="button" disabled={disabled||working||!text.trim()} onClick={()=>{setError('');setOpen(true);}}>🎙 Record Narration</button>
-  <button type="button" disabled={disabled||working||!text.trim()||text.length>4096} onClick={()=>void generate()}>Generate AI Narration</button>
+  {allowRecording&&<button type="button" disabled={disabled||working||!text.trim()} onClick={()=>{setError('');setOpen(true);}}>🎙 Record Narration</button>}
+  <button type="button" disabled={!allowAI||disabled||working||!text.trim()||text.length>4096} onClick={()=>void generate()}>Generate AI Narration</button>
  </div>{disabled&&<small>Save this page before creating media.</small>}{working&&<p role="status">Creating and compressing narration…</p>}{error&&!open&&<p className="inline-error" role="alert">{error}</p>}
  {open&&<dialog ref={dialog} className="studio-dialog recording-dialog" onCancel={event=>{event.preventDefault();close();}}>
   <h2>Record Narration</h2><p>Read the script below. Recording stops after 10 minutes.</p><div className="reading-script">{text}</div>
@@ -51,7 +51,7 @@ export function NarrationMedia({owner,text,disabled,onAudio,onRecording}:{owner:
  </dialog>}
  </div>;
 }
-export function BlockImage({owner,alt,src,text,disabled,onImage,onDescription}:{owner:MediaOwner;alt:string;src?:string;text:string;disabled:boolean;onDescription:(value:string)=>void;onImage:(value:any)=>void}){
+export function BlockImage({owner,alt,src,text,disabled,onImage,onDescription,allowUpload=true,allowAI=true}:{allowUpload?:boolean;allowAI?:boolean;owner:MediaOwner;alt:string;src?:string;text:string;disabled:boolean;onDescription:(value:string)=>void;onImage:(value:any)=>void}){
  const [description,setDescription]=useState(alt),[working,setWorking]=useState(false),[error,setError]=useState('');
  useEffect(()=>setDescription(alt),[alt]);
  async function run(kind:string,file?:File){
@@ -60,10 +60,10 @@ export function BlockImage({owner,alt,src,text,disabled,onImage,onDescription}:{
   try{
    const prepare=await browserProcessing();let prepared={};
    if(file&&prepare){const {prepareImage}=await import('./prepare-media');prepared=await prepareImage(file);}
-   let result=await api<{image?:any;generatedImage?:{data:string;mimeType:string}}>(endpoint(owner,kind),'POST',{...owner,description,textContext:text,...(file&&!prepare?{data:await base64(file)}:{}),...prepared});
+   let result=await api<{image?:any;generationId?:string;generatedImage?:{data:string;mimeType:string}}>(endpoint(owner,kind),'POST',{...owner,description,textContext:text,...(file&&!prepare?{data:await base64(file)}:{}),...prepared});
    if(result.generatedImage){const {prepareImage}=await import('./prepare-media'),raw=atob(result.generatedImage.data),bytes=Uint8Array.from(raw,value=>value.charCodeAt(0));
     const optimized=await prepareImage(new Blob([bytes],{type:result.generatedImage.mimeType}));
-    result=await api(endpoint(owner,'image-upload'),'POST',{...owner,description,...optimized,source:'ai'});
+    result=await api(endpoint(owner,'image-upload'),'POST',{...owner,description,...optimized,source:'ai',generationId:result.generationId});
    }
    if(!result.image)throw Error('No image was saved.');onImage(result.image);
   }
@@ -71,8 +71,8 @@ export function BlockImage({owner,alt,src,text,disabled,onImage,onDescription}:{
  }
  return <section className="block-image">
   <div className="image-label-row"><label>Image Description<input value={description} onChange={event=>{setDescription(event.target.value);onDescription(event.target.value);}} placeholder="Describe the image you want"/></label>
-   <button disabled={disabled||working||!description.trim()} onClick={()=>void run('image-generate')}>Generate Image</button></div>
-  <label className="upload-control">Upload Image<input type="file" accept="image/png,image/jpeg,image/webp" disabled={disabled||working||!description.trim()} onChange={event=>{const file=event.target.files?.[0];if(file)void run('image-upload',file);event.target.value='';}}/></label>
+   <button disabled={!allowAI||disabled||working||!description.trim()} onClick={()=>void run('image-generate')}>Generate Image</button></div>
+  {allowUpload&&<label className="upload-control">Upload Image<input type="file" accept="image/png,image/jpeg,image/webp" disabled={disabled||working||!description.trim()} onChange={event=>{const file=event.target.files?.[0];if(file)void run('image-upload',file);event.target.value='';}}/></label>}
   {src&&<img src={src} alt={alt} className="editor-image"/>}
   {disabled&&<small>Save this block before adding media.</small>}
   {working&&<p role="status">Creating and optimizing image…</p>}{error&&<p className="inline-error" role="alert">{error}</p>}

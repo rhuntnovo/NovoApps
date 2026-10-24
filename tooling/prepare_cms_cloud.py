@@ -4,13 +4,16 @@ from pathlib import Path
 from contextlib import closing
 
 CONTENT=('cms_providers','cms_courses','cms_modules','cms_pages','cms_page_revisions','cms_module_structures','cms_media_assets','cms_publications','cms_publication_leases','d1_migrations')
-CONTROL=('auth_user','auth_account','auth_session','auth_verification','platform_setup','platform_admin','cms_invitation','cms_grant','platform_audit','d1_migrations')
+CONTROL=('auth_user','auth_account','auth_session','auth_verification','platform_setup','platform_admin','cms_invitation','cms_grant','platform_audit','cms_ai_settings','cms_ai_grant','cms_ai_activity','cms_ai_artifact','cms_ai_reconciliation_event','d1_migrations')
 EPHEMERAL={'auth_session','auth_verification','cms_publication_leases'}
 def digest(data):return hashlib.sha256(data).hexdigest()
 def quote(name):return '"'+name.replace('"','""')+'"'
 def rows(connection,table,omit_ephemeral=False):
     if omit_ephemeral and table in EPHEMERAL:return []
     values=[dict(row) for row in connection.execute('SELECT * FROM '+quote(table))]
+    if omit_ephemeral and table=='cms_ai_settings':
+        for row in values:
+            for name in ['encrypted_key','key_nonce','key_version','credential_id']:row[name]=None
     # Self-referencing source records must precede their editions (D1 imports can
     # execute batches separately, so do not depend on a whole-file transaction).
     source={'cms_courses':'source_course_id','cms_modules':'source_module_id','cms_pages':'source_page_id'}.get(table)

@@ -161,3 +161,11 @@ Wrangler internal error occurred when two setup commands started concurrently;
 it did not require resetting either database. Never delete sandbox/daily state as
 a first response. `npm.cmd run test:cms-launcher` exercises real port contention,
 release and subprocess error reporting without touching CMS data.
+
+
+The [AI credentials/activity milestone](17-SUPER-ADMIN-AI-AND-ACTIVITY.md) now adds
+encrypted provider settings, scoped generation and usage/reconciliation tables to
+control D1. It has not been copied to remote staging. Cloud-copy preparation
+preserves activity but excludes current credential ciphertext/nonce/key-version
+and credential reference; configure credentials separately after a future import.
+The staged snapshot remains dated and must not overwrite newer local authoring.

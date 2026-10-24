@@ -402,7 +402,7 @@ test('AI settings survive separate requests and replacement, never return creden
   assert.equal((await(await context.request(path)).json() as any).configured,true);
   let usedSavedKey=false;
   globalThis.fetch=async(url:any,init:any)=>{
-   if(String(url).endsWith('/images/generations')){usedSavedKey=init.headers.Authorization==='Bearer '+replacement;return Response.json({data:[{b64_json:'aW1hZ2U='}]});}
+   if(String(url).endsWith('/images/generations')){usedSavedKey=new Headers(init.headers).get('Authorization')==='Bearer '+replacement;return Response.json({data:[{b64_json:'aW1hZ2U='}]});}
    if(String(url).endsWith('/image'))return Response.json({image:{src:'/assets/cms/test.webp'}});
    throw Error('Unexpected network request');
   };

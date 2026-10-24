@@ -20,7 +20,9 @@ try{
  if(authenticated){
   const file=new URL('../services/api-worker/.dev.vars.'+(storage?'storage':'auth'),import.meta.url);
   try{await writeFile(file,'# Generated local authentication secrets. Never commit or share.\nBETTER_AUTH_SECRET='+randomBytes(48).toString('hex')+'\nCMS_MEDIA_SECRET='+randomBytes(48).toString('hex')+'\n',{flag:'wx',mode:0o600});}catch(e){if(e.code!=='EEXIST')throw e;}
-  const config=await readFile(file,'utf8');
+  let config=await readFile(file,'utf8');
+  if(!/^AI_CREDENTIAL_MASTER_KEY=/m.test(config)){await writeFile(file,(config.endsWith('\n')?'':'\n')+'# Keep this encryption secret separately for credential recovery.\nAI_CREDENTIAL_KEY_ID=v1\nAI_CREDENTIAL_MASTER_KEY='+randomBytes(32).toString('hex')+'\n',{flag:'a',mode:0o600});config=await readFile(file,'utf8');}
+  if(!/^AI_CREDENTIAL_MASTER_KEY=[a-f0-9]{64}$/m.test(config))throw Error('The local AI encryption secret is incomplete. Preserve this file for recovery.');
   const bridge=config.match(/^CMS_MEDIA_SECRET=([a-f0-9]{96})$/m)?.[1];
   if(!bridge||!/^BETTER_AUTH_SECRET=[a-f0-9]{96}$/m.test(config))throw Error('The local auth secret file is incomplete. See docs/15 for recovery.');
   childEnv.CMS_MEDIA_SECRET=bridge;childEnv.CMS_AUTH_MODE='true';

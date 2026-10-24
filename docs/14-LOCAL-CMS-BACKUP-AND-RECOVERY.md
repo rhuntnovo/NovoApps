@@ -151,3 +151,11 @@ The local ZIP does not back up remote staging D1 or R2. Preserve the verified
 migration source ZIP/manifest privately and plan remote database exports plus
 private object backups before hosted authoring begins; see docs/16. A staging
 copy is not an ongoing backup or synchronization service.
+
+
+Authenticated provider AI settings add encrypted credential rows, grants, activity,
+asset receipts and reconciliation events to control D1, all included in private
+snapshots. The encryption master keys in ignored .dev.vars.auth/.storage remain
+excluded. Preserve those separately with their environment/version labels; a ZIP
+alone cannot decrypt provider API keys. Do not generate a replacement master key
+as a recovery shortcut. See docs/17 for rotation and restore boundaries.

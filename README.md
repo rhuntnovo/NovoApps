@@ -169,3 +169,16 @@ This uses a separate **Storage Sandbox** copy, with emulated R2 and local-only
 publishing. Sign in at http://127.0.0.1:5176/ using your existing account credentials.
 Edits in this sandbox do not update the daily CMS or cloud copy. Return to the daily
 dataset by stopping it and running `npm.cmd run dev:cms:auth`.
+
+## Super Admin AI Settings and Activity
+
+Authenticated CMS modes now provide provider-specific encrypted credentials,
+independent reviewer permissions for translation/Marin narration/images, and an
+activity ledger with UTC filters, reported usage, CSV export and reconciliation
+notes. Open **AI Settings** for the selected provider as Super Admin. Restart the
+authenticated launcher once after updating to apply control migrations and create
+its private encryption secret. Save pending edits first.
+
+See the [AI settings and reconciliation runbook](docs/17-SUPER-ADMIN-AI-AND-ACTIVITY.md)
+for setup, usage limitations and separate encryption-key backup/recovery. The
+ledger does not calculate your invoice or query OpenAI billing automatically.

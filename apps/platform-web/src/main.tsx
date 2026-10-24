@@ -39,14 +39,14 @@ function App(){
      {invitation&&<button type="button" onClick={()=>{setRegister(!register);setPassword('');}}>{register?'I Already Have An Account':'Create An Invited Account'}</button>}
     </fieldset></form>
    </section>:<>
-    <section><span className="eyebrow">Signed In As {session.owner?'Owner':'Reviewer'}</span><h1>{session.user.name}</h1><p>{session.user.email}</p>
+    <section><span className="eyebrow">Signed In As {session.owner?'Super Admin':'Reviewer'}</span><h1>{session.user.name}</h1><p>{session.user.email}</p>
      {invitation&&!accepted?<><p>Accept review access for {invitation.locale}. This invitation does not grant publishing or AI-generation access.</p><button className="primary" disabled={busy} onClick={()=>void action(async()=>{await request('v1/account/accept',{token});setAccepted(true);await refresh();setNotice('Invitation accepted. You can now open Content Studio.');})}>Accept Review Access</button></>:null}
      {(session.owner||session.grants.length>0)&&<a className="button primary" href={cms}>Open Content Studio →</a>}
      {!session.owner&&session.grants.length===0&&!invitation&&<p>No active course access. Ask the owner for a new invitation link.</p>}
      <button disabled={busy} onClick={()=>void action(async()=>{await request('auth/sign-out',{});await refresh();setInviteURL('');setInvites([]);setCourses([]);})}>Sign Out</button>
      <p className="muted">Keep any Content Studio tab with unsaved edits open when signing in again.</p>
     </section>
-    {session.owner&&<section><h2>Invite A Course Reviewer</h2><p>Reviewers can edit and review the selected language edition and read its primary language. They cannot publish, change course structure, or use your AI key.</p>
+    {session.owner&&<section><h2>Invite A Course Reviewer</h2><p>Reviewers can edit and review the selected language edition and read its primary language. They cannot publish or change course structure. AI generation is disabled by default; grant individual features in the provider’s AI Settings. Reviewers never receive the API key.</p>
      <form onSubmit={event=>{event.preventDefault();void action(async()=>{const course=editions.find(course=>course.id===editionId);if(!course)throw Error('Choose a language edition.');const result=await request<{url:string}>('v1/account/invitations',{email:inviteEmail,providerId:course.providerId,courseId:course.sourceCourseId,locale:course.locale});setInviteURL(result.url);setInviteEmail('');await refresh();});}}><fieldset disabled={busy}>
       <label>Reviewer Email<input type="email" required value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)}/></label>
       <label>Course / Language Edition<select required value={editionId} onChange={e=>setEditionId(e.target.value)}><option value="">Choose An Edition</option>{editions.map(course=><option key={course.id} value={course.id}>{course.metadata.title+' · '+course.locale}</option>)}</select></label>

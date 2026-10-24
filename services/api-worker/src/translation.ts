@@ -1,4 +1,5 @@
 import { ContentError } from './repository';
+import {HTTPException} from 'hono/http-exception';
 
 export type AIEnvironment = {OPENAI_API_KEY?:string;OPENAI_TRANSLATION_MODEL?:string};
 type Session = {apiKey:string|null;model:string;expires:number};
@@ -35,7 +36,7 @@ export async function translateFields(fields:Record<string,string>,language:stri
           schema:{type:'object',properties,required:Object.keys(fields),additionalProperties:false}}}
       })
     });
-  }catch{throw new ContentError(502,'Translation timed out or could not connect. Your existing draft was kept. Retry when ready.');}
+  }catch(error){if(error instanceof HTTPException)throw error;throw new ContentError(502,'Translation timed out or could not connect. Your existing draft was kept. Retry when ready.');}
   if(!response.ok) {
     const message=response.status===401?'OpenAI did not accept this API key.':
       response.status===429?'OpenAI rate or quota limit reached.':

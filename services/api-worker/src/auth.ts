@@ -10,7 +10,7 @@ import * as schema from '../../../database/control/schema';
 import {contentRepository} from './repository';
 
 export type AuthEnvironment={AUTH_REQUIRED?:string;CONTROL_DB?:D1Database;BETTER_AUTH_SECRET?:string;
- AUTH_ORIGIN?:string;CMS_ORIGIN?:string;PLATFORM_ORIGIN?:string;PREVIEW_ORIGIN?:string;LOCAL_AUTHORING?:string;CONTENT_DB:D1Database;CMS_MEDIA_SECRET?:string;CMS_MEDIA_URL?:string}&StorageEnvironment;
+ AUTH_ORIGIN?:string;CMS_ORIGIN?:string;PLATFORM_ORIGIN?:string;PREVIEW_ORIGIN?:string;LOCAL_AUTHORING?:string;CONTENT_DB:D1Database;CMS_MEDIA_SECRET?:string;CMS_MEDIA_URL?:string;AI_CREDENTIAL_MASTER_KEY?:string;AI_CREDENTIAL_KEY_ID?:string;AI_CREDENTIAL_PREVIOUS_MASTER_KEY?:string;AI_CREDENTIAL_PREVIOUS_KEY_ID?:string}&StorageEnvironment;
 export type Grant={id:string;provider_id:string;course_id:string;locale:string;role:'reviewer'};
 export type Principal={user:{id:string;name:string;email:string};owner:boolean;grants:Grant[]};
 export const control=(env:AuthEnvironment)=>{if(!env.CONTROL_DB)throw new HTTPException(503,{message:'Control database is not configured.'});return env.CONTROL_DB;};

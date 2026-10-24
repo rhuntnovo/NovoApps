@@ -124,7 +124,7 @@ def snapshot(connection, output, compact):
             raise BackupError('SQLite foreign-key check failed; no completed backup was created.')
         tables = {row[0] for row in target.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         counts = {name: target.execute('SELECT count(*) FROM "' + name + '"').fetchone()[0]
-                  for name in ('cms_providers', 'cms_courses', 'cms_modules', 'cms_pages', 'cms_page_revisions', 'cms_media_assets', 'cms_publications', 'cms_publication_leases', 'auth_user', 'auth_session', 'cms_invitation', 'cms_grant', 'platform_audit') if name in tables}
+                  for name in ('cms_providers', 'cms_courses', 'cms_modules', 'cms_pages', 'cms_page_revisions', 'cms_media_assets', 'cms_publications', 'cms_publication_leases', 'cms_ai_settings', 'cms_ai_grant', 'cms_ai_activity', 'cms_ai_artifact', 'cms_ai_reconciliation_event', 'auth_user', 'auth_session', 'cms_invitation', 'cms_grant', 'platform_audit') if name in tables}
     return {'method': 'vacuum-into' if compact else 'online-backup', 'integrityCheck': 'ok',
             'foreignKeyCheck': 'ok', **({'rowCounts': counts} if counts else {})}
 

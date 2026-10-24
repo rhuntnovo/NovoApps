@@ -1,6 +1,9 @@
 import {accountRoutes,authHandler,principal,type AuthEnvironment} from './auth';
 import {authorize,draftMedia,requestActor} from './authorization';
 import {mediaRoutes} from './media';
+import {aiRoutes} from './ai-routes';
+import {aiOperation,storageReady} from './ai';
+import {markArtifactsSaved} from './ai-artifacts';
 import { pages } from '../../../database/content/schema';
 import { drizzle } from 'drizzle-orm/d1';
 import { eq } from 'drizzle-orm';
@@ -69,10 +72,11 @@ app.get('/audio/cms/*',draftMedia);
 app.use('/api/v1/cms/*',authorize);
 const revisionInput=z.object({expectedRevision:z.number().int().positive()});
 app.route('/api/v1/cms',mediaRoutes);
+app.route('/api/v1/cms',aiRoutes);
 app.put('/api/v1/cms/modules/:id/page-order',async c=>{const input=z.object({expectedStructureRevision:z.number().int().positive(),pageIds:z.array(z.string().uuid()).min(1)}).parse(await jsonBody(c.req.raw));return c.json(await contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)).reorderPages(c.req.param('id'),input.expectedStructureRevision,input.pageIds));});
 app.post('/api/v1/cms/modules/:id/pages/:pageId/delete',async c=>{const input=z.object({expectedStructureRevision:z.number().int().positive()}).parse(await jsonBody(c.req.raw));return c.json(await contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)).deletePage(c.req.param('id'),c.req.param('pageId'),input.expectedStructureRevision));});
 app.get('/robots.txt',c=>c.text('User-agent: *\nDisallow: /\n'));
-app.get('/health',c=>c.json({status:'ok',mode:c.env.AUTH_REQUIRED==='true'?'local-authenticated':'local-authoring'}));
+app.get('/health',c=>c.json({status:'ok',mode:c.env.AUTH_REQUIRED==='true'?'local-authenticated':'local-authoring',aiCredentialStorage:c.env.AUTH_REQUIRED==='true'?(storageReady(c.env)?'ready':'unconfigured'):'local-session'}));
 app.get('/api/v1/cms/providers',async c=>c.json(await contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)).listProviders()));
 app.post('/api/v1/cms/providers',async c=>c.json(await contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)).createProvider(providerInput.parse(await jsonBody(c.req.raw))),201));
 app.get('/api/v1/cms/courses',async c=>c.json(await contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)).listCourses()));
@@ -97,10 +101,12 @@ app.put('/api/v1/cms/modules/:id/headings',async c=>{
 });
 app.put('/api/v1/cms/pages/:id/draft',async c=>{
   const input=savePageSchema.extend({sourceRevision:z.number().int().positive().optional()}).parse(await jsonBody(c.req.raw));
-  return c.json(await contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)).savePage(c.req.param('id'),input.expectedRevision,input.page,input.allowWordingChanges,input));
+  const result=await contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)).savePage(c.req.param('id'),input.expectedRevision,input.page,input.allowWordingChanges,input);
+  await markArtifactsSaved(c.env,requestActor.get(c.req.raw),c.req.param('id'),input.page);return c.json(result);
 });
-app.get('/api/v1/cms/translation-settings',c=>c.json(aiStatus(c.env)));
+app.get('/api/v1/cms/translation-settings',c=>c.env.AUTH_REQUIRED==='true'?c.json({error:'Choose a provider in AI Settings.'},400):c.json(aiStatus(c.env)));
 app.put('/api/v1/cms/translation-settings',async c=>{
+  if(c.env.AUTH_REQUIRED==='true')return c.json({error:'Use provider-specific AI Settings.'},400);
   const input=z.object({apiKey:z.string().trim().min(20).max(500).optional(),
     model:z.string().trim().regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]{1,99}$/).optional(),forget:z.boolean().optional()}).parse(await jsonBody(c.req.raw));
   configureAI(input,c.env);return c.json(aiStatus(c.env));
@@ -123,19 +129,24 @@ app.post('/api/v1/cms/pages/:id/translate',async c=>{
   if(!source)throw new ContentError(409,'Source page not found. Synchronize this edition.');
   const issue=target.sourceCourse.source_issues.find(item=>item.source_slide===source!.source_slide);
   if(issue)source={...source,presentation:{...source.presentation,source_note:issue.note}};
-  const fields=await translateFields(pageText(source),target.course.language,target.course.country,aiConfiguration(c.env));
+  const operation=await aiOperation(c.env,c.req.raw,target,'translate',{pageId:summary.id});
+  const fields=await translateFields(pageText(source),target.course.language,target.course.country,operation.config,operation.request);
+  await operation.recheck();
   const page=applyTranslation(source,fields);
-  return c.json(await repository.savePage(summary.id,input.expectedRevision,page,true,{
-    translationStatus:'draft',sourceRevision:summary.sourceCurrentRevision!,reviewNote:summary.reviewNote}));
+  const result=await repository.savePage(summary.id,input.expectedRevision,page,true,{
+    translationStatus:'draft',sourceRevision:summary.sourceCurrentRevision!,reviewNote:summary.reviewNote});
+  await operation.finish('saved');return c.json(result);
 });
 app.post('/api/v1/cms/modules/:id/translate-headings',async c=>{
   const input=revisionInput.parse(await jsonBody(c.req.raw));
   const repository=contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)),target=await repository.getModule(c.req.param('id'));
   if(!target.sourceCourse)throw new ContentError(400,'Create an edition first.');
   if(target.metadataRevision!==input.expectedRevision)throw new ContentError(409,'Module headings changed. Reload first.');
+  const operation=await aiOperation(c.env,c.req.raw,target,'translate');
   const fields=await translateFields({courseTitle:target.sourceCourse.title,moduleTitle:target.sourceCourse.module.title,track:target.sourceCourse.track},
-    target.course.language,target.course.country,aiConfiguration(c.env));
-  return c.json(await repository.saveHeadings(target.id,input.expectedRevision,headingsInput.parse(fields) as ModuleHeadings));
+    target.course.language,target.course.country,operation.config,operation.request);
+  await operation.recheck();const result=await repository.saveHeadings(target.id,input.expectedRevision,headingsInput.parse(fields) as ModuleHeadings);
+  await operation.finish('saved');return c.json(result);
 });
 app.get('/api/v1/cms/modules/:id/export',async c=>{
   const draft=await contentRepository(c.env.CONTENT_DB,requestActor.get(c.req.raw)).getModule(c.req.param('id'));

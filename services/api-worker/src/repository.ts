@@ -7,7 +7,7 @@ import { courseSchema, canonicalChanged, sameBlockIds, withoutAudio, localeKey, 
   type PublishedCourse, type CoursePage, type AuthoringModule, type ModuleHeadings } from '@novoapps/content-model';
 
 export class ContentError extends Error {
-  constructor(public status:400|404|409|422|502|503, message:string) { super(message); }
+  constructor(public status:400|403|404|409|422|502|503, message:string) { super(message); }
 }
 const digest = async (value:unknown) => [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value))))]
   .map(byte=>byte.toString(16).padStart(2,'0')).join('');

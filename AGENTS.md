@@ -189,3 +189,24 @@ not a global transaction: reconcile auditPending/crash records before hosting.
 Do not relax the loopback guard, provision public signup, send email or deploy
 the CMS as part of storage preparation. Hosted identity/recovery, credential policy,
 limits and device testing remain subsequent milestones.
+
+## Super Admin AI and Activity Reconciliation (2026-10-24)
+
+Read docs/17-SUPER-ADMIN-AI-AND-ACTIVITY.md and ADR 0015 before AI credentials,
+generation permissions, usage tracking or reconciliation work. In authenticated
+modes provider keys are write-only AES-GCM ciphertext in control D1, with a
+separate Worker Secret master key. This supersedes the older memory-only guidance
+for those modes; trusted dev:cms retains legacy local memory configuration. Never
+read/expose .dev.vars.auth/.storage, keys or master secrets in agent output. Back
+up encryption secrets separately. Cloud-copy tooling excludes credential material.
+
+Only the global Super Admin manages provider settings, keys, feature grants and
+activity/reconciliation. AI permissions extend existing exact provider/course/locale
+reviewer grants; they never grant publication, structure changes or arbitrary media
+attachment. Preserve all canonical wording/review behavior. Record an activity row
+before spending; failed reservation means no AI request. Keep only allowlisted
+identifiers/numeric usage, no prompts or raw upstream errors. Missing usage is
+unknown, not zero; timed-out requests may still be billed. Never auto-retry paid
+calls or claim the ledger is an invoice. CSV/reconciliation events retain history.
+Tests stub paid calls; browser validation uses disposable identities and fake keys.
+This milestone authorizes neither hosted deployment nor email/recovery rollout.

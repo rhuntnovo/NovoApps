@@ -1,4 +1,6 @@
 import {r2Mode,readPrivate} from './r2-storage';
+import {requireFeature,capabilities} from './ai';
+import {reviewerArtifacts,type ReviewedArtifact} from './ai-artifacts';
 import type {Context,Next} from 'hono';
 import {HTTPException} from 'hono/http-exception';
 import {contentRepository} from './repository';
@@ -12,15 +14,18 @@ export const canWrite=(who:Principal,row:{providerId:string|null;id:string;sourc
 const canonical=(value:unknown):string=>JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.entries(item).sort(([a],[b])=>a.localeCompare(b))):item);
 // Allow text review, not arbitrary JSON replacement. Preserve IDs, order, layouts,
 // media ownership and unknown schema extensions. A changed script detaches audio.
-export function reviewerPage(before:CoursePage,after:CoursePage){
+export function reviewerPage(before:CoursePage,after:CoursePage,artifacts:ReviewedArtifact[]=[]){
  const expected=structuredClone(before);expected.title=after.title;
  if(typeof expected.presentation?.source_note==='string')expected.presentation.source_note=after.presentation?.source_note;
- for(const block of expected.blocks){const next=after.blocks.find(item=>item.id===block.id);if(!next)return false;block.text=next.text;if(block.image&&next.image)block.image.alt=next.image.alt;}
+ for(const block of expected.blocks){const next=after.blocks.find(item=>item.id===block.id);if(!next)return false;block.text=next.text;const generated=artifacts.find(item=>item.blockId===block.id&&item.image&&next.image&&item.image.src===next.image.src);if(generated)block.image={...generated.image,alt:next.image!.alt};else if(block.image&&next.image)block.image.alt=next.image.alt;}
  const prompt=(a:any,b:any)=>{if(a&&b)for(const key of ['title','prompt','time'])if(key in a||key==='time'&&typeof b[key]==='string')a[key]=b[key];};
  prompt(expected.reflection,after.reflection);
  if(expected.guided&&after.guided){expected.guided.narration=after.guided.narration;prompt(expected.guided.facilitator,after.guided.facilitator);
   for(const segment of expected.guided.segments||[]){const next=after.guided.segments?.find(item=>item.block_id===segment.block_id);if(!next)return false;
-   if(segment.text!==next.text||next.audio===undefined&&next.audio_source===undefined){segment.text=next.text;delete segment.audio;delete segment.audio_source;}}
+   if(segment.text!==next.text||next.audio===undefined&&next.audio_source===undefined){segment.text=next.text;delete segment.audio;delete segment.audio_source;}
+   const generated=artifacts.find(item=>item.blockId===segment.block_id&&!!item.audio&&item.audio===next.audio&&item.script===next.text);if(generated){segment.audio=generated.audio;segment.audio_source='ai';}
+  }
+  if(after.guided.narration_mode==='marin_opus'&&artifacts.some(item=>item.audio&&after.guided?.segments?.some(segment=>segment.audio===item.audio)))expected.guided.narration_mode='marin_opus';
  }
  return canonical(expected)===canonical(after);
 }
@@ -38,12 +43,17 @@ export async function authorize(c:Context<{Bindings:AuthEnvironment}>,next:Next)
  if(moduleId){module=await repo.getModule(moduleId);if(!readable.some(row=>row.id===module!.courseId))deny();}
  if(!who.owner){
   if(method==='GET'){
-   if(!list&&!/^\/modules\/[^/]+(?:\/export)?$/.test(path))deny();
+   if(!list&&!/^\/modules\/[^/]+(?:\/(?:export|ai-capabilities))?$/.test(path)&&path!=='/media-capabilities')deny();
+   if(path==='/media-capabilities'&&!await control(c.env).prepare('SELECT a.grant_id FROM cms_ai_grant a JOIN cms_grant g ON g.id=a.grant_id WHERE g.user_id=? AND (a.images_enabled=1 OR a.narration_enabled=1)').bind(who.user.id).first())deny();
   }else if(method==='PUT'&&/^\/pages\/[^/]+\/draft$/.test(path)&&module){
    const row=courseRows.find(row=>row.id===module!.courseId);if(!row||!canWrite(who,row))deny();
    const input=await c.req.raw.clone().json() as any,after=pageSchema.parse(input.page);
    const summary=module.pages.find(page=>page.id===pageId),before=module.course.module.pages.find(page=>page.id===summary?.canonicalId);
-   if(!before||!reviewerPage(before,after)||input.allowStructureChanges||(input.removedBlockIds?.length))deny();
+   const artifacts=await reviewerArtifacts(c.env,c.req.raw,who,module,pageId!,after);
+   if(!before||!reviewerPage(before,after,artifacts)||input.allowStructureChanges||(input.removedBlockIds?.length))deny();
+  }else if(method==='POST'&&module&&(/^\/pages\/[^/]+\/translate$/.test(path)||/^\/modules\/[^/]+\/translate-headings$/.test(path)||/^\/modules\/[^/]+\/pages\/[^/]+\/media\/(speech|image-generate|image-upload)$/.test(path))){
+   const row=courseRows.find(row=>row.id===module!.courseId);if(!row||!canWrite(who,row))deny();
+   await requireFeature(c.env,c.req.raw,module,path.endsWith('/speech')?'narration':path.includes('/media/')?'images':'translate');
   }else deny();
  }
  // Unknown endpoints must never inherit an implicit write permission for reviewers.
@@ -72,7 +82,11 @@ export async function draftMedia(c:Context<{Bindings:AuthEnvironment}>){
  }
  // Owners may preview newly uploaded, not-yet-attached files; the bridge secret
  // still prevents bypassing sign-in through the local media helper.
- if(!allowed&&!who.owner)deny();
+ if(!allowed&&!who.owner){
+  const rows=(await control(c.env).prepare('SELECT module_id,metadata_json FROM cms_ai_artifact WHERE actor_id=?').bind(who.user.id).all<{module_id:string;metadata_json:string}>()).results;
+  for(const row of rows){const asset=JSON.parse(row.metadata_json);if(asset.audio!==path&&asset.image?.src!==path&&asset.image?.small_src!==path)continue;const module=await repo.getModule(row.module_id),course=courses.find(course=>course.id===module.courseId);if(!course||!canWrite(who,course))continue;const caps=await capabilities(c.env,c.req.raw,module);if(asset.audio?caps.narration:caps.images){allowed=true;expected={providerId:module.provider.id,providerSlug:module.provider.slug,courseId:course.sourceCourseId||course.id};break;}}
+  if(!allowed)deny();
+ }
  if(r2Mode(c.env))return readPrivate(c.env,path,c.req.header('Range'),who.owner?undefined:expected);
  const response=await fetch((c.env.CMS_MEDIA_URL||'http://127.0.0.1:8789')+path,{headers:{'X-CMS-Bridge':c.env.CMS_MEDIA_SECRET||'',...(c.req.header('Range')?{Range:c.req.header('Range')!}:{})}});
  const headers=new Headers(response.headers);headers.set('Cache-Control','no-store');headers.set('X-Robots-Tag','noindex, nofollow');
