@@ -110,9 +110,19 @@ accountRoutes.post('/register',async c=>{
  // Registering alone grants no content access. Acceptance checks a fresh session.
  return c.json({created:true},201);
 });
+accountRoutes.get('/pending-invitations',async c=>{
+ const who=await principal(c.env,c.req.raw.headers);if(!who)throw new HTTPException(401,{message:'Sign in to see your invitations.'});
+ const rows=(await control(c.env).prepare('SELECT id,provider_id,course_id,locale,expires_at FROM cms_invitation WHERE email=? AND consumed_at IS NULL AND revoked_at IS NULL AND expires_at>? ORDER BY created_at DESC').bind(who.user.email.toLowerCase(),Date.now()).all<{id:string;provider_id:string;course_id:string;locale:string;expires_at:number}>()).results;
+ const repo=contentRepository(c.env.CONTENT_DB),courses=await repo.listCourses(),providers=await repo.listProviders();
+ return c.json(rows.flatMap(row=>{const course=courses.find(course=>course.providerId===row.provider_id&&(course.sourceCourseId||course.id)===row.course_id&&course.locale===row.locale);return course?[{id:row.id,providerName:providers.find(provider=>provider.id===row.provider_id)?.name||'Content Provider',courseTitle:course.metadata.title,locale:row.locale,primary:!course.sourceCourseId,expiresAt:row.expires_at}]:[];}));
+});
 accountRoutes.post('/accept',async c=>{
  const who=await principal(c.env,c.req.raw.headers);if(!who)throw new HTTPException(401,{message:'Sign in before accepting the invitation.'});
- const {token}=tokenInput.parse(await json(c.req.raw)),row=await invitation(c.env,token),db=control(c.env);
+ const input=z.union([tokenInput,z.object({invitationId:z.string().uuid()})]).parse(await json(c.req.raw)),db=control(c.env);
+ // A verified signed-in recipient can recover their own pending invitation
+ // without keeping the original bearer fragment in browser storage.
+ const row='token' in input?await invitation(c.env,input.token):await db.prepare('SELECT id,email,provider_id,course_id,locale,expires_at FROM cms_invitation WHERE id=? AND email=? AND consumed_at IS NULL AND revoked_at IS NULL AND expires_at>?').bind(input.invitationId,who.user.email.toLowerCase(),Date.now()).first<Invitation>();
+ if(!row)throw new HTTPException(400,{message:'This invitation is invalid, expired or already used.'});
  if(who.user.email.toLowerCase()!==row.email)throw new HTTPException(403,{message:'Sign in with the email address invited by the owner.'});
  if(accountEmailMode(c.env)==='preview'&&!who.user.emailVerified)throw new HTTPException(403,{message:'Verify your email address before accepting review access.'});
  const now=Date.now(),grantId=v7();
@@ -130,13 +140,13 @@ accountRoutes.get('/invitations',async c=>{
 accountRoutes.post('/invitations',async c=>{
  const who=await owner(c.env,c.req.raw.headers),input=z.object({email,providerId:z.string().uuid(),courseId:z.string().uuid(),locale:z.string().min(2).max(40)}).parse(await json(c.req.raw));
  const courses=await contentRepository(c.env.CONTENT_DB).listCourses();
- if(!courses.some(course=>course.sourceCourseId===input.courseId&&course.providerId===input.providerId&&course.locale===input.locale))
-  throw new HTTPException(400,{message:'Choose an existing translated edition and its primary course.'});
+ const selectedCourse=courses.find(course=>(course.sourceCourseId||course.id)===input.courseId&&course.providerId===input.providerId&&course.locale===input.locale);
+ if(!selectedCourse)throw new HTTPException(400,{message:'Choose an existing primary course or language edition.'});
  const token=Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join(''),id=v7(),now=Date.now(),expires=now+7*86400000;
  await control(c.env).prepare("INSERT INTO cms_invitation(id,email,token_hash,provider_id,course_id,locale,role,created_by,created_at,expires_at) VALUES(?,?,?,?,?,?,'reviewer',?,?,?)").bind(id,input.email,await tokenHash(token),input.providerId,input.courseId,input.locale,who.user.id,now,expires).run();
  await audit(c.env,who.user.id,'invitation.create',id,201);
  const url=c.env.PLATFORM_ORIGIN+'/#invite='+token;
- const delivery=accountEmailMode(c.env)==='preview'?deliverAccountEmail(c.env,{to:input.email,purpose:'invitation',url,expiresAt:expires,context:'Review Access: '+courses.find(course=>course.sourceCourseId===input.courseId&&course.providerId===input.providerId&&course.locale===input.locale)!.metadata.title+' · '+input.locale}):{mode:'disabled'};
+ const delivery=accountEmailMode(c.env)==='preview'?deliverAccountEmail(c.env,{to:input.email,purpose:'invitation',url,expiresAt:expires,context:'Review Access: '+selectedCourse.metadata.title+' · '+input.locale}):{mode:'disabled'};
  return c.json({id,url,expiresAt:expires,delivery},201);
 });
 accountRoutes.post('/invitations/:id/revoke',async c=>{

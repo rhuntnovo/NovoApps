@@ -193,3 +193,11 @@ session open in one profile when testing recovery in a second profile.
 
 See [account email and recovery](docs/18-ACCOUNT-EMAIL-AND-RECOVERY.md) for testing,
 link expiry, session revocation and remaining hosted-email requirements.
+
+Course invitations now include primary English courses as well as translated
+editions. Existing invited accounts can sign in at http://127.0.0.1:5176/ and accept
+their **Pending Course Invitations** after verification; the original link is not
+needed again. Owner status refreshes on focus and while visible, with manual
+**Refresh Invitations** available. English reviewers save wording-unlocked,
+review-required drafts; publication and structure changes remain restricted.
+See [the invitation workflow](docs/18-ACCOUNT-EMAIL-AND-RECOVERY.md).

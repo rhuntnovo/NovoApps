@@ -8,7 +8,7 @@ export function EmailActionPanel({action,request,onComplete,onCancel}:{action:Em
   if(action.kind==='reset'&&password!==confirmation){setError('The passwords do not match.');return;}
   setBusy(true);try{
    await request('v1/account/'+(action.kind==='verify'?'verify-email':'reset-password'),{token:action.token,...(action.kind==='reset'?{newPassword:password}:{})});
-   await onComplete(action.kind==='verify'?'Email verified. Sign in if needed, then return to your invitation to accept access.':'Password reset. Existing sessions have been signed out. Sign in with your new password. Keep any editor tab with unsaved work open.');
+   await onComplete(action.kind==='verify'?'Email verified. Sign in if needed, then accept your pending course invitation below.':'Password reset. Existing sessions have been signed out. Sign in with your new password. Keep any editor tab with unsaved work open.');
   }catch(error){setError(String(error));}finally{setPassword('');setConfirmation('');setBusy(false);}
  }
  return <section aria-labelledby="email-action-title"><span className="eyebrow">Account Security</span><h1 id="email-action-title">{action.kind==='verify'?'Verify Your Email':'Choose A New Password'}</h1>

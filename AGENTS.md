@@ -228,3 +228,21 @@ mailbox ownership. Preserve original local data/IDs and the dated staging snapsh
 Hosted verified-account enforcement, real email delivery, distributed limits and
 deployment remain later work. This user-approved local milestone supersedes older
 no-email/recovery guidance only within this development scope.
+
+## Recoverable Invitations and Primary Reviewers (2026-10-26)
+
+Read ADR 0017 and docs/18 before invitation or reviewer permission changes. The
+user authorized primary English course text review/editing as well as translated
+editions. Reuse exact provider/primary-course/locale reviewer grants; never grant
+global administration or broaden a translation-only grant to primary writing.
+Primary edits must explicitly unlock wording, retain snapshots/revisions/actor
+attribution and require review. Structure/headings/publishing/settings remain
+owner operations; primary reviewer AI has not been enabled.
+
+Signed-in recipients discover their own active pending invitations after verifying
+or reopening the account app. Acceptance by stable ID requires current recipient,
+verification and invitation-state checks; IDs are not bearer authority. Keep token
+registration compatibility and never persist fragments or auto-accept on verification.
+Refresh account/invitation status on focus/visibility and while visibly open, with
+manual refresh controls. Tests use disposable identities/content only; no live
+grants or curriculum should be silently changed by this fix.

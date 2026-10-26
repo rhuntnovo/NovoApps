@@ -133,3 +133,59 @@ test('email endpoints retain origin, local-only and native-route boundaries, and
   await c.data(await c.request('/api/v1/account/forgot-password','POST',{email:'owner@example.test'}),429);assert.equal((await previews(c,owner)).length,0);
  }finally{c.close();}
 });
+
+test('verified recipients can recover and accept their own pending invitation after closing the original link',async()=>{
+ const c=await context();try{
+  const owner=await c.setup(),created=await invite(c,owner);
+  await c.data(await c.request('/api/v1/account/pending-invitations'),401);
+  await c.data(await c.request('/api/v1/account/register','POST',{name:'Reviewer',password,token:created.token}),201);const reviewer=await c.signIn('reviewer@example.test');
+  const pending=await c.data(await c.request('/api/v1/account/pending-invitations','GET',undefined,reviewer),200);assert.equal(pending.length,1);assert.equal(pending[0].id,created.id);assert.equal(pending[0].locale,'es-ni');assert.ok(pending[0].courseTitle);assert.ok(pending[0].providerName);assert.equal(JSON.stringify(pending).includes(created.token),false);
+  assert.deepEqual(await c.data(await c.request('/api/v1/account/pending-invitations','GET',undefined,owner),200),[]);
+  await c.data(await c.request('/api/v1/account/accept','POST',{invitationId:created.id},owner),400);
+  await c.data(await c.request('/api/v1/account/accept','POST',{invitationId:created.id},reviewer),403);
+  const verification=await message(c,owner,'verification','reviewer@example.test');await c.data(await c.request('/api/v1/account/verify-email','POST',{token:linkToken(verification,'verify')}),200);
+  assert.equal(c.control.sqlite.prepare('SELECT count(*) AS n FROM cms_grant').get()!.n,0); // Verification alone never grants access.
+  const signedInAgain=await c.signIn('reviewer@example.test');
+  await c.data(await c.request('/api/v1/account/accept','POST',{invitationId:pending[0].id},signedInAgain),200);
+  assert.deepEqual(await c.data(await c.request('/api/v1/account/pending-invitations','GET',undefined,signedInAgain),200),[]);
+  assert.equal((await c.data(await c.request('/api/v1/account/session','GET',undefined,signedInAgain),200)).grants.length,1);
+  const adminList=await c.data(await c.request('/api/v1/account/invitations','GET',undefined,owner),200);assert.ok(adminList.find((row:any)=>row.id===created.id).consumed_at);
+  await c.data(await c.request('/api/v1/account/accept','POST',{invitationId:created.id},signedInAgain),400);
+  const stored=c.control.sqlite.prepare('SELECT provider_id,course_id FROM cms_invitation WHERE id=?').get(created.id)!;
+  const make=async()=>c.data(await c.request('/api/v1/account/invitations','POST',{email:'reviewer@example.test',providerId:stored.provider_id,courseId:stored.course_id,locale:'es-ni'},owner),201);
+  const revoked=await make();await c.data(await c.request('/api/v1/account/invitations/'+revoked.id+'/revoke','POST',{},owner),200);
+  const expired=await make();c.control.sqlite.prepare('UPDATE cms_invitation SET expires_at=0 WHERE id=?').run(expired.id);
+  assert.deepEqual(await c.data(await c.request('/api/v1/account/pending-invitations','GET',undefined,signedInAgain),200),[]);
+  for(const invitationId of [revoked.id,expired.id])await c.data(await c.request('/api/v1/account/accept','POST',{invitationId},signedInAgain),400);
+ }finally{c.close();}
+});
+
+test('primary English reviewers can save scoped review drafts while preserving wording history and owner-only operations',async()=>{
+ const c=await context();try{
+  const owner=await c.setup(),{moduleId}=await c.data(await c.request('/api/v1/cms/import','POST',source,owner),201),primary=await c.data(await c.request('/api/v1/cms/modules/'+moduleId,'GET',undefined,owner),200);
+  const {moduleId:spanishId}=await c.data(await c.request('/api/v1/cms/modules/'+moduleId+'/editions','POST',{language:'es',region:'NI'},owner),201);
+  const other=await c.data(await c.request('/api/v1/cms/providers','POST',{name:'Other Provider',slug:'other-provider'},owner),201);
+  const {moduleId:otherModule}=await c.data(await c.request('/api/v1/cms/import','POST',{providerId:other.id,course:source},owner),201);
+  const created=await c.data(await c.request('/api/v1/account/invitations','POST',{email:'staff@example.test',providerId:primary.provider.id,courseId:primary.courseId,locale:'en-global'},owner),201);
+  await c.data(await c.request('/api/v1/account/register','POST',{name:'English Staff',password,token:linkToken(created,'invite')}),201);const staff=await c.signIn('staff@example.test');
+  const verification=await message(c,owner,'verification','staff@example.test');await c.data(await c.request('/api/v1/account/verify-email','POST',{token:linkToken(verification,'verify')}),200);
+  const pending=await c.data(await c.request('/api/v1/account/pending-invitations','GET',undefined,staff),200);assert.equal(pending[0].primary,true);
+  await c.data(await c.request('/api/v1/account/accept','POST',{invitationId:created.id},staff),200);
+  const modules=await c.data(await c.request('/api/v1/cms/modules','GET',undefined,staff),200);assert.deepEqual(modules.map((row:any)=>row.id),[moduleId]);
+  for(const id of [spanishId,otherModule])await c.data(await c.request('/api/v1/cms/modules/'+id,'GET',undefined,staff),403);
+  const page=structuredClone(primary.course.module.pages[4]),state=primary.pages[4],url='/api/v1/cms/pages/'+state.id+'/draft';page.blocks[0].text+=' Staff review draft.';
+  const body={expectedRevision:1,page,allowWordingChanges:true};
+  await c.data(await c.request(url,'PUT',{...body,allowWordingChanges:false},staff),400);
+  const saved=await c.data(await c.request(url,'PUT',body,staff),200);assert.equal(saved.wordingReviewRequired,true);
+  const baseline=JSON.parse(c.content.sqlite.prepare('SELECT document_json FROM cms_page_revisions WHERE page_id=? AND revision=1').get(state.id)!.document_json as string);assert.deepEqual(baseline,source.module.pages[4]);
+  assert.deepEqual(JSON.parse(c.content.sqlite.prepare('SELECT source_document_json FROM cms_modules WHERE id=?').get(moduleId)!.source_document_json as string),source);
+  const actor=(await c.data(await c.request('/api/v1/account/session','GET',undefined,staff),200)).user.id;assert.equal(c.content.sqlite.prepare('SELECT created_by FROM cms_page_revisions WHERE page_id=? AND revision=2').get(state.id)!.created_by,actor);
+  const changed=structuredClone(page);changed.blocks.reverse();await c.data(await c.request(url,'PUT',{...body,page:changed,expectedRevision:2},staff),403);
+  await c.data(await c.request(url,'PUT',body,staff),409);
+  for(const path of ['/modules/'+moduleId+'/publish','/modules/'+moduleId+'/pages','/providers'])await c.data(await c.request('/api/v1/cms'+path,'POST',{},staff),403);
+  await c.data(await c.request('/api/v1/cms/providers/'+primary.provider.id+'/ai-settings','GET',undefined,staff),403);
+  const cap=await c.data(await c.request('/api/v1/cms/modules/'+moduleId+'/ai-capabilities','GET',undefined,staff),200);assert.equal(cap.images,false);assert.equal(cap.narration,false);
+  await c.data(await c.request('/api/v1/account/invitations/'+created.id+'/revoke','POST',{},owner),200);
+  await c.data(await c.request(url,'PUT',{...body,expectedRevision:2},staff),403);
+ }finally{c.close();}
+});

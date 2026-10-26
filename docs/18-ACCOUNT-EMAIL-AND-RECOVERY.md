@@ -135,3 +135,53 @@ email sending accompanies this local milestone.
 Reference: [Better Auth email/password workflows](https://better-auth.com/docs/authentication/email-password)
 and [email verification](https://better-auth.com/docs/concepts/email). Behavior was
 also checked against the installed Better Auth 1.7.12 source.
+
+## Pending Invitations and English Reviewers (2026-10-26)
+
+Account creation and email verification are followed by an explicit course
+acceptance. Previously, the invitation fragment could be lost between those steps,
+leaving the account verified but without a grant. The account screen now lists
+**Pending Course Invitations** for the signed-in email, including after a fresh
+sign-in or verification in another tab/browser.
+
+For an already-created account: open http://127.0.0.1:5176/, sign in, and choose
+**Accept Review Access** under the pending course. If unverified, request/confirm
+verification first. No replacement account or invitation is needed while the
+original invitation is valid. Expired/revoked invitations need the owner's action.
+Verification alone never grants a course role.
+
+The owner sees **Access Active** after acceptance. Visible account pages refresh
+on focus/visibility and every 15 seconds; **Refresh Invitations** and **Refresh
+Account Status** provide immediate checks without discarding form inputs.
+
+The invitation **Course / Language** dropdown now includes primary English courses,
+labelled **(Primary)**, alongside translations. Inviting a primary-course reviewer
+grants edits to that exact course/provider/locale. In Content Studio, select
+**Create Wording Changes For Review** before changing primary text, then **Save**.
+The imported original and prior revisions remain; edits require content review
+before publication. Source changes also make dependent translation reviews stale
+through the existing source-revision checks.
+
+Reviewers can edit existing text, Scripture, questions and narration scripts.
+Page/block structure, headings, arbitrary media replacement, publication, invitation
+management and AI settings remain Super Admin operations. Existing translation
+AI permissions are unchanged; primary-course reviewer AI is not added here.
+Translation-only reviewers still cannot edit English. English-only reviewers
+cannot read or edit Spanish without a separate grant. Revocation applies to an
+already-signed-in reviewer on subsequent API requests.
+
+Pending lists contain only the current recipient's live invitation IDs and course
+labels. Acceptance by ID rechecks signed-in email, verification, expiry, revocation
+and prior consumption; no invitation token is returned by these lists or persisted
+in browser storage. Stable IDs/roles/schema are unchanged. See ADR 0017.
+
+
+Validation for this update: all 61 CMS/model/API/media regression tests and the
+CMS/account/preview builds passed. Disposable real local D1 plus isolated Chrome
+account contexts verified fresh-sign-in invitation recovery, verification followed
+by explicit acceptance without the original fragment, automatic owner status refresh,
+Spanish default selection, primary English invitations, wording unlock/save/review
+flags, and restricted publishing/settings. Phone/desktop layouts were inspected.
+Edge's automated debugging endpoint was unavailable, so this update does not claim
+an automated Edge browser pass. Tests used disposable accounts/content only; no
+external email, paid request, live permission change or publication occurred.

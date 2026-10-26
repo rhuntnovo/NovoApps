@@ -10,7 +10,7 @@ import {principal,audit,control,type AuthEnvironment,type Principal} from './aut
 export const requestActor=new WeakMap<Request,string>();
 const deny=()=>{throw new HTTPException(403,{message:'Your account does not have permission for this content or operation.'});};
 export const canRead=(who:Principal,row:{providerId:string|null;id:string;sourceCourseId:string|null;locale:string})=>who.owner||who.grants.some(grant=>grant.provider_id===row.providerId&&grant.course_id===(row.sourceCourseId||row.id)&&(!row.sourceCourseId||grant.locale===row.locale));
-export const canWrite=(who:Principal,row:{providerId:string|null;id:string;sourceCourseId:string|null;locale:string})=>who.owner||!!row.sourceCourseId&&who.grants.some(grant=>grant.provider_id===row.providerId&&grant.course_id===row.sourceCourseId&&grant.locale===row.locale);
+export const canWrite=(who:Principal,row:{providerId:string|null;id:string;sourceCourseId:string|null;locale:string})=>who.owner||who.grants.some(grant=>grant.provider_id===row.providerId&&grant.course_id===(row.sourceCourseId||row.id)&&grant.locale===row.locale);
 const canonical=(value:unknown):string=>JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.entries(item).sort(([a],[b])=>a.localeCompare(b))):item);
 // Allow text review, not arbitrary JSON replacement. Preserve IDs, order, layouts,
 // media ownership and unknown schema extensions. A changed script detaches audio.

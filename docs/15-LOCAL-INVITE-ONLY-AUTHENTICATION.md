@@ -187,3 +187,15 @@ Super Admin email previews simulate invitation/verification/reset delivery witho
 external sending. Existing local accounts retain access; new invitation acceptance
 requires verification. Hosted delivery, mandatory verified sessions and distributed
 limits remain later work. Account previews are not an emergency owner-recovery bypass.
+
+## Primary Course Reviewer Update (2026-10-26)
+
+The user explicitly extended invitations to primary English courses. This
+supersedes the translated-editions-only constraint above: exact provider/primary
+course/locale grants permit existing text/script/question edits in either the
+selected primary or translated edition. English text changes require an explicit
+wording unlock and remain review-required drafts. Publishing, structure/headings,
+arbitrary media and administrative settings remain restricted. Existing translation
+AI permissions are unchanged. Translation-only grants retain primary read access
+without primary write access. See ADR 0017 and docs/18 for pending invitation
+recovery after verification and fresh sign-in.

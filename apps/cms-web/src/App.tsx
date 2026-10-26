@@ -51,7 +51,7 @@ export function App({access}:{access:Access}){
   const editions=visibleCourses.filter(item=>(item.sourceCourseId||item.id)===primaryCourseId);
   function contextLabel(course:CourseSummary){try{return new Intl.DisplayNames(['en'],{type:'language'}).of(course.metadata.language)+' · '+(course.metadata.country.toLowerCase()==='global'?'Global':new Intl.DisplayNames(['en'],{type:'region'}).of(course.metadata.country.toUpperCase()))+(!course.sourceCourseId?' (Primary)':'');}catch{return course.locale;}}
   function chooseCourse(id:string){if(!mayLeave())return;setCourseId(id);const selected=modules.find(item=>item.courseId===id&&item.canonicalId===module?.course.module.id)||modules.find(item=>item.courseId===id);if(selected)void action(async()=>{await loadModule(selected.id,pageId);});else{setModule(null);setDraft(null);}}
-  const writable=owner||!!module?.sourceModuleId&&access.grants.some(grant=>grant.provider_id===module.provider.id&&grant.locale===module.course.language+'-'+module.course.country.toLowerCase()&&grant.course_id===primaryCourseId);
+  const writable=owner||!!module&&access.grants.some(grant=>grant.provider_id===module.provider.id&&grant.locale===module.course.language+'-'+module.course.country.toLowerCase()&&grant.course_id===primaryCourseId);
   const mediaOwner=(blockId:string)=>({moduleId:module!.id,pageId:summary!.id,blockId,expectedRevision:summary!.revision});
   function mayLeave(){return !busy&&!recording&&(!dirty||window.confirm('Discard unsaved draft changes?'));}
   function selectPage(selected:AuthoringModule,id:string){
@@ -72,9 +72,9 @@ export function App({access}:{access:Access}){
   }
   useEffect(()=>{void(async()=>{
     try{
-      const {providerRows,moduleRows}=await library();
+      const {providerRows,courseRows,moduleRows}=await library();
       const last=sessionStorage.getItem('novoapps.cms.last-module');
-      if(moduleRows.length)await loadModule(moduleRows.find(item=>item.id===last)?.id||moduleRows.find(item=>!owner&&item.sourceModuleId&&access.grants.some(grant=>grant.provider_id===item.providerId&&grant.locale===item.locale))?.id||moduleRows[0].id);
+      if(moduleRows.length)await loadModule(moduleRows.find(item=>item.id===last)?.id||moduleRows.find(item=>!owner&&access.grants.some(grant=>grant.provider_id===item.providerId&&grant.locale===item.locale&&courseRows.some(course=>course.id===item.courseId&&(course.sourceCourseId||course.id)===grant.course_id)))?.id||moduleRows[0].id);
       else setProviderId(providerRows[0]?.id||'');
       if(owner&&access.mode==='local')setAI(await api<AIStatus>('/translation-settings'));
     }catch(error){setError(String(error));}
@@ -285,7 +285,7 @@ export function App({access}:{access:Access}){
           <h2>{savedPage?.title}</h2>
           {importInfo&&<p className="muted">PowerPoint Source: Slide {savedPage?.source_slide} · {importInfo.filename}</p>}
           {importInfo?.issues?.filter(issue=>issue.source_slide===savedPage?.source_slide).map((issue,index)=><p className="review-note" key={index}>Source Review: {issue.note}</p>)}
-          {summary?.wordingReviewRequired&&owner&&!module.sourceModuleId&&<p className="review-note">This draft requires content review before publication.</p>}
+          {summary?.wordingReviewRequired&&writable&&!module.sourceModuleId&&<p className="review-note">This draft requires content review before publication.</p>}
           {module.sourceModuleId&&<div className="translation-banner"><strong>{summary?.needsUpdate?'Source changed — compare again':summary?.translationStatus}</strong>
             <p>{module.course.language} · {module.course.country} · linked to source revision {summary?.sourceRevision}{summary?.sourceCurrentRevision!==summary?.sourceRevision?' (current '+summary?.sourceCurrentRevision+')':''}</p>
             <button disabled={!aiCaps.translate||busy||dirty} onClick={()=>void translatePage()}>{summary?.translationStatus==='untranslated'?'Auto-Translate Page':'Regenerate Page Translation'}</button>
@@ -296,15 +296,15 @@ export function App({access}:{access:Access}){
             <button key={value} role="tab" aria-selected={tab===value} onClick={()=>setTab(value)}>{label}</button>)}</div>
           <fieldset disabled={busy||!writable}>
             {draft&&tab==='content'&&<>
-              {owner&&!module.sourceModuleId&&<label className="wording-lock"><input type="checkbox" checked={unlock} onChange={event=>setUnlock(event.target.checked)}/><span>Create Wording Changes For Review<small>Original imported wording and previous revisions are retained.</small></span></label>}
-              <label>Page Title<input value={draft.title} readOnly={owner&&!module.sourceModuleId&&!unlock} onChange={event=>edit({title:event.target.value})}/></label>
+              {writable&&!module.sourceModuleId&&<label className="wording-lock"><input type="checkbox" checked={unlock} onChange={event=>setUnlock(event.target.checked)}/><span>Create Wording Changes For Review<small>Original imported wording and previous revisions are retained.</small></span></label>}
+              <label>Page Title<input value={draft.title} readOnly={!module.sourceModuleId&&!unlock} onChange={event=>edit({title:event.target.value})}/></label>
               <label>Page Layout<select disabled={!owner} value={draft.template||'teaching'} onChange={event=>edit({template:event.target.value as CoursePage['template'],layout:event.target.value,presentation:{...draft.presentation,reveal_blocks:!['title','prayer'].includes(event.target.value)}})}>{templateSchema.options.map(value=><option key={value} value={value}>{titleCase(value)}</option>)}</select></label>
               <label className="wording-lock"><input type="checkbox" disabled={!owner} checked={!!draft.presentation?.reveal_blocks} onChange={event=>edit({presentation:{...draft.presentation,reveal_blocks:event.target.checked}})}/><span>Reveal Content Section By Section</span></label>
               <div className="section-heading"><h3>Content Blocks</h3>{owner&&!module.sourceModuleId&&<button onClick={createBlock}>Add Content Block</button>}</div>
               {draft.blocks.map((block,index)=><section className="block-card" key={block.id}>
                 <div className="block-heading"><strong>{block.type==='title'?'Title':'Section '+draft.blocks.slice(0,index+1).filter(item=>item.type!=='title').length}</strong><select disabled={!owner} aria-label={'Content Block Type For Section '+(index+1)} value={block.type} onChange={event=>changeBlockType(block.id,event.target.value)}>{Array.from(new Set(['paragraph','scripture','concept','step','list','table','flow','question','prayer','title',block.type])).map(type=><option key={type} value={type}>{titleCase(type)}</option>)}</select>
                   <button aria-label={'Move block '+(index+1)+' up'} disabled={!owner||index===0} onClick={()=>moveBlock(index,-1)}>↑</button><button aria-label={'Move block '+(index+1)+' down'} disabled={!owner||index===draft.blocks.length-1} onClick={()=>moveBlock(index,1)}>↓</button></div>
-                <textarea aria-label={'Text for '+block.id} rows={Math.min(12,Math.max(3,block.text.split('\n').length+1))} readOnly={owner&&!module.sourceModuleId&&!unlock} value={block.text}
+                <textarea aria-label={'Text for '+block.id} rows={Math.min(12,Math.max(3,block.text.split('\n').length+1))} readOnly={!module.sourceModuleId&&!unlock} value={block.text}
                   onChange={event=>edit({blocks:draft.blocks.map(item=>item.id===block.id?{...item,text:event.target.value}:item)})}/>
                 <small className="stable-id">{block.id}{block.icon?' · '+block.icon+' icon retained':''}</small>
                 {block.type==='table'&&<p className="editor-help">Table rows use one line each, with tabs between columns. Empty cells preserve the column positions.</p>}
