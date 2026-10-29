@@ -257,7 +257,7 @@ export function App({access}:{access:Access}){
       {module&&<div className="heading-actions"><button className="text-button" disabled={!owner||busy||recording} onClick={editHeadings}>Edit Headings</button><span>Language/Locale <strong>{module.course.language+'-'+module.course.country.toLowerCase()}</strong></span></div>}</div><span className="draft-label">Draft Authoring</span></div>
     </div>
     {access.datasetLabel&&<div className="message" role="status">Storage Sandbox: this is a separate local copy. Changes and publications stay in this sandbox. Use your normal CMS to continue daily authoring.</div>}
-    {error&&<div className="message error" role="alert">{error}{module&&<button disabled={busy} onClick={()=>mayLeave()&&void action(async()=>{await loadModule(module.id,pageId);})}>Reload latest draft</button>}</div>}
+    {error&&<div className="message error" role="alert">{error}{module&&<button disabled={busy} onClick={()=>mayLeave()&&void action(async()=>{await loadModule(module.id,pageId);})}>Reload Latest Draft</button>}</div>}
     {!owner&&module&&!writable&&<div className="message">Primary Language: Read Only. Choose your assigned language in Language/Context to edit and review.</div>}
     {notice&&<div className="message success" role="status">{notice}</div>}
     {batch&&<div className="translation-progress message" role="status"><strong>{batch.label}</strong><div><progress aria-label="Translation Progress" max={batch.total} value={batch.completed}/><span>{Math.round(batch.completed/batch.total*100)}%</span></div>{busy?<button onClick={()=>{cancelBatch.current=true;}}>Stop After This Page</button>:<button onClick={()=>setBatch(null)}>Dismiss</button>}</div>}
@@ -290,7 +290,7 @@ export function App({access}:{access:Access}){
             <p>{module.course.language} · {module.course.country} · linked to source revision {summary?.sourceRevision}{summary?.sourceCurrentRevision!==summary?.sourceRevision?' (current '+summary?.sourceCurrentRevision+')':''}</p>
             <button disabled={!aiCaps.translate||busy||dirty} onClick={()=>void translatePage()}>{summary?.translationStatus==='untranslated'?'Auto-Translate Page':'Regenerate Page Translation'}</button>
             <button disabled={!aiCaps.translate||busy||dirty} onClick={()=>void translateModule()}>Translate Remaining Pages</button>
-            {module.missingSourcePages>0&&<button disabled={!owner||busy||dirty} onClick={()=>void action(async()=>{await api('/modules/'+module.id+'/sync-source','POST',{});await loadModule(module.id,pageId);})}>Add {module.missingSourcePages} new source pages</button>}
+            {module.missingSourcePages>0&&<button disabled={!owner||busy||dirty} onClick={()=>void action(async()=>{await api('/modules/'+module.id+'/sync-source','POST',{});await loadModule(module.id,pageId);})}>Add {module.missingSourcePages} New Source Pages</button>}
           </div>}
           <div className="editor-tabs" role="tablist" aria-label="Page editor">{[['content','Content'],['reflections','Reflections'],['narration','Narration'],...(module.sourceModuleId?[['translation','Translation']]:[])].map(([value,label])=>
             <button key={value} role="tab" aria-selected={tab===value} onClick={()=>setTab(value)}>{label}</button>)}</div>
@@ -339,10 +339,10 @@ export function App({access}:{access:Access}){
             </>}
             {draft&&tab==='translation'&&sourcePage&&<>
               <p className="editor-help">Source on the left; editable translation on the right. Check Scripture against the authorized Spanish Bible text. Automatic translation does not establish an official NTV quotation. Image adaptation and new recordings require separate review.</p>
-              {(owner||aiCaps.translate)&&<div className="translation-tools"><button disabled={dirty||!aiCaps.translate} onClick={()=>void translateHeadings()}>Auto-translate headings</button>{owner&&<button onClick={editHeadings}>Edit Headings</button>}</div>}
+              {(owner||aiCaps.translate)&&<div className="translation-tools"><button disabled={dirty||!aiCaps.translate} onClick={()=>void translateHeadings()}>Auto-Translate Headings</button>{owner&&<button onClick={editHeadings}>Edit Headings</button>}</div>}
               <TranslationFields source={sourcePage} draft={draft} onChange={value=>{setDraft(value);setNotice('');}}/>
               <label>Reviewer Notes<textarea rows={3} value={reviewNote} onChange={event=>setReviewNote(event.target.value)}/></label>
-              <button className="primary" disabled={!validated.success} onClick={()=>void save(true)}>Save and mark reviewed</button>
+              <button className="primary" disabled={!validated.success} onClick={()=>void save(true)}>Save &amp; Mark Reviewed</button>
               <p className="editor-help">Review status is saved with the current source revision. Publication requires the owner.</p>
             </>}
           </fieldset>

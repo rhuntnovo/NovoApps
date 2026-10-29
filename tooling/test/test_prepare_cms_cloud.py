@@ -71,4 +71,20 @@ class CloudPreparationTest(unittest.TestCase):
     self.assertEqual(restored.execute('SELECT request_id FROM cms_ai_activity').fetchone()[0],'req_test')
     self.assertEqual(cloud.fingerprint(source,('cms_ai_settings','cms_ai_activity'),omit_ephemeral=True),cloud.fingerprint(restored,('cms_ai_settings','cms_ai_activity')))
 
+ def test_email_credentials_and_queued_bearer_messages_never_transfer_to_cloud(self):
+  with closing(sqlite3.connect(':memory:')) as source:
+   source.row_factory=sqlite3.Row
+   source.executescript('CREATE TABLE platform_email_settings(id TEXT PRIMARY KEY,provider TEXT,enabled INTEGER,mailgun_secret TEXT,cloudflare_secret TEXT);CREATE TABLE platform_email_outbox(id TEXT PRIMARY KEY,payload TEXT);')
+   source.execute('INSERT INTO platform_email_settings VALUES(?,?,?,?,?)',('account-email','mailgun',1,'private-mailgun-cipher','private-cloudflare-cipher'))
+   source.execute('INSERT INTO platform_email_outbox VALUES(?,?)',('stable-message-id','private-message-cipher'))
+   tables=('platform_email_settings','platform_email_outbox');sql=cloud.sql_export(source,tables)
+   self.assertNotIn('private-',sql)
+   with closing(sqlite3.connect(':memory:')) as restored:
+    restored.row_factory=sqlite3.Row;restored.executescript(sql)
+    row=restored.execute('SELECT * FROM platform_email_settings').fetchone()
+    self.assertEqual(row['provider'],'preview');self.assertEqual(row['enabled'],0)
+    self.assertIsNone(row['mailgun_secret']);self.assertIsNone(row['cloudflare_secret'])
+    self.assertEqual(restored.execute('SELECT count(*) FROM platform_email_outbox').fetchone()[0],0)
+    self.assertEqual(cloud.fingerprint(source,tables,omit_ephemeral=True),cloud.fingerprint(restored,tables))
+
 if __name__=='__main__':unittest.main()

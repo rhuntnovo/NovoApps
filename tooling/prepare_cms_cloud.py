@@ -4,8 +4,8 @@ from pathlib import Path
 from contextlib import closing
 
 CONTENT=('cms_providers','cms_courses','cms_modules','cms_pages','cms_page_revisions','cms_module_structures','cms_media_assets','cms_publications','cms_publication_leases','d1_migrations')
-CONTROL=('auth_user','auth_account','auth_session','auth_verification','platform_setup','platform_admin','cms_invitation','cms_grant','platform_audit','cms_ai_settings','cms_ai_grant','cms_ai_activity','cms_ai_artifact','cms_ai_reconciliation_event','d1_migrations')
-EPHEMERAL={'auth_session','auth_verification','cms_publication_leases'}
+CONTROL=('auth_user','auth_account','auth_session','auth_verification','platform_setup','platform_admin','cms_invitation','cms_grant','platform_audit','cms_ai_settings','cms_ai_grant','cms_ai_activity','cms_ai_artifact','cms_ai_reconciliation_event','platform_email_settings','platform_email_outbox','d1_migrations')
+EPHEMERAL={'auth_session','auth_verification','cms_publication_leases','platform_email_outbox'}
 def digest(data):return hashlib.sha256(data).hexdigest()
 def quote(name):return '"'+name.replace('"','""')+'"'
 def rows(connection,table,omit_ephemeral=False):
@@ -16,6 +16,10 @@ def rows(connection,table,omit_ephemeral=False):
     if omit_ephemeral and table=='auth_user':
         for row in values:
             if 'email_verified' in row:row['email_verified']=0
+    if omit_ephemeral and table=='platform_email_settings':
+        for row in values:
+            row['mailgun_secret']=None;row['cloudflare_secret']=None
+            row['enabled']=0;row['provider']='preview'
     if omit_ephemeral and table=='cms_ai_settings':
         for row in values:
             for name in ['encrypted_key','key_nonce','key_version','credential_id']:row[name]=None

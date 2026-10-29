@@ -246,3 +246,23 @@ registration compatibility and never persist fragments or auto-accept on verific
 Refresh account/invitation status on focus/visibility and while visibly open, with
 manual refresh controls. Tests use disposable identities/content only; no live
 grants or curriculum should be silently changed by this fix.
+
+## Configurable Account Email (2026-10-28)
+
+Read docs/19 and ADR 0018 before email setup, transport/outbox or cloud-copy work.
+The user authorized Super Admin setup for Mailgun now and Cloudflare Email Sending
+later. Local Preview stays default until explicit external enablement. Tests use
+fake credentials and stub all provider I/O; never send actual email, read actual keys,
+or expose real message bodies/tokens during development.
+
+Global platform email settings/control D1 are separate from provider AI/curriculum.
+Write-only provider credentials and queued bearer payloads use AES-GCM with the existing
+credential master Secret and email-specific AAD. Back up that secret separately.
+Claim durable UUIDv7 messages atomically, pin configuration revision, validate links
+before dispatch, and never replay uncertain sends or silently switch providers.
+Only explicit HTTP 429 retries are automatic. Accepted is not confirmed inbox delivery.
+Cloud preparation clears email credentials/outbox and disables copied external sending.
+
+Hosted identity/security, cron/DNS/domain/paid-plan provisioning and real inbox testing
+remain separate milestones. Local account links still address the development computer.
+Use title case for authoring button labels without changing canonical curriculum.

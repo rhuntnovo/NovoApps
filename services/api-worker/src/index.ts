@@ -1,4 +1,6 @@
 import {accountRoutes,authHandler,principal,type AuthEnvironment} from './auth';
+import {emailAdmin} from './email-admin';
+import {processEmailOutbox} from './email-delivery';
 import {authorize,draftMedia,requestActor} from './authorization';
 import {mediaRoutes} from './media';
 import {aiRoutes} from './ai-routes';
@@ -61,7 +63,11 @@ async function jsonBody(request:Request){
   if(new TextEncoder().encode(raw).byteLength>1000000)throw new HTTPException(413,{message:'Course input is too large'});
   try{return JSON.parse(raw);}catch{throw new HTTPException(400,{message:'Invalid JSON'});}
 }
+// Enqueue is awaited; provider I/O runs after the response on Worker runtimes.
+// Tests/CLI can explicitly drain. A scheduled handler also supports later hosting.
+app.use('*',async(c,next)=>{await next();if(c.env.AUTH_REQUIRED==='true'){try{c.executionCtx.waitUntil(processEmailOutbox(c.env).catch(()=>{}));}catch{/* No execution context in direct app.fetch tests. */}}});
 app.route('/api/v1/account',accountRoutes);
+app.route('/api/v1/email-admin',emailAdmin);
 app.all('/api/auth/*',async c=>c.env.AUTH_REQUIRED==='true'?authHandler(c.env,c.req.raw):c.json({error:'Authentication pilot is not enabled.'},404));
 app.get('/api/v1/access',async c=>{
  if(c.env.AUTH_REQUIRED!=='true')return c.json({mode:'local',owner:true,grants:[]});
@@ -154,4 +160,4 @@ app.get('/api/v1/cms/modules/:id/export',async c=>{
   // This remains a draft export, including unreviewed editions; never a publication.
   return c.json(draft.course);
 });
-export default app;
+export default {fetch:app.fetch,scheduled(_event:ScheduledController,env:Bindings,ctx:ExecutionContext){ctx.waitUntil(processEmailOutbox(env));}};

@@ -159,3 +159,10 @@ snapshots. The encryption master keys in ignored .dev.vars.auth/.storage remain
 excluded. Preserve those separately with their environment/version labels; a ZIP
 alone cannot decrypt provider API keys. Do not generate a replacement master key
 as a recovery shortcut. See docs/17 for rotation and restore boundaries.
+
+The account-email milestone adds encrypted provider credentials and queued bearer
+payloads to control D1. Private backups include that ciphertext; the existing
+credential master Secret remains separately required for recovery. Restore with
+external sending disabled and reconcile pending/uncertain delivery records before
+dispatch, rather than replaying historical account links. Cloud-copy preparation
+excludes email credentials and outbox rows. See docs/19.

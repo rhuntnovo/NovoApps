@@ -1,5 +1,5 @@
 import type {StorageEnvironment} from './r2-storage';
-import {accountEmailMode,accountLink,deliverAccountEmail,listEmailPreviews,openEmailPreview,clearEmailPreviews,type AccountEmailEnvironment} from './account-email';
+import {accountEmailMode,activeEmailMode,accountLink,deliverAccountEmail,listEmailPreviews,openEmailPreview,clearEmailPreviews,type AccountEmailEnvironment} from './account-email';
 import {betterAuth} from 'better-auth';
 import {drizzleAdapter} from '@better-auth/drizzle-adapter';
 import {drizzle} from 'drizzle-orm/d1';
@@ -27,11 +27,11 @@ export function identity(env:AuthEnvironment){
   // below requires verification whenever email workflows are enabled.
   emailAndPassword:{enabled:true,minPasswordLength:12,maxPasswordLength:128,autoSignIn:false,
    ...(emailEnabled?{resetPasswordTokenExpiresIn:1800,revokeSessionsOnPasswordReset:true,
-    sendResetPassword:async({user,token}:{user:{email:string};token:string})=>{deliverAccountEmail(env,{to:user.email,purpose:'password-reset',url:accountLink(env,'reset',token),expiresAt:Date.now()+1800000});},
+    sendResetPassword:async({user,token}:{user:{email:string};token:string})=>{await deliverAccountEmail(env,{to:user.email,purpose:'password-reset',url:accountLink(env,'reset',token),expiresAt:Date.now()+1800000});},
     onPasswordReset:async({user}:{user:{id:string}})=>{await control(env).prepare('DELETE FROM auth_verification WHERE value=?').bind(user.id).run();await audit(env,user.id,'account.password.reset',user.id,200);}
    }:{})},
   ...(emailEnabled?{verification:{storeIdentifier:'hashed' as const},emailVerification:{sendOnSignUp:true,sendOnSignIn:false,expiresIn:3600,autoSignInAfterVerification:false,
-   sendVerificationEmail:async({user,token}:{user:{email:string};token:string})=>{deliverAccountEmail(env,{to:user.email,purpose:'verification',url:accountLink(env,'verify',token),expiresAt:Date.now()+3600000});},
+   sendVerificationEmail:async({user,token}:{user:{email:string};token:string})=>{await deliverAccountEmail(env,{to:user.email,purpose:'verification',url:accountLink(env,'verify',token),expiresAt:Date.now()+3600000});},
    afterEmailVerification:async(user:{id:string})=>{await audit(env,user.id,'account.email.verify',user.id,200);}
   }}:{}),
   session:{expiresIn:60*60*24*7,updateAge:60*60*24,cookieCache:{enabled:false}},
@@ -80,7 +80,7 @@ accountRoutes.use('*',async(c,next)=>{
 });
 accountRoutes.get('/status',async c=>{
  const setup=await control(c.env).prepare("SELECT completed FROM platform_setup WHERE id='owner'").first<{completed:number}>();
- return c.json({setupRequired:!setup?.completed,datasetLabel:c.env.CMS_DATASET_LABEL,emailMode:accountEmailMode(c.env)});
+ return c.json({setupRequired:!setup?.completed,datasetLabel:c.env.CMS_DATASET_LABEL,emailMode:await activeEmailMode(c.env)});
 });
 accountRoutes.get('/session',async c=>{const who=await principal(c.env,c.req.raw.headers);return who?c.json({mode:'authenticated',datasetLabel:c.env.CMS_DATASET_LABEL,...who}):c.json({error:'Sign in to continue.'},401);});
 accountRoutes.post('/setup',async c=>{
@@ -146,7 +146,7 @@ accountRoutes.post('/invitations',async c=>{
  await control(c.env).prepare("INSERT INTO cms_invitation(id,email,token_hash,provider_id,course_id,locale,role,created_by,created_at,expires_at) VALUES(?,?,?,?,?,?,'reviewer',?,?,?)").bind(id,input.email,await tokenHash(token),input.providerId,input.courseId,input.locale,who.user.id,now,expires).run();
  await audit(c.env,who.user.id,'invitation.create',id,201);
  const url=c.env.PLATFORM_ORIGIN+'/#invite='+token;
- const delivery=accountEmailMode(c.env)==='preview'?deliverAccountEmail(c.env,{to:input.email,purpose:'invitation',url,expiresAt:expires,context:'Review Access: '+selectedCourse.metadata.title+' · '+input.locale}):{mode:'disabled'};
+ const delivery=accountEmailMode(c.env)!=='disabled'?await deliverAccountEmail(c.env,{to:input.email,purpose:'invitation',url,expiresAt:expires,context:'Review Access: '+selectedCourse.metadata.title+' · '+input.locale}):{mode:'disabled'};
  return c.json({id,url,expiresAt:expires,delivery},201);
 });
 accountRoutes.post('/invitations/:id/revoke',async c=>{
@@ -158,11 +158,11 @@ accountRoutes.post('/invitations/:id/revoke',async c=>{
 // Do not expose Better Auth's native reset/verify routes or user-selected redirects.
 const emailRequest=z.object({email});
 const emailToken=z.object({token:z.string().min(20).max(2048)});
-const genericEmail={requested:true,message:'If this address has an eligible account, a link will be available. Check your email or ask the local Super Admin to open Email Previews.'};
+const genericEmail={requested:true,message:'If this address has an eligible account, a link will be prepared. Check your inbox; in Local Preview mode, ask the Super Admin to open Email Previews.'};
 function requireEmail(env:AuthEnvironment){if(accountEmailMode(env)!=='preview')throw new HTTPException(503,{message:'Account email workflows are not configured.'});}
 accountRoutes.post('/send-verification',async c=>{
  requireEmail(c.env);const input=emailRequest.parse(await json(c.req.raw));
- await identity(c.env).api.sendVerificationEmail({body:{email:input.email}});
+ const started=Date.now();try{await identity(c.env).api.sendVerificationEmail({body:{email:input.email}});}catch{/* Keep public responses generic even if the outbox rejects a request. */}await new Promise(resolve=>setTimeout(resolve,Math.max(0,500-(Date.now()-started))));
  return c.json(genericEmail);
 });
 accountRoutes.post('/verify-email',async c=>{
@@ -173,7 +173,7 @@ accountRoutes.post('/verify-email',async c=>{
 });
 accountRoutes.post('/forgot-password',async c=>{
  requireEmail(c.env);const input=emailRequest.parse(await json(c.req.raw));
- await identity(c.env).api.requestPasswordReset({body:{email:input.email}});
+ const started=Date.now();try{await identity(c.env).api.requestPasswordReset({body:{email:input.email}});}catch{/* No account enumeration on queue/configuration failures. */}await new Promise(resolve=>setTimeout(resolve,Math.max(0,500-(Date.now()-started))));
  return c.json(genericEmail);
 });
 accountRoutes.post('/reset-password',async c=>{
@@ -187,8 +187,8 @@ accountRoutes.post('/invitations/:id/resend',async c=>{
  const token=Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join(''),expires=Date.now()+7*86400000;
  const row=await control(c.env).prepare('UPDATE cms_invitation SET token_hash=?,expires_at=? WHERE id=? AND consumed_at IS NULL AND revoked_at IS NULL RETURNING email,locale').bind(await tokenHash(token),expires,id).first<{email:string;locale:string}>();
  if(!row)throw new HTTPException(409,{message:'Only an unaccepted, unrevoked invitation can be resent.'});
- deliverAccountEmail(c.env,{to:row.email,purpose:'invitation',url:accountLink(c.env,'invite',token),expiresAt:expires,context:'Review Language: '+row.locale});
- await audit(c.env,who.user.id,'invitation.resend',id,200);return c.json({resent:true,delivery:{mode:'preview'}});
+ const delivery=await deliverAccountEmail(c.env,{to:row.email,purpose:'invitation',url:accountLink(c.env,'invite',token),expiresAt:expires,context:'Review Language: '+row.locale});
+ await audit(c.env,who.user.id,'invitation.resend',id,200);return c.json({resent:true,delivery});
 });
 accountRoutes.get('/email-previews',async c=>{await owner(c.env,c.req.raw.headers);return c.json({mode:accountEmailMode(c.env),messages:listEmailPreviews(c.env)});});
 accountRoutes.post('/email-previews/:id/open',async c=>{await owner(c.env,c.req.raw.headers);return c.json(openEmailPreview(c.env,z.string().uuid().parse(c.req.param('id'))));});

@@ -201,3 +201,15 @@ needed again. Owner status refreshes on focus and while visible, with manual
 **Refresh Invitations** available. English reviewers save wording-unlocked,
 review-required drafts; publication and structure changes remain restricted.
 See [the invitation workflow](docs/18-ACCOUNT-EMAIL-AND-RECOVERY.md).
+
+### Account Email Providers
+
+At http://127.0.0.1:5176/, the Super Admin can open **Email Settings & Delivery**
+to prepare **Mailgun** or **Cloudflare Email Sending**. Local Preview remains the
+default until **Enable External Sending** is saved. A Mailgun sandbox can be used
+before purchasing a project domain, with recipients authorized in Mailgun first.
+Keys are write-only; Delivery History tracks queued/accepted/rejected/uncertain
+submissions. The CMS remains local and its email links open on this computer.
+
+See [email setup and delivery](docs/19-CONFIGURABLE-ACCOUNT-EMAIL.md) for configuration,
+encryption recovery, retry behavior and the remaining hosted-deployment requirements.

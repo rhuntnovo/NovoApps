@@ -185,3 +185,11 @@ flags, and restricted publishing/settings. Phone/desktop layouts were inspected.
 Edge's automated debugging endpoint was unavailable, so this update does not claim
 an automated Edge browser pass. Tests used disposable accounts/content only; no
 external email, paid request, live permission change or publication occurred.
+
+## Configurable Email Provider Update (2026-10-28)
+
+The user authorized Mailgun sending setup and Cloudflare Email Sending preparation.
+[Docs/19](19-CONFIGURABLE-ACCOUNT-EMAIL.md) supersedes the preview-only transport
+boundary above: Super Admin can configure either provider, keep preview active or
+explicitly enable external sending. Existing account/verification/acceptance rules
+remain. No actual email or hosted deployment is performed during development.

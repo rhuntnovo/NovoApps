@@ -18,7 +18,7 @@ export function CreateDialog({spec,onClose}:{spec:FormSpec;onClose:()=>void}){
          <input name={field.name} type={field.type||'text'} defaultValue={field.value} min={field.type==='number'?1:undefined} required={field.required!==false}/>}
          {field.hint&&<small>{field.hint}</small>}</label>)}</fieldset>
       {error&&<p className="message error" role="alert">{error}</p>}
-      <div className="dialog-actions"><button type="button" disabled={busy} onClick={onClose}>Cancel</button><button className="primary" disabled={busy}>{busy?'Saving…':spec.submit}</button></div>
+      <div className="dialog-actions"><button type="button" disabled={busy} onClick={onClose}>Cancel</button><button className="primary" disabled={busy}>{busy?'Saving…':spec.submit.replace(/\b[a-z]/g,letter=>letter.toUpperCase())}</button></div>
     </form>
   </dialog>;
 }

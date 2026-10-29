@@ -20,9 +20,9 @@ export function EmailActionPanel({action,request,onComplete,onCancel}:{action:Em
  </section>;
 }
 
-export function ForgotPassword({request,initialEmail,onBack}:{request:Request;initialEmail:string;onBack:()=>void}){
+export function ForgotPassword({request,initialEmail,onBack,preview=true}:{request:Request;initialEmail:string;preview?:boolean;onBack:()=>void}){
  const [email,setEmail]=useState(initialEmail),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
- return <section><span className="eyebrow">Account Recovery</span><h1>Forgot Your Password?</h1><p>Enter your account email. If it has an eligible account, a reset link will be prepared. Local previews are available only to the Super Admin on this computer.</p>
+ return <section><span className="eyebrow">Account Recovery</span><h1>Forgot Your Password?</h1><p>Enter your account email. If it has an eligible account, a reset link will be prepared. {preview?'Local previews are available only to the Super Admin on this computer.':'Check your inbox for the password reset message.'}</p>
   {error&&<p role="alert" className="error">{error}</p>}{notice&&<p role="status" className="notice">{notice}</p>}
   <form onSubmit={event=>{event.preventDefault();setBusy(true);setError('');setNotice('');void request<{message:string}>('v1/account/forgot-password',{email}).then(result=>setNotice(result.message)).catch(error=>setError(String(error))).finally(()=>setBusy(false));}}><fieldset disabled={busy}><label>Account Email<input type="email" autoComplete="username" required value={email} onChange={event=>setEmail(event.target.value)}/></label><button className="primary">{busy?'Please Wait…':'Request Reset Link'}</button><button type="button" onClick={onBack}>Back To Sign In</button></fieldset></form>
  </section>;
