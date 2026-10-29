@@ -171,3 +171,26 @@ Before live local activation, a verified private backup was created:
 both daily local control D1 and its separate Storage Sandbox. No existing rows
 were replaced. The running sandbox still reports Preview. No service restart,
 live credential setup, external enablement, remote migration or deployment occurred.
+
+## Mailgun Test Reported Unknown (2026-10-28)
+
+A local Workers runtime compatibility bug caused the initial transport to throw
+before submitting a request: Workers does not support `redirect: 'error'`. The
+adapter now uses `redirect: 'manual'` and explicitly rejects HTTP 3xx responses.
+It never follows Location or forwards the credential to another host. This applies
+to both Mailgun and Cloudflare Email Sending. See the [Workers Request reference](https://developers.cloudflare.com/workers/runtime-apis/request/).
+
+The earlier broad error handler reported this as Response Lost Or Timed Out.
+Historical Unknown rows remain unchanged and are never replayed automatically.
+Check Mailgun logs for the original attempt before requesting a new test. After
+loading this fix, refresh the account page and use Send Test Email To Me once.
+No API key replacement or database migration is required for this fix. If the
+Worker is not running in watch mode, save pending CMS work before restarting the
+same launcher/dataset. For a sandbox, the recipient must still be authorized in
+Mailgun and the configured region must match the sending domain.
+
+A new real workerd regression test bundles the actual email adapters and stubs all
+outbound service traffic with fake credentials. It covers both Mailgun regions,
+Cloudflare acceptance, and 302/307 refusal with exactly one fixed-host submission.
+It fails on the original code before outbound I/O. No actual email or live key is
+used by the test. Existing D1 outbox tests also check that redirects do not retry.

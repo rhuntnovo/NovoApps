@@ -23,7 +23,9 @@ async function tokenStillValid(env:EmailEnvironment,message:EmailMessage){
  return !!await db.prepare('SELECT id FROM auth_verification WHERE identifier=? AND expires_at>?').bind(identifier,now).first();
 }
 // Fixed endpoints only; provider adapters never follow redirects or forward a key
-// to a client-selected host. Add new providers here with their own validated config.
+// to a client-selected host. Workers supports manual, not error, redirect mode.
+// Reject every redirect below; never follow its Location with credentials.
+// Add new providers here with their own validated config.
 export async function sendProviderEmail(env:EmailEnvironment,settings:EmailSettings,message:EmailMessage):Promise<Result>{
  let response:Response,secret:string;
  try{
@@ -31,12 +33,13 @@ export async function sendProviderEmail(env:EmailEnvironment,settings:EmailSetti
    secret=await openEmailSecret(env,'credential:mailgun',settings.mailgun_secret!);
    const form=new FormData();form.set('from',settings.from_name+' <'+settings.from_email+'>');form.set('to',message.to);form.set('subject',message.subject);form.set('text',message.text);if(settings.reply_to)form.set('h:Reply-To',settings.reply_to);
    for(const field of ['o:tracking','o:tracking-opens','o:tracking-clicks'])form.set(field,'no');
-   response=await fetch((settings.mailgun_region==='eu'?'https://api.eu.mailgun.net':'https://api.mailgun.net')+'/v3/'+encodeURIComponent(settings.mailgun_domain)+'/messages',{method:'POST',redirect:'error',signal:AbortSignal.timeout(8000),headers:{Authorization:'Basic '+btoa('api:'+secret)},body:form});
+   response=await fetch((settings.mailgun_region==='eu'?'https://api.eu.mailgun.net':'https://api.mailgun.net')+'/v3/'+encodeURIComponent(settings.mailgun_domain)+'/messages',{method:'POST',redirect:'manual',signal:AbortSignal.timeout(8000),headers:{Authorization:'Basic '+btoa('api:'+secret)},body:form});
   }else if(settings.provider==='cloudflare'){
    secret=await openEmailSecret(env,'credential:cloudflare',settings.cloudflare_secret!);
-   response=await fetch('https://api.cloudflare.com/client/v4/accounts/'+settings.cloudflare_account_id+'/email/sending/send',{method:'POST',redirect:'error',signal:AbortSignal.timeout(8000),headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json'},body:JSON.stringify({to:message.to,from:{email:settings.from_email,name:settings.from_name},subject:message.subject,text:message.text,...(settings.reply_to?{replyTo:settings.reply_to}:{})})});
+   response=await fetch('https://api.cloudflare.com/client/v4/accounts/'+settings.cloudflare_account_id+'/email/sending/send',{method:'POST',redirect:'manual',signal:AbortSignal.timeout(8000),headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json'},body:JSON.stringify({to:message.to,from:{email:settings.from_email,name:settings.from_name},subject:message.subject,text:message.text,...(settings.reply_to?{replyTo:settings.reply_to}:{})})});
   }else return {status:'rejected',code:'unsupported_provider'};
  }catch(error){if(error instanceof HTTPException)return {status:'rejected',code:'credential_unavailable'};return {status:'unknown',code:'network_or_timeout'};}
+ if(response.status>=300&&response.status<400)return {status:'rejected',code:'provider_redirect',http:response.status};
  if(response.status===429)return {status:'retry',code:'provider_rate_limit',http:429};
  if(response.status>=500)return {status:'unknown',code:'provider_server_error',http:response.status};
  if(!response.ok)return {status:'rejected',code:response.status===401||response.status===403?'provider_credentials_or_domain':'provider_rejected',http:response.status};

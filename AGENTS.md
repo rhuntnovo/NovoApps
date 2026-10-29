@@ -266,3 +266,8 @@ Cloud preparation clears email credentials/outbox and disables copied external s
 Hosted identity/security, cron/DNS/domain/paid-plan provisioning and real inbox testing
 remain separate milestones. Local account links still address the development computer.
 Use title case for authoring button labels without changing canonical curriculum.
+
+Email transport regression: Workers rejects `redirect: 'error'` before outbound I/O.
+Use `redirect: 'manual'` and reject 3xx; never forward credentials via redirects.
+Preserve the real workerd email-runtime test with stubbed outbound service I/O;
+Node fetch mocks alone do not validate Workers Request options.
